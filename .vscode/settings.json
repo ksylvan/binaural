@@ -17,6 +17,7 @@
         "Kraus",
         "mkdocs",
         "mypy",
+        "ndarray",
         "nosetests",
         "numpy",
         "Oster",

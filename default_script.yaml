@@ -1,0 +1,32 @@
+# Default Binaural Beat Generation Script
+# This script replicates the original hardcoded behavior.
+
+# Global settings (optional)
+base_frequency: 100 # Hz (carrier frequency)
+sample_rate: 44100 # Hz (audio sample rate)
+output_filename: "binaural_beats.wav" # Default output file name
+
+# Sequence of audio generation steps
+steps:
+  # 1. Beta phase (stable 18 Hz beat)
+  - type: stable
+    frequency: 18 # Hz (binaural beat frequency)
+    duration: 3   # minutes
+
+  # 2. Transition from Beta (18 Hz) to Alpha (10 Hz)
+  - type: transition
+    start_frequency: 18 # Hz
+    end_frequency: 10   # Hz
+    duration: 5         # minutes
+
+  # 3. Transition from Alpha (10 Hz) to Theta (6 Hz)
+  - type: transition
+    start_frequency: 10 # Hz
+    end_frequency: 6    # Hz
+    duration: 5         # minutes
+
+  # 4. Transition from Theta (6 Hz) to Delta (2 Hz)
+  - type: transition
+    start_frequency: 6  # Hz
+    end_frequency: 2    # Hz
+    duration: 7         # minutes
