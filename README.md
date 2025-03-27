@@ -24,6 +24,8 @@ Binaural beats are one method of achieving brainwave entrainment, potentially he
 
 ### Brainwave States
 
+- **Gamma Waves (30-100 Hz)**: The fastest brainwaves, linked to high-level cognitive functions such as sensory integration, focused attention, and advanced mental processing.
+Gamma activity plays a key role in binding together information from different brain regions and is often enhanced during peak concentration and certain meditative states.
 - **Beta Waves (13-30 Hz)**: Alertness, concentration, active thinking, problem-solving.
   *Note*: Higher Beta (e.g., 18-30 Hz) may correlate with stress or anxiety, while lower Beta (12-15 Hz) is linked to relaxed focus.
 - **Alpha Waves (8-12 Hz)**: Relaxation, calmness, light meditation, daydreaming, and passive attention (e.g., closing your eyes or mindfulness practices).
