@@ -89,18 +89,26 @@ python binaural.py <path_to_script.yaml> [options]
 
 **Example:**
 
-To use the default script provided:
+To use the example script provided:
 
 ```bash
-python binaural.py default_script.yaml
+python binaural.py example_script.yaml
 ```
 
-This will generate `binaural_beats.wav` (or the filename specified in `default_script.yaml`) in the current directory.
+This will generate `binaural_beats.wav` (or the filename specified in `example_script.yaml`) in the current directory.
+
+To use one of the pre-defined scripts from the library (see [Script Library](#script-library)):
+
+```bash
+python binaural.py scripts/relaxation_alpha.yaml
+```
+
+This will generate `relaxation_alpha.wav` in the current directory.
 
 To specify a different output file:
 
 ```bash
-python binaural.py my_custom_script.yaml -o custom_audio.wav
+python binaural.py scripts/focus_beta.yaml -o my_focus_session.wav
 ```
 
 ## YAML Script Format
@@ -126,44 +134,72 @@ A list under the `steps:` key, where each item defines an audio segment.
   - `end_frequency`: The ending binaural beat frequency in Hz.
   - `duration`: The duration of this transition in minutes.
 
-**Example YAML (`default_script.yaml`):**
+**Example YAML (`example_script.yaml`):**
 
 ```yaml
-# Global settings
-base_frequency: 100
-sample_rate: 44100
-output_filename: "binaural_beats.wav"
+# Example Binaural Beat Generation Script
 
-# Sequence of audio generation steps
+# Global settings (optional)
+base_frequency: 100 # Hz (carrier frequency)
+sample_rate: 44100 # Hz (audio sample rate)
+output_filename: "binaural_beats.wav" # Default output file name
+
+# Sequence of audio generation steps (Total Duration: 20 min)
 steps:
-  # 1. Beta phase (stable 18 Hz beat for 3 minutes)
+  # 1. Beta phase (stable 18 Hz beat)
   - type: stable
-    frequency: 18
-    duration: 3
+    frequency: 18 # Hz (binaural beat frequency)
+    duration: 3 # minutes
 
-  # 2. Transition from Beta (18 Hz) to Alpha (10 Hz) over 5 minutes
+  # 2. Transition from Beta (18 Hz) to Alpha (10 Hz)
   - type: transition
-    start_frequency: 18 # Can be omitted if previous step ended at 18 Hz
-    end_frequency: 10
-    duration: 5
+    start_frequency: 18 # Hz
+    end_frequency: 10 # Hz
+    duration: 5 # minutes
 
-  # 3. Transition from Alpha (10 Hz) to Theta (6 Hz) over 5 minutes
+  # 3. Transition from Alpha (10 Hz) to Theta (6 Hz)
   - type: transition
-    start_frequency: 10 # Can be omitted
-    end_frequency: 6
-    duration: 5
+    start_frequency: 10 # Hz
+    end_frequency: 6 # Hz
+    duration: 5 # minutes
 
-  # 4. Transition from Theta (6 Hz) to Delta (2 Hz) over 7 minutes
+  # 4. Transition from Theta (6 Hz) to Delta (2 Hz)
   - type: transition
-    start_frequency: 6 # Can be omitted
-    end_frequency: 2
-    duration: 7
+    start_frequency: 6 # Hz
+    end_frequency: 2 # Hz
+    duration: 7 # minutes
+```
+
+## Script Library
+
+A collection of pre-defined YAML scripts for common use-cases is available in the `scripts/` directory:
+
+- **`scripts/focus_beta.yaml`**: Designed to enhance concentration and alertness using Beta waves (14-18 Hz).
+- **`scripts/focus_gamma.yaml`**: Targets peak concentration and problem-solving with Gamma waves (40 Hz).
+- **`scripts/relaxation_alpha.yaml`**: Aims to reduce stress and promote calmness using Alpha waves (8-10 Hz).
+- **`scripts/meditation_theta.yaml`**: Facilitates deep meditation and introspection using Theta waves (6 Hz).
+- **`scripts/sleep_delta.yaml`**: Guides the brain towards deep sleep states using Delta waves (2 Hz).
+- **`scripts/creativity_theta.yaml`**: Intended to foster an intuitive and creative mental state using Theta waves (7 Hz).
+
+You can use these scripts directly or modify them to suit your needs.
+
+Example usage:
+
+```bash
+python binaural.py scripts/sleep_delta.yaml
 ```
 
 ## File Structure
 
-- `binaural.py`: Main script that generates the binaural beats audio based on a YAML script.
-- `default_script.yaml`: Example YAML script defining the default sequence.
+- `binaural.py`: Main script that generates the binaural beats audio.
+- `example_script.yaml`: Original example YAML script.
+- `scripts/`: Directory containing pre-defined YAML scripts for various use-cases.
+  - `focus_beta.yaml`
+  - `focus_gamma.yaml`
+  - `relaxation_alpha.yaml`
+  - `meditation_theta.yaml`
+  - `sleep_delta.yaml`
+  - `creativity_theta.yaml`
 - `bin/setup.sh`: Setup script to prepare the development environment.
 - `requirements.txt`: Python dependencies (numpy, PyYAML).
 - `requirements-bootstrap.txt`: Bootstrap dependencies for setup (uv).

@@ -1,0 +1,25 @@
+# Binaural Beat Script for Creativity (Theta Waves)
+# Aims to foster an intuitive and creative mental state.
+
+# Global settings
+base_frequency: 110 # Hz
+sample_rate: 44100  # Hz
+output_filename: "creativity_theta.wav"
+
+# Sequence (Total Duration: 25 min)
+steps:
+  # 1. Start at Alpha for relaxed awareness (5 minutes)
+  - type: stable
+    frequency: 10 # Hz (Alpha)
+    duration: 5   # minutes
+
+  # 2. Transition down to upper Theta (5 minutes)
+  - type: transition
+    # start_frequency: 10 (implied)
+    end_frequency: 7 # Hz (Upper Theta)
+    duration: 5      # minutes
+
+  # 3. Hold upper Theta for creative flow (15 minutes)
+  - type: stable
+    frequency: 7 # Hz (Upper Theta)
+    duration: 15 # minutes

@@ -1,0 +1,36 @@
+# Binaural Beat Script for Focus (Beta Waves)
+# Aims to enhance concentration and alertness.
+
+# Global settings
+base_frequency: 120 # Hz (carrier frequency)
+sample_rate: 44100  # Hz (audio sample rate)
+output_filename: "focus_beta.wav" # Default output file name
+
+# Sequence of audio generation steps (Total Duration: 25 min)
+steps:
+  # 1. Start with calming Alpha (2 minutes)
+  - type: stable
+    frequency: 10 # Hz (Alpha)
+    duration: 2   # minutes
+
+  # 2. Transition smoothly to low Beta (3 minutes)
+  - type: transition
+    # start_frequency: 10 (implied from previous step)
+    end_frequency: 14 # Hz (Low Beta)
+    duration: 3       # minutes
+
+  # 3. Hold low Beta for sustained focus (15 minutes)
+  - type: stable
+    frequency: 14 # Hz (Low Beta)
+    duration: 15  # minutes
+
+  # 4. Brief transition to mid-Beta (1 minute)
+  - type: transition
+    # start_frequency: 14 (implied)
+    end_frequency: 18 # Hz (Mid Beta)
+    duration: 1       # minute
+
+  # 5. Hold mid-Beta for active thinking (4 minutes)
+  - type: stable
+    frequency: 18 # Hz (Mid Beta)
+    duration: 4   # minutes
