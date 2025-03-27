@@ -24,10 +24,15 @@ Binaural beats are one method of achieving brainwave entrainment, potentially he
 
 ### Brainwave States
 
-- **Beta Waves (13-30 Hz)**: Alertness, concentration, active thinking.
-- **Alpha Waves (8-12 Hz)**: Relaxation, calmness, passive attention.
-- **Theta Waves (4-7 Hz)**: Deep meditation, drowsiness, REM sleep.
-- **Delta Waves (0.5-4 Hz)**: Deep, dreamless sleep, healing, regeneration.
+- **Beta Waves (13-30 Hz)**: Alertness, concentration, active thinking, problem-solving.
+  *Note*: Higher Beta (e.g., 18-30 Hz) may correlate with stress or anxiety, while lower Beta (12-15 Hz) is linked to relaxed focus.
+- **Alpha Waves (8-12 Hz)**: Relaxation, calmness, light meditation, daydreaming, and passive attention (e.g., closing your eyes or mindfulness practices).
+  Acts as a bridge between conscious (Beta) and subconscious (Theta) states.
+- **Theta Waves (4-7 Hz)**: Deep meditation, creativity, intuition, drowsiness (stage 1 NREM sleep), and light sleep (stage 2 NREM).
+- **Delta Waves (0.5-4 Hz)**: Deep, dreamless sleep (NREM stages 3-4, "slow-wave sleep"), physical healing, and regeneration. Dominant in restorative sleep, critical for immune function and memory consolidation.
+
+*Note*: While Theta waves are present in REM sleep, they are not the dominant pattern. REM is characterized by mixed-frequency activity
+(including Beta-like waves) due to heightened brain activity during dreaming. Theta is more prominent during pre-sleep relaxation and early sleep stages.
 
 ## Scientific Research
 

@@ -19,6 +19,7 @@
         "mypy",
         "ndarray",
         "nosetests",
+        "NREM",
         "numpy",
         "Oster",
         "pipenv",
