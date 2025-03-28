@@ -95,7 +95,7 @@ To use the example script provided:
 python binaural.py example_script.yaml
 ```
 
-This will generate `binaural_beats.wav` (or the filename specified in `example_script.yaml`) in the current directory.
+This will generate `example.wav` (or the filename specified in `example_script.yaml`) in the `audio/` directory.
 
 To use one of the pre-defined scripts from the library (see [Script Library](#script-library)):
 
@@ -103,7 +103,7 @@ To use one of the pre-defined scripts from the library (see [Script Library](#sc
 python binaural.py scripts/relaxation_alpha.yaml
 ```
 
-This will generate `relaxation_alpha.wav` in the current directory.
+This will generate `relaxation_alpha.wav` in the `audio/` directory.
 
 To specify a different output file:
 
@@ -142,7 +142,7 @@ A list under the `steps:` key, where each item defines an audio segment.
 # Global settings (optional)
 base_frequency: 100 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
-output_filename: "binaural_beats.wav" # Default output file name
+output_filename: "audio/example.wav" # Default output file name
 
 # Sequence of audio generation steps (Total Duration: 20 min)
 steps:

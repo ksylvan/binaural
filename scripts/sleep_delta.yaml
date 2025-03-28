@@ -4,20 +4,20 @@
 # Global settings
 base_frequency: 90 # Hz (Lower carrier might feel 'softer')
 sample_rate: 44100 # Hz
-output_filename: "sleep_delta.wav"
+output_filename: "audio/sleep_delta.wav"
 
 # Sequence (Total Duration: 45 min)
 steps:
   # 1. Start at low Alpha (calm baseline) (5 minutes)
   - type: stable
     frequency: 8 # Hz (Low Alpha)
-    duration: 5  # minutes
+    duration: 5 # minutes
 
   # 2. Transition down through Theta (10 minutes)
   - type: transition
     # start_frequency: 8 (implied)
     end_frequency: 5 # Hz (Theta)
-    duration: 10     # minutes
+    duration: 10 # minutes
 
   # 3. Hold Theta (light sleep/drowsiness) (10 minutes)
   - type: stable
@@ -28,7 +28,7 @@ steps:
   - type: transition
     # start_frequency: 5 (implied)
     end_frequency: 2 # Hz (Delta)
-    duration: 10     # minutes
+    duration: 10 # minutes
 
   # 5. Hold Delta for deep sleep induction (10 minutes)
   - type: stable

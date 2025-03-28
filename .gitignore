@@ -191,3 +191,5 @@ cython_debug/
 *.ra
 *.ram
 *.wpl
+
+audio/
