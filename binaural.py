@@ -6,6 +6,7 @@ Generates binaural beat audio (WAV or FLAC) from a YAML configuration file.
 """
 
 import argparse
+import math
 import os
 import sys
 from typing import List, Tuple
@@ -66,7 +67,9 @@ def load_yaml_config(path: str) -> dict:
         sys.exit(f"Configuration error: {e}")
 
 
-def validate_step(step: dict, previous_freq: float) -> Tuple[str, float, float, float]:
+def validate_step(
+    step: dict, previous_freq: float | None
+) -> Tuple[str, float, float, float]:
     """Validates and extracts necessary fields from a step."""
     # Get step type and duration
     step_type = step.get("type")
@@ -82,7 +85,7 @@ def validate_step(step: dict, previous_freq: float) -> Tuple[str, float, float, 
         raise ValueError("Step duration must be a positive number in minutes.")
 
     # Convert duration from minutes to seconds
-    duration_sec = duration_min * 60
+    duration_sec = duration_min * 60.0
 
     # Handle 'stable' type steps
     if step_type == "stable":
@@ -104,10 +107,12 @@ def validate_step(step: dict, previous_freq: float) -> Tuple[str, float, float, 
             "Transition step must specify 'start_frequency' if it's the first step or "
             "if the previous step's frequency is unknown."
         )
-    if not all(isinstance(f, (int, float)) for f in (start_freq, end_freq)):
+    if not isinstance(end_freq, (int, float)):
+        raise ValueError("Transition step must specify a valid numeric 'end_frequency'.")
+    if not isinstance(start_freq, (int, float)):
+        # This case should only happen if previous_freq was None and start_frequency wasn't set
         raise ValueError(
-            "Transition step must specify valid numeric 'start_frequency' "
-            "(or have a previous step) and 'end_frequency'."
+            "Transition step must specify valid numeric 'start_frequency' or have a previous step."
         )
 
     # Return type, duration, start frequency, and end frequency
@@ -116,12 +121,14 @@ def validate_step(step: dict, previous_freq: float) -> Tuple[str, float, float, 
 
 def generate_audio_sequence(
     steps: List[dict], base_freq: float, sample_rate: int
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Generates the complete audio sequence from the list of steps."""
+) -> Tuple[np.ndarray, np.ndarray, float]:
+    """Generates the complete audio sequence and returns total duration."""
     # Initialize lists to hold audio data for each channel
     left_audio, right_audio = [], []
     # Keep track of the end frequency of the last processed step
-    previous_freq = None
+    previous_freq: float | None = None
+    # Initialize total duration in seconds
+    total_duration_sec = 0.0
 
     # Iterate through each step in the configuration
     for idx, step in enumerate(steps, start=1):
@@ -130,10 +137,12 @@ def generate_audio_sequence(
             step_type, duration_sec, freq_start, freq_end = validate_step(
                 step, previous_freq
             )
+            # Add step duration to total duration
+            total_duration_sec += duration_sec
             # Print progress information
             print(
                 f"Generating step {idx}: {step_type}, "
-                f"{freq_start}Hz -> {freq_end}Hz, duration {duration_sec / 60:.2f}min"
+                f"{freq_start}Hz -> {freq_end}Hz, duration {duration_sec / 60.0:.2f}min"
             )
             # Generate the audio tones for the current step
             left, right = generate_tone(
@@ -149,13 +158,22 @@ def generate_audio_sequence(
             sys.exit(f"Error in step {idx}: {e}")
 
     # Concatenate all audio segments into single arrays for each channel
-    return np.concatenate(left_audio), np.concatenate(right_audio)
+    # Return concatenated audio and the total duration in seconds
+    return (
+        np.concatenate(left_audio),
+        np.concatenate(right_audio),
+        total_duration_sec,
+    )
 
 
 def save_audio_file(
-    filename: str, left: np.ndarray, right: np.ndarray, sample_rate: int
+    filename: str,
+    left: np.ndarray,
+    right: np.ndarray,
+    sample_rate: int,
+    total_duration_sec: float,
 ):
-    """Saves stereo audio data to a WAV or FLAC file using soundfile."""
+    """Saves stereo audio data and prints total duration."""
     # Check if the filename has a supported extension
     _root, ext = os.path.splitext(filename)
     if ext.lower() not in SUPPORTED_FORMATS:
@@ -182,13 +200,22 @@ def save_audio_file(
         # soundfile handles normalization and format detection based on extension
         # subtype='PCM_16' is common for WAV, FLAC uses lossless compression by default
         sf.write(filename, stereo_audio, sample_rate, subtype="PCM_16")
-        print(f"Audio file '{filename}' created successfully.")
+
+        # Calculate total minutes and remaining seconds
+        total_minutes = math.floor(total_duration_sec / 60)
+        remaining_seconds = total_duration_sec % 60
+
+        # Print success message including the total duration
+        print(
+            f"Audio file '{filename}' created successfully. "
+            f"Total duration: {total_minutes} minutes and {remaining_seconds:.2f} seconds."
+        )
     except (sf.SoundFileError, RuntimeError, IOError) as e:
         # Handle errors during file writing
         sys.exit(f"Error writing audio file '{filename}': {e}")
 
 
-def main(script_path: str, output_path: str = None):
+def main(script_path: str, output_path: str | None = None):
     """Main function to generate binaural beats from a YAML script."""
     # Load the configuration from the YAML script
     config = load_yaml_config(script_path)
@@ -206,12 +233,15 @@ def main(script_path: str, output_path: str = None):
     )
 
     # Generate the complete audio sequence based on the steps
-    left_channel, right_channel = generate_audio_sequence(
+    # Also get the total duration
+    left_channel, right_channel, total_duration = generate_audio_sequence(
         config["steps"], base_freq, sample_rate
     )
 
-    # Save the generated audio to the specified file
-    save_audio_file(output_filename, left_channel, right_channel, sample_rate)
+    # Save the generated audio to the specified file, passing the total duration
+    save_audio_file(
+        output_filename, left_channel, right_channel, sample_rate, total_duration
+    )
 
 
 if __name__ == "__main__":
