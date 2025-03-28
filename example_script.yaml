@@ -3,7 +3,8 @@
 # Global settings (optional)
 base_frequency: 100 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
-output_filename: "audio/example.wav" # Default output file name
+# Default output file name. Extension determines format (.wav or .flac).
+output_filename: "audio/example.flac"
 
 # Sequence of audio generation steps (Total Duration: 20 min)
 steps:

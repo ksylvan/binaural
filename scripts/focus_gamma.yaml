@@ -4,7 +4,7 @@
 # Global settings
 base_frequency: 150 # Hz (slightly higher carrier for potentially clearer high freq beats)
 sample_rate: 44100 # Hz
-output_filename: "audio/focus_gamma.wav"
+output_filename: "audio/focus_gamma.flac"
 
 # Sequence (Total Duration: 30 min)
 steps:

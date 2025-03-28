@@ -1,10 +1,10 @@
 # Binaural
 
-Binaural is a Python tool that generates binaural beat audio designed to induce different brain wave states, configured via a simple YAML script.
+Binaural is a Python tool that generates binaural beat audio (WAV or FLAC) designed to induce different brain wave states, configured via a simple YAML script.
 
 ## Description
 
-This tool reads a YAML script defining a sequence of binaural beat frequencies and durations, then creates a WAV audio file based on that sequence. It allows for both stable frequency segments and smooth transitions between frequencies.
+This tool reads a YAML script defining a sequence of binaural beat frequencies and durations, then creates an audio file based on that sequence. It supports output in both WAV and FLAC formats. It allows for both stable frequency segments and smooth transitions between frequencies.
 
 The program uses a configurable base carrier frequency (defaulting to 100 Hz) and creates stereo audio. The frequency difference between the left and right channels creates the binaural beat effect, which is intended to influence brainwave activity.
 
@@ -52,6 +52,7 @@ Research on binaural beats has shown mixed results, but several studies suggest 
 - Dependencies listed in `requirements.txt`:
   - `numpy`: For numerical operations and array handling.
   - `PyYAML`: For parsing the configuration script.
+  - `soundfile`: For writing audio files (WAV, FLAC).
 
 ### Setup
 
@@ -85,30 +86,30 @@ python binaural.py <path_to_script.yaml> [options]
 **Arguments:**
 
 - `<path_to_script.yaml>` (Required): Path to the YAML file defining the binaural beat sequence.
-- `-o <output_file.wav>`, `--output <output_file.wav>` (Optional): Specify the output WAV file path. This overrides the `output_filename` setting in the YAML script.
+- `-o <output_file>`, `--output <output_file>` (Optional): Specify the output audio file path. The file extension determines the format (e.g., `.wav` for WAV, `.flac` for FLAC). This overrides the `output_filename` setting in the YAML script.
 
 **Example:**
 
-To use the example script provided:
+To use the example script provided (which defaults to FLAC output):
 
 ```bash
 python binaural.py example_script.yaml
 ```
 
-This will generate `example.wav` (or the filename specified in `example_script.yaml`) in the `audio/` directory.
+This will generate `example.flac` (or the filename specified in `example_script.yaml`) in the `audio/` directory.
 
-To use one of the pre-defined scripts from the library (see [Script Library](#script-library)):
+To use one of the pre-defined scripts from the library and output as WAV:
 
 ```bash
-python binaural.py scripts/relaxation_alpha.yaml
+python binaural.py scripts/relaxation_alpha.yaml -o audio/relaxation_alpha.wav
 ```
 
-This will generate `relaxation_alpha.wav` in the `audio/` directory.
+This will generate `relaxation_alpha.wav` in the `audio/` directory, overriding the default name in the script.
 
-To specify a different output file:
+To generate a FLAC file with a custom name:
 
 ```bash
-python binaural.py scripts/focus_beta.yaml -o my_focus_session.wav
+python binaural.py scripts/focus_beta.yaml -o my_focus_session.flac
 ```
 
 ## YAML Script Format
@@ -119,7 +120,8 @@ The YAML script defines the parameters and sequence for audio generation.
 
 - `base_frequency`: The carrier frequency in Hz (e.g., 100). Default: `100`.
 - `sample_rate`: The audio sample rate in Hz (e.g., 44100). Default: `44100`.
-- `output_filename`: The default name for the output WAV file. Default: `"binaural_beats.wav"`.
+- `output_filename`: The default name for the output audio file (e.g., `"audio/my_session.flac"` or `"audio/my_session.wav"`).
+  The extension (`.wav` or `.flac`) determines the output format. Default: `"output.flac"`.
 
 **Steps (Required):**
 
@@ -130,7 +132,8 @@ A list under the `steps:` key, where each item defines an audio segment.
   - `duration`: The duration of this segment in minutes.
 
 - **`type: transition`**: Linearly changes the binaural beat frequency over time.
-  - `start_frequency`: The starting binaural beat frequency in Hz. If omitted, it uses the end frequency of the previous step for a smooth transition.
+  - `start_frequency`: The starting binaural beat frequency in Hz. If omitted, it uses the end frequency of the
+    previous step for a smooth transition.
   - `end_frequency`: The ending binaural beat frequency in Hz.
   - `duration`: The duration of this transition in minutes.
 
@@ -142,7 +145,7 @@ A list under the `steps:` key, where each item defines an audio segment.
 # Global settings (optional)
 base_frequency: 100 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
-output_filename: "audio/example.wav" # Default output file name
+output_filename: "audio/example.flac" # Default output file name (FLAC format)
 
 # Sequence of audio generation steps (Total Duration: 20 min)
 steps:
@@ -172,7 +175,9 @@ steps:
 
 ## Script Library
 
-A collection of pre-defined YAML scripts for common use-cases is available in the `scripts/` directory:
+A collection of pre-defined YAML scripts for common use-cases is available in the `scripts/` directory.
+These currently default to `.flac` output but can be easily changed by modifying the `output_filename` field or
+using the `-o` command-line option with a `.wav` extension.
 
 - **`scripts/focus_beta.yaml`**: Designed to enhance concentration and alertness using Beta waves (14-18 Hz).
 - **`scripts/focus_gamma.yaml`**: Targets peak concentration and problem-solving with Gamma waves (40 Hz).
@@ -183,16 +188,16 @@ A collection of pre-defined YAML scripts for common use-cases is available in th
 
 You can use these scripts directly or modify them to suit your needs.
 
-Example usage:
+Example usage for WAV output:
 
 ```bash
-python binaural.py scripts/sleep_delta.yaml
+python binaural.py scripts/sleep_delta.yaml -o audio/sleep_delta.wav
 ```
 
 ## File Structure
 
 - `binaural.py`: Main script that generates the binaural beats audio.
-- `example_script.yaml`: Original example YAML script.
+- `example_script.yaml`: Example YAML script
 - `scripts/`: Directory containing pre-defined YAML scripts for various use-cases.
   - `focus_beta.yaml`
   - `focus_gamma.yaml`
@@ -201,7 +206,7 @@ python binaural.py scripts/sleep_delta.yaml
   - `sleep_delta.yaml`
   - `creativity_theta.yaml`
 - `bin/setup.sh`: Setup script to prepare the development environment.
-- `requirements.txt`: Python dependencies (numpy, PyYAML).
+- `requirements.txt`: Python dependencies (numpy, PyYAML, soundfile).
 - `requirements-bootstrap.txt`: Bootstrap dependencies for setup (uv).
 - `README.md`: This file.
 - `LICENSE`: Project license information.

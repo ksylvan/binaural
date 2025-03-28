@@ -4,7 +4,7 @@
 # Global settings
 base_frequency: 110 # Hz
 sample_rate: 44100 # Hz
-output_filename: "audio/creativity_theta.wav"
+output_filename: "audio/creativity_theta.flac"
 
 # Sequence (Total Duration: 25 min)
 steps:

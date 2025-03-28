@@ -4,7 +4,7 @@
 # Global settings
 base_frequency: 90 # Hz (Lower carrier might feel 'softer')
 sample_rate: 44100 # Hz
-output_filename: "audio/sleep_delta.wav"
+output_filename: "audio/sleep_delta.flac"
 
 # Sequence (Total Duration: 45 min)
 steps:

@@ -4,7 +4,7 @@
 # Global settings
 base_frequency: 120 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
-output_filename: "audio/focus_beta.wav" # Default output file name
+output_filename: "audio/focus_beta.flac" # Default output file name
 
 # Sequence of audio generation steps (Total Duration: 25 min)
 steps:
