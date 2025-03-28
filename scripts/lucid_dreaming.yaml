@@ -1,0 +1,53 @@
+# Lucid Dreaming Binaural Beat Script
+# Total Duration: 45 minutes
+# Purpose: To induce REM sleep and enhance lucid dreaming potential
+
+# Global settings
+base_frequency: 200 # Hz (higher carrier frequency for better perception during sleep)
+sample_rate: 44100 # Hz (standard audio sample rate)
+output_filename: "audio/lucid_dreaming.flac" # Output file name (FLAC format)
+
+# Research basis:
+# - Sleep onset is facilitated by Alpha (8-12 Hz) transitioning to Theta (4-7 Hz)
+# - REM sleep contains mixed frequencies with Theta components
+# - Lucid dreaming correlates with higher Gamma activity (40 Hz) during REM
+# - Studies show 40 Hz binaural beats may increase lucidity awareness (Stumbrys et al., 2014)
+
+# Total Duration: 60 minutes
+# This script is designed to guide the listener through a series of brainwave states
+# that promote relaxation, sleep onset, and REM sleep, with a focus on enhancing the potential for lucid dreaming.
+#
+steps:
+  # Phase 1: Relaxation (5 minutes)
+  # Alpha waves to promote initial relaxation
+  - type: stable
+    frequency: 10 # Hz (mid-Alpha)
+    duration: 5 # minutes
+
+  # Phase 2: Sleep Onset Transition (10 minutes)
+  # Gradually transition from Alpha to Theta to facilitate sleep entry
+  - type: transition
+    start_frequency: 10 # Hz (Alpha)
+    end_frequency: 6 # Hz (Theta)
+    duration: 10 # minutes
+
+  # Phase 3: Deep Relaxation (10 minutes)
+  # Stable Theta to deepen relaxation and prepare for REM entry
+  - type: stable
+    frequency: 6 # Hz (Theta)
+    duration: 10 # minutes
+
+  # Phase 4: REM Sleep Induction (10 minutes)
+  # Lower Theta frequencies associated with REM sleep onset
+  - type: transition
+    start_frequency: 6 # Hz
+    end_frequency: 4.5 # Hz (lower Theta, associated with REM)
+    duration: 10 # minutes
+
+  # Phase 5: Lucidity Enhancement (25 minutes)
+  # Research indicates that 40 Hz (Gamma) binaural beats during REM may enhance lucid dream probability
+  # This creates a Gamma overlay on Theta foundation to potentially stimulate lucid awareness during REM
+  - type: transition
+    start_frequency: 4.5 # Hz (Theta/REM state)
+    end_frequency: 40 # Hz (Gamma - lucidity enhancement)
+    duration: 25 # minutes

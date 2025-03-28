@@ -182,7 +182,7 @@ def save_audio_file(
         # soundfile handles normalization and format detection based on extension
         # subtype='PCM_16' is common for WAV, FLAC uses lossless compression by default
         sf.write(filename, stereo_audio, sample_rate, subtype="PCM_16")
-        print(f"Audio file f'{filename}' created successfully.")
+        print(f"Audio file '{filename}' created successfully.")
     except (sf.SoundFileError, RuntimeError, IOError) as e:
         # Handle errors during file writing
         sys.exit(f"Error writing audio file '{filename}': {e}")
@@ -228,7 +228,6 @@ if __name__ == "__main__":
         help="Output audio file path (e.g., 'output.wav' or 'output.flac'). "
         "Overrides 'output_filename' in the YAML script. "
         f"The file extension determines the format. Default is {DEFAULT_OUTPUT_FILENAME}.",
-        default=DEFAULT_OUTPUT_FILENAME,
     )
     # Parse the command-line arguments
     args = parser.parse_args()
