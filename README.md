@@ -129,7 +129,7 @@ A list under the `steps:` key, where each item defines an audio segment. Each st
 
 - **`type: stable`**: Holds a constant binaural beat frequency.
   - `frequency`: The binaural beat frequency in Hz.
-  - `duration`: The duration of this segment in minutes.
+  - `duration`: The duration of this segment in seconds.
   - `fade_in_duration` (Optional): Duration of a linear volume fade-in at the beginning of the step, in minutes. Default: `0`.
   - `fade_out_duration` (Optional): Duration of a linear volume fade-out at the end of the step, in minutes. Default: `0`.
 
@@ -137,8 +137,8 @@ A list under the `steps:` key, where each item defines an audio segment. Each st
   - `start_frequency`: The starting binaural beat frequency in Hz. If omitted, it uses the end frequency of the previous step for a smooth transition.
   - `end_frequency`: The ending binaural beat frequency in Hz.
   - `duration`: The duration of this transition in minutes.
-  - `fade_in_duration` (Optional): Duration of a linear volume fade-in at the beginning of the step, in minutes. Default: `0`.
-  - `fade_out_duration` (Optional): Duration of a linear volume fade-out at the end of the step, in minutes. Default: `0`.
+  - `fade_in_duration` (Optional): Duration of a linear volume fade-in at the beginning of the step, in seconds. Default: `0`.
+  - `fade_out_duration` (Optional): Duration of a linear volume fade-out at the end of the step, in seconds. Default: `0`.
 
 **Important Notes on Fades:**
 
@@ -153,35 +153,37 @@ A list under the `steps:` key, where each item defines an audio segment. Each st
 # Global settings (optional)
 base_frequency: 100 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
-output_filename: "audio/example_fade.flac" # Default output file name (FLAC format)
+# Default output file name. Extension determines format (.wav or .flac).
+output_filename: "audio/example_fade.flac"
 
-# Sequence of audio generation steps (Total Duration: 20 min)
+# Sequence of audio generation steps (Total Duration: 1200 seconds = 20 minutes)
 steps:
-  # 1. Beta phase with fade-in
+  # 1. Beta phase (stable 18 Hz beat) with fade-in
   - type: stable
-    frequency: 18 # Hz (binaural beat frequency)
-    duration: 3 # minutes
-    fade_in_duration: 0.1 # 6 seconds fade-in
+    frequency: 18
+    duration: 180 # 3 minutes
+    fade_in_duration: 6
 
   # 2. Transition from Beta (18 Hz) to Alpha (10 Hz)
   - type: transition
-    start_frequency: 18 # Hz
-    end_frequency: 10 # Hz
-    duration: 5 # minutes
-    # No fade in/out specified, uses defaults (0)
+    start_frequency: 18
+    end_frequency: 10
+    duration: 300 # 5 minutes
 
   # 3. Transition from Alpha (10 Hz) to Theta (6 Hz)
   - type: transition
-    start_frequency: 10 # Hz
-    end_frequency: 6 # Hz
-    duration: 5 # minutes
+    start_frequency: 10
+    end_frequency: 6
+    duration: 300 # 5 minutes
+    fade_in_duration: 3
+    fade_out_duration: 3
 
   # 4. Transition from Theta (6 Hz) to Delta (2 Hz) with fade-out
   - type: transition
-    start_frequency: 6 # Hz
-    end_frequency: 2 # Hz
-    duration: 7 # minutes
-    fade_out_duration: 0.2 # 12 seconds fade-out at the very end
+    start_frequency: 6
+    end_frequency: 2
+    duration: 420 # 7 minutes
+    fade_out_duration: 12
 ```
 
 ## Script Library

@@ -6,20 +6,20 @@ base_frequency: 100 # Hz
 sample_rate: 44100 # Hz
 output_filename: "audio/meditation_theta.flac"
 
-# Sequence (Total Duration: 30 min)
+# Sequence (Total Duration: 30 minutes)
 steps:
-  # 1. Start at relaxed Alpha (5 minutes)
+  # 1. Start at relaxed Alpha (300 seconds)
   - type: stable
     frequency: 10 # Hz (Alpha)
-    duration: 5 # minutes
+    duration: 300 # seconds
 
-  # 2. Transition down towards Theta (10 minutes)
+  # 2. Transition down towards Theta (600 seconds)
   - type: transition
     # start_frequency: 10 (implied)
     end_frequency: 6 # Hz (Theta)
-    duration: 10 # minutes
+    duration: 600 # seconds
 
-  # 3. Hold Theta for deep meditation (15 minutes)
+  # 3. Hold Theta for deep meditation (900 seconds)
   - type: stable
     frequency: 6 # Hz (Theta)
-    duration: 15 # minutes
+    duration: 900 # seconds

@@ -3,9 +3,9 @@
 # Purpose: To reduce migraine pain and related symptoms through progressive relaxation
 
 # Global settings
-base_frequency: 144 # Hz (carrier frequency optimized for headache relief - solfeggio frequency associated with transformation)
+base_frequency: 144 # Hz (carrier frequency optimized for headache relief)
 sample_rate: 48000 # Hz (higher sample rate for improved fidelity)
-output_filename: "audio/migraine_relief.flac" # Output file name (FLAC format)
+output_filename: "audio/migraine_relief.flac"
 
 # Research basis:
 # - Alpha waves (8-12 Hz) reduce anxiety and tension commonly associated with migraines
@@ -17,36 +17,36 @@ output_filename: "audio/migraine_relief.flac" # Output file name (FLAC format)
 # Total Duration: 30 minutes
 
 steps:
-  # Phase 1: Initial Pain Reduction (5 minutes)
+  # Phase 1: Initial Pain Reduction (300 seconds)
   # Start with higher Alpha to gently begin relaxation without jarring sensory input
   - type: stable
     frequency: 10.5 # Hz (higher Alpha)
-    duration: 5 # minutes
+    duration: 300 # seconds
 
-  # Phase 2: Alpha Relaxation Deepening (8 minutes)
+  # Phase 2: Alpha Relaxation Deepening (480 seconds)
   # Gradual transition to lower Alpha for deeper relaxation and reduced tension
   - type: transition
     start_frequency: 10.5 # Hz
     end_frequency: 8 # Hz (lower Alpha)
-    duration: 8 # minutes
+    duration: 480 # seconds
 
-  # Phase 3: Alpha-Theta Transition (7 minutes)
+  # Phase 3: Alpha-Theta Transition (420 seconds)
   # Bridge to therapeutic Theta frequencies associated with pain reduction
   - type: transition
     start_frequency: 8 # Hz (Alpha)
     end_frequency: 6 # Hz (upper Theta)
-    duration: 7 # minutes
+    duration: 420 # seconds
 
-  # Phase 4: Deep Theta for Pain Relief (7 minutes)
+  # Phase 4: Deep Theta for Pain Relief (420 seconds)
   # Research shows mid-Theta frequencies can significantly reduce pain perception
   - type: transition
     start_frequency: 6 # Hz
     end_frequency: 4.5 # Hz (mid Theta)
-    duration: 7 # minutes
+    duration: 420 # seconds
 
-  # Phase 5: Therapeutic Delta (3 minutes)
+  # Phase 5: Therapeutic Delta (180 seconds)
   # Brief exposure to upper Delta to promote neurochemical release for pain relief
   - type: transition
     start_frequency: 4.5 # Hz (Theta)
     end_frequency: 3.5 # Hz (upper Delta)
-    duration: 3 # minutes
+    duration: 180 # seconds

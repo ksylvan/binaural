@@ -4,6 +4,7 @@
 
 Generates binaural beat audio (WAV or FLAC) from a YAML configuration file,
 including optional volume fade-in and fade-out for each segment.
+Segment durations are specified in seconds.
 """
 
 import argparse
@@ -113,77 +114,52 @@ def validate_step(
     step: dict, previous_freq: float | None
 ) -> Tuple[str, float, float, float, float, float]:
     """Validates and extracts necessary fields from a step, including fades."""
-    # Get step type and duration
     step_type = step.get("type")
-    duration_min = step.get("duration")
+    duration_sec = step.get("duration")
 
-    # Validate step type
     if step_type not in ("stable", "transition"):
         raise ValueError(
             f"Invalid step type '{step_type}'. Must be 'stable' or 'transition'."
         )
-    # Validate duration
-    if not isinstance(duration_min, (int, float)) or duration_min <= 0:
-        raise ValueError("Step duration must be a positive number in minutes.")
+    if not isinstance(duration_sec, (int, float)) or duration_sec <= 0:
+        raise ValueError("Step duration must be a positive number in seconds.")
 
-    # Convert duration from minutes to seconds
-    duration_sec = duration_min * 60.0
+    fade_in_sec = step.get("fade_in_duration", 0.0)
+    fade_out_sec = step.get("fade_out_duration", 0.0)
 
-    # --- Validate Fade Durations ---
-    fade_in_min = step.get("fade_in_duration", 0.0)
-    fade_out_min = step.get("fade_out_duration", 0.0)
+    if not isinstance(fade_in_sec, (int, float)) or fade_in_sec < 0:
+        raise ValueError("fade_in_duration must be a non-negative number in seconds.")
+    if not isinstance(fade_out_sec, (int, float)) or fade_out_sec < 0:
+        raise ValueError("fade_out_duration must be a non-negative number in seconds.")
 
-    # Validate fade_in_duration
-    if not isinstance(fade_in_min, (int, float)) or fade_in_min < 0:
-        raise ValueError("fade_in_duration must be a non-negative number in minutes.")
-    # Validate fade_out_duration
-    if not isinstance(fade_out_min, (int, float)) or fade_out_min < 0:
-        raise ValueError("fade_out_duration must be a non-negative number in minutes.")
-
-    # Convert fade durations to seconds
-    fade_in_sec = fade_in_min * 60.0
-    fade_out_sec = fade_out_min * 60.0
-
-    # Check if total fade time exceeds step duration
     if fade_in_sec + fade_out_sec > duration_sec:
         raise ValueError(
-            f"Sum of fade_in_duration ({fade_in_min}min) and "
-            f"fade_out_duration ({fade_out_min}min) cannot exceed "
-            f"step duration ({duration_min}min)."
+            f"Sum of fade_in_duration ({fade_in_sec}s) and fade_out_duration ({fade_out_sec}s) "
+            f"cannot exceed step duration ({duration_sec}s)."
         )
-    # --- End Fade Validation ---
 
-    # Handle 'stable' type steps
     if step_type == "stable":
         freq = step.get("frequency")
-        # Validate frequency for stable step
         if not isinstance(freq, (int, float)):
             raise ValueError("Stable step must specify a valid 'frequency'.")
-        # Return type, duration, start/end frequency (same for stable), and fades
         return step_type, duration_sec, freq, freq, fade_in_sec, fade_out_sec
 
-    # Handle 'transition' type steps
-    # Use previous step's end frequency if start_frequency is not provided
     start_freq = step.get("start_frequency", previous_freq)
     end_freq = step.get("end_frequency")
 
-    # Validate start and end frequencies for transition step
     if start_freq is None:
         raise ValueError(
-            "Transition step must specify 'start_frequency' if it's the first step or "
-            "if the previous step's frequency is unknown."
+            "Transition step must specify 'start_frequency' if it's the first step or if the previous step's frequency is unknown."
         )
     if not isinstance(end_freq, (int, float)):
         raise ValueError(
             "Transition step must specify a valid numeric 'end_frequency'."
         )
     if not isinstance(start_freq, (int, float)):
-        # This case should only happen if previous_freq was None and start_frequency wasn't set
         raise ValueError(
             "Transition step must specify valid numeric 'start_frequency' or have a previous step."
         )
 
-    # Return type, duration, start frequency, end frequency, and fades
     return step_type, duration_sec, start_freq, end_freq, fade_in_sec, fade_out_sec
 
 

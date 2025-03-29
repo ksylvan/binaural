@@ -6,31 +6,31 @@ base_frequency: 120 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
 output_filename: "audio/focus_beta.flac" # Default output file name
 
-# Sequence of audio generation steps (Total Duration: 25 min)
+# Sequence of audio generation steps (Total Duration: 25 minutes)
 steps:
-  # 1. Start with calming Alpha (2 minutes)
+  # 1. Start with calming Alpha (120 seconds)
   - type: stable
     frequency: 10 # Hz (Alpha)
-    duration: 2 # minutes
+    duration: 120 # seconds
 
-  # 2. Transition smoothly to low Beta (3 minutes)
+  # 2. Transition smoothly to low Beta (180 seconds)
   - type: transition
     # start_frequency: 10 (implied from previous step)
     end_frequency: 14 # Hz (Low Beta)
-    duration: 3 # minutes
+    duration: 180 # seconds
 
-  # 3. Hold low Beta for sustained focus (15 minutes)
+  # 3. Hold low Beta for sustained focus (900 seconds)
   - type: stable
     frequency: 14 # Hz (Low Beta)
-    duration: 15 # minutes
+    duration: 900 # seconds
 
-  # 4. Brief transition to mid-Beta (1 minute)
+  # 4. Brief transition to mid-Beta (60 seconds)
   - type: transition
     # start_frequency: 14 (implied)
     end_frequency: 18 # Hz (Mid Beta)
-    duration: 1 # minute
+    duration: 60 # seconds
 
-  # 5. Hold mid-Beta for active thinking (4 minutes)
+  # 5. Hold mid-Beta for active thinking (240 seconds)
   - type: stable
     frequency: 18 # Hz (Mid Beta)
-    duration: 4 # minutes
+    duration: 240 # seconds

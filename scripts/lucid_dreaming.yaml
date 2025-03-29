@@ -1,5 +1,5 @@
 # Lucid Dreaming Binaural Beat Script
-# Total Duration: 45 minutes
+# Total Duration: 60 minutes
 # Purpose: To induce REM sleep and enhance lucid dreaming potential
 
 # Global settings
@@ -17,37 +17,38 @@ output_filename: "audio/lucid_dreaming.flac" # Output file name (FLAC format)
 # This script is designed to guide the listener through a series of brainwave states
 # that promote relaxation, sleep onset, and REM sleep, with a focus on enhancing the potential for lucid dreaming.
 #
+
 steps:
-  # Phase 1: Relaxation (5 minutes)
+  # Phase 1: Relaxation (300 seconds)
   # Alpha waves to promote initial relaxation
   - type: stable
     frequency: 10 # Hz (mid-Alpha)
-    duration: 5 # minutes
+    duration: 300 # seconds
 
-  # Phase 2: Sleep Onset Transition (10 minutes)
+  # Phase 2: Sleep Onset Transition (600 seconds)
   # Gradually transition from Alpha to Theta to facilitate sleep entry
   - type: transition
     start_frequency: 10 # Hz (Alpha)
     end_frequency: 6 # Hz (Theta)
-    duration: 10 # minutes
+    duration: 600 # seconds
 
-  # Phase 3: Deep Relaxation (10 minutes)
+  # Phase 3: Deep Relaxation (600 seconds)
   # Stable Theta to deepen relaxation and prepare for REM entry
   - type: stable
     frequency: 6 # Hz (Theta)
-    duration: 10 # minutes
+    duration: 600 # seconds
 
-  # Phase 4: REM Sleep Induction (10 minutes)
+  # Phase 4: REM Sleep Induction (600 seconds)
   # Lower Theta frequencies associated with REM sleep onset
   - type: transition
     start_frequency: 6 # Hz
     end_frequency: 4.5 # Hz (lower Theta, associated with REM)
-    duration: 10 # minutes
+    duration: 600 # seconds
 
-  # Phase 5: Lucidity Enhancement (25 minutes)
+  # Phase 5: Lucidity Enhancement (1500 seconds)
   # Research indicates that 40 Hz (Gamma) binaural beats during REM may enhance lucid dream probability
   # This creates a Gamma overlay on Theta foundation to potentially stimulate lucid awareness during REM
   - type: transition
     start_frequency: 4.5 # Hz (Theta/REM state)
     end_frequency: 40 # Hz (Gamma - lucidity enhancement)
-    duration: 25 # minutes
+    duration: 1500 # seconds

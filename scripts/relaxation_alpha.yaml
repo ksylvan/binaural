@@ -6,26 +6,26 @@ base_frequency: 100 # Hz
 sample_rate: 44100 # Hz
 output_filename: "audio/relaxation_alpha.flac"
 
-# Sequence (Total Duration: 20 min)
+# Sequence (Total Duration: 20 minutes)
 steps:
-  # 1. Start slightly active (low Beta) (3 minutes)
+  # 1. Start slightly active (low Beta) (180 seconds)
   - type: stable
     frequency: 13 # Hz (Low Beta)
-    duration: 3 # minutes
+    duration: 180 # seconds
 
-  # 2. Transition gently down to Alpha (5 minutes)
+  # 2. Transition gently down to Alpha (300 seconds)
   - type: transition
     # start_frequency: 13 (implied)
     end_frequency: 10 # Hz (Mid Alpha)
-    duration: 5 # minutes
+    duration: 300 # seconds
 
-  # 3. Hold Mid Alpha for relaxation (10 minutes)
+  # 3. Hold Mid Alpha for relaxation (600 seconds)
   - type: stable
     frequency: 10 # Hz (Mid Alpha)
-    duration: 10 # minutes
+    duration: 600 # seconds
 
-  # 4. Slight dip towards lower Alpha to deepen calm (2 minutes)
+  # 4. Slight dip towards lower Alpha to deepen calm (120 seconds)
   - type: transition
     # start_frequency: 10 (implied)
     end_frequency: 8 # Hz (Low Alpha)
-    duration: 2 # minutes
+    duration: 120 # seconds

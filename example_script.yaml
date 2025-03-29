@@ -6,34 +6,31 @@ sample_rate: 44100 # Hz (audio sample rate)
 # Default output file name. Extension determines format (.wav or .flac).
 output_filename: "audio/example_fade.flac"
 
-# Sequence of audio generation steps (Total Duration: 20 min)
+# Sequence of audio generation steps (Total Duration: 1200 seconds = 20 minutes)
 steps:
   # 1. Beta phase (stable 18 Hz beat) with fade-in
   - type: stable
     frequency: 18 # Hz (binaural beat frequency)
-    duration: 3 # minutes
-    fade_in_duration: 0.1 # 6 seconds fade-in (linear ramp from 0 to full volume)
+    duration: 180 # 3 minutes
+    fade_in_duration: 6
 
   # 2. Transition from Beta (18 Hz) to Alpha (10 Hz)
-  # No fades specified, defaults to 0 (immediate full volume)
   - type: transition
     start_frequency: 18 # Hz
-    end_frequency: 10 # Hz
-    duration: 5 # minutes
+    end_frequency: 10
+    duration: 300 # 5 minutes
 
   # 3. Transition from Alpha (10 Hz) to Theta (6 Hz)
-  # Demonstrate both fade-in and fade-out within a single step
   - type: transition
-    start_frequency: 10 # Hz
-    end_frequency: 6 # Hz
-    duration: 5 # minutes
-    fade_in_duration: 0.05 # 3 seconds fade-in
-    fade_out_duration: 0.05 # 3 seconds fade-out
+    start_frequency: 10
+    end_frequency: 6
+    duration: 300 # 5 minutes
+    fade_in_duration: 3
+    fade_out_duration: 3
 
   # 4. Transition from Theta (6 Hz) to Delta (2 Hz) with fade-out
-  # This fade-out applies only to the end of this step
   - type: transition
-    start_frequency: 6 # Hz
-    end_frequency: 2 # Hz
-    duration: 7 # minutes
-    fade_out_duration: 0.2 # 12 seconds fade-out (linear ramp from full volume to 0)
+    start_frequency: 6
+    end_frequency: 2
+    duration: 420 # 7 minutes
+    fade_out_duration: 12
