@@ -11,18 +11,21 @@ import soundfile as sf
 from binaural.fade import apply_fade
 from binaural.utils import validate_step
 from binaural.constants import SUPPORTED_FORMATS
+from binaural.types import Tone
 
 
 def generate_tone(
-    duration_sec: float,
-    base_freq: float,
-    freq_diff_start: float,
-    freq_diff_end: float,
-    sample_rate: int,
-    fade_in_sec: float = 0.0,
-    fade_out_sec: float = 0.0,
+    sample_rate: int, duration_sec: float, tone: Tone
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Generates stereo audio data for binaural beats with volume envelope."""
+
+    # Unpack the tone parameters
+    base_freq = tone.base_freq
+    freq_diff_start = tone.freq_diff_start
+    freq_diff_end = tone.freq_diff_end
+    fade_in_sec = tone.fade_in_sec
+    fade_out_sec = tone.fade_out_sec
+
     num_samples = int(sample_rate * duration_sec)
     if num_samples == 0:
         return np.array([]), np.array([])
@@ -44,7 +47,9 @@ def generate_tone(
 
 
 def generate_audio_sequence(
-    steps: list[dict], base_freq: float, sample_rate: int
+    sample_rate: int,
+    base_freq: float,
+    steps: list[dict],
 ) -> Tuple[np.ndarray, np.ndarray, float]:
     """Generates the complete audio sequence and returns total duration."""
     # Initialize lists to hold audio data for each channel
@@ -85,13 +90,9 @@ def generate_audio_sequence(
 
             # Generate the audio tones for the current step, applying fades
             left, right = generate_tone(
-                duration_sec,
-                base_freq,
-                freq_start,
-                freq_end,
                 sample_rate,
-                fade_in_sec,
-                fade_out_sec,
+                duration_sec,
+                Tone(base_freq, freq_start, freq_end, fade_in_sec, fade_out_sec),
             )
             # Append the generated audio data to the respective channel lists
             left_audio.append(left)
@@ -116,9 +117,9 @@ def generate_audio_sequence(
 
 def save_audio_file(
     filename: str,
+    sample_rate: int,
     left: np.ndarray,
     right: np.ndarray,
-    sample_rate: int,
     total_duration_sec: float,
 ) -> None:
     """Saves stereo audio data and prints total duration."""

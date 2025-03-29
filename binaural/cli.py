@@ -25,18 +25,18 @@ def main() -> None:
 
     config = load_yaml_config(args.script)
 
-    base_freq = config.get("base_frequency", DEFAULT_BASE_FREQUENCY)
     sample_rate = config.get("sample_rate", DEFAULT_SAMPLE_RATE)
+    base_freq = config.get("base_frequency", DEFAULT_BASE_FREQUENCY)
     output_filename = args.output or config.get(
         "output_filename", DEFAULT_OUTPUT_FILENAME
     )
 
     left_channel, right_channel, total_duration = generate_audio_sequence(
-        config["steps"], base_freq, sample_rate
+        sample_rate, base_freq, config["steps"]
     )
 
     save_audio_file(
-        output_filename, left_channel, right_channel, sample_rate, total_duration
+        output_filename, sample_rate, left_channel, right_channel, total_duration
     )
 
 
