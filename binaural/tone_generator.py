@@ -8,10 +8,9 @@ from typing import Tuple
 import numpy as np
 import soundfile as sf
 
-from binaural.fade import apply_fade
-from binaural.utils import validate_step
 from binaural.constants import SUPPORTED_FORMATS
-from binaural.types import Tone
+from binaural.fade import apply_fade
+from binaural.types import AudioStep, Tone
 
 
 def generate_tone(
@@ -62,43 +61,44 @@ def generate_audio_sequence(
     # Iterate through each step in the configuration
     for idx, step in enumerate(steps, start=1):
         try:
-            # Validate the current step and get its parameters, including fades
-            (
-                step_type,
-                duration_sec,
-                freq_start,
-                freq_end,
-                fade_in_sec,
-                fade_out_sec,
-            ) = validate_step(step, previous_freq)
+            audio_step = AudioStep(**step)  # Unpack and validate the step
+            if idx >= 1:
+                if audio_step.type == "transition":
+                    if previous_freq is None:
+                        raise ValueError(
+                            "Transition step must specify 'start_frequency' if it's the first step "
+                            "or if the previous step's frequency is unknown."
+                        )
+                    if audio_step.start_frequency is None:
+                        # Use the previous frequency if not specified
+                        audio_step.start_frequency = previous_freq
+                elif audio_step.type == "stable":
+                    # For stable steps, set the previous frequency to the current frequency
+                    previous_freq = audio_step.frequency
 
             # Add step duration to total duration
-            total_duration_sec += duration_sec
+            total_duration_sec += audio_step.duration
 
-            # Print progress information, including fade details if present
-            fade_info = ""
-            if fade_in_sec > 0:
-                fade_info += f", fade-in {fade_in_sec/60.0:.2f}min"
-            if fade_out_sec > 0:
-                fade_info += f", fade-out {fade_out_sec/60.0:.2f}min"
-
-            print(
-                f"Generating step {idx}: {step_type}, "
-                f"{freq_start}Hz -> {freq_end}Hz, duration {duration_sec / 60.0:.2f}min"
-                f"{fade_info}"
-            )
+            # Print progress information
+            print(f"Generating step {idx}: {audio_step}")
 
             # Generate the audio tones for the current step, applying fades
             left, right = generate_tone(
                 sample_rate,
-                duration_sec,
-                Tone(base_freq, freq_start, freq_end, fade_in_sec, fade_out_sec),
+                audio_step.duration,
+                Tone(
+                    base_freq,
+                    audio_step.start_frequency,
+                    audio_step.end_frequency,
+                    audio_step.fade_in_duration,
+                    audio_step.fade_out_duration,
+                ),
             )
             # Append the generated audio data to the respective channel lists
             left_audio.append(left)
             right_audio.append(right)
             # Update the previous frequency for the next step's potential transition
-            previous_freq = freq_end
+            previous_freq = audio_step.end_frequency
         except ValueError as e:
             # Handle validation errors for the specific step
             sys.exit(f"Error in step {idx}: {e}")

@@ -1,13 +1,14 @@
 """Command-line interface for generating binaural beats audio from a YAML script."""
 
 import argparse
-from binaural.utils import load_yaml_config
-from binaural.tone_generator import generate_audio_sequence, save_audio_file
+
 from binaural.constants import (
-    DEFAULT_SAMPLE_RATE,
     DEFAULT_BASE_FREQUENCY,
     DEFAULT_OUTPUT_FILENAME,
+    DEFAULT_SAMPLE_RATE,
 )
+from binaural.tone_generator import generate_audio_sequence, save_audio_file
+from binaural.utils import load_yaml_config
 
 
 def main() -> None:
