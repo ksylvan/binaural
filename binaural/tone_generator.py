@@ -1,7 +1,6 @@
 """Generates stereo audio data for binaural beats with volume envelope."""
 
 import os
-import sys
 from typing import Optional, Tuple
 
 import numpy as np
@@ -10,6 +9,7 @@ import soundfile as sf
 from binaural.constants import SUPPORTED_FORMATS
 from binaural.fade import apply_fade
 from binaural.types import AudioStep, Tone
+from binaural.exceptions import AudioGenerationError, UnsupportedFormatError
 
 
 def generate_tone(
@@ -53,7 +53,7 @@ def generate_audio_sequence(
         if audio_step.type == "transition":
             if audio_step.start_frequency is None:
                 if previous_freq is None:
-                    sys.exit(
+                    raise AudioGenerationError(
                         f"Error in step {idx}: Transition step must specify 'start_frequency'."
                     )
                 audio_step.start_frequency = previous_freq
@@ -95,12 +95,12 @@ def save_audio_file(
     """Saves stereo audio data."""
     _, ext = os.path.splitext(filename)
     if ext.lower() not in SUPPORTED_FORMATS:
-        sys.exit(
-            f"Error: Unsupported format '{ext}'. Supported formats: {', '.join(SUPPORTED_FORMATS)}"
+        raise UnsupportedFormatError(
+            f"Unsupported format '{ext}'. Supported formats: {', '.join(SUPPORTED_FORMATS)}"
         )
 
     if left.size == 0 or right.size == 0:
-        sys.exit("Warning: No audio data generated. Exiting without creating file.")
+        raise AudioGenerationError("No audio data generated.")
 
     stereo_audio = np.column_stack((left, right))
 
@@ -112,7 +112,8 @@ def save_audio_file(
         sf.write(filename, stereo_audio, sample_rate, subtype="PCM_16")
         minutes, seconds = divmod(total_duration_sec, 60)
         print(
-            f"Audio file '{filename}' created successfully. Total duration: {int(minutes)}m {seconds:.2f}s."
+            f"Audio file '{filename}' created successfully. "
+            f"Total duration: {int(minutes)}m {seconds:.2f}s."
         )
     except (sf.SoundFileError, RuntimeError, IOError) as e:
-        sys.exit(f"Error writing audio file '{filename}': {e}")
+        raise AudioGenerationError(f"Error writing audio file '{filename}': {e}") from e
