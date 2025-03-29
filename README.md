@@ -4,7 +4,7 @@ Binaural is a Python tool that generates binaural beat audio (WAV or FLAC) desig
 
 ## Description
 
-This tool reads a YAML script defining a sequence of binaural beat frequencies and durations, then creates an audio file based on that sequence. It supports output in both WAV and FLAC formats. It allows for both stable frequency segments and smooth transitions between frequencies.
+This tool reads a YAML script defining a sequence of binaural beat frequencies, durations, and optional volume fades, then creates an audio file based on that sequence. It supports output in both WAV and FLAC formats. It allows for stable frequency segments, smooth transitions between frequencies, and gradual fade-in/fade-out for each segment.
 
 The program uses a configurable base carrier frequency (defaulting to 100 Hz) and creates stereo audio. The frequency difference between the left and right channels creates the binaural beat effect, which is intended to influence brainwave activity.
 
@@ -96,7 +96,7 @@ To use the example script provided (which defaults to FLAC output):
 python binaural.py example_script.yaml
 ```
 
-This will generate `example.flac` (or the filename specified in `example_script.yaml`) in the `audio/` directory.
+This will generate `example_fade.flac` (or the filename specified in `example_script.yaml`) in the `audio/` directory.
 
 To use one of the pre-defined scripts from the library and output as WAV:
 
@@ -125,40 +125,50 @@ The YAML script defines the parameters and sequence for audio generation.
 
 **Steps (Required):**
 
-A list under the `steps:` key, where each item defines an audio segment.
+A list under the `steps:` key, where each item defines an audio segment. Each step can be one of the following types:
 
 - **`type: stable`**: Holds a constant binaural beat frequency.
   - `frequency`: The binaural beat frequency in Hz.
   - `duration`: The duration of this segment in minutes.
+  - `fade_in_duration` (Optional): Duration of a linear volume fade-in at the beginning of the step, in minutes. Default: `0`.
+  - `fade_out_duration` (Optional): Duration of a linear volume fade-out at the end of the step, in minutes. Default: `0`.
 
 - **`type: transition`**: Linearly changes the binaural beat frequency over time.
-  - `start_frequency`: The starting binaural beat frequency in Hz. If omitted, it uses the end frequency of the
-    previous step for a smooth transition.
+  - `start_frequency`: The starting binaural beat frequency in Hz. If omitted, it uses the end frequency of the previous step for a smooth transition.
   - `end_frequency`: The ending binaural beat frequency in Hz.
   - `duration`: The duration of this transition in minutes.
+  - `fade_in_duration` (Optional): Duration of a linear volume fade-in at the beginning of the step, in minutes. Default: `0`.
+  - `fade_out_duration` (Optional): Duration of a linear volume fade-out at the end of the step, in minutes. Default: `0`.
+
+**Important Notes on Fades:**
+
+- Fades are applied *within* the specified `duration` of the step.
+- The sum of `fade_in_duration` and `fade_out_duration` for a single step cannot exceed the step's `duration`.
 
 **Example YAML (`example_script.yaml`):**
 
 ```yaml
-# Example Binaural Beat Generation Script
+# Example Binaural Beat Generation Script with Fades
 
 # Global settings (optional)
 base_frequency: 100 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
-output_filename: "audio/example.flac" # Default output file name (FLAC format)
+output_filename: "audio/example_fade.flac" # Default output file name (FLAC format)
 
 # Sequence of audio generation steps (Total Duration: 20 min)
 steps:
-  # 1. Beta phase (stable 18 Hz beat)
+  # 1. Beta phase with fade-in
   - type: stable
     frequency: 18 # Hz (binaural beat frequency)
     duration: 3 # minutes
+    fade_in_duration: 0.1 # 6 seconds fade-in
 
   # 2. Transition from Beta (18 Hz) to Alpha (10 Hz)
   - type: transition
     start_frequency: 18 # Hz
     end_frequency: 10 # Hz
     duration: 5 # minutes
+    # No fade in/out specified, uses defaults (0)
 
   # 3. Transition from Alpha (10 Hz) to Theta (6 Hz)
   - type: transition
@@ -166,11 +176,12 @@ steps:
     end_frequency: 6 # Hz
     duration: 5 # minutes
 
-  # 4. Transition from Theta (6 Hz) to Delta (2 Hz)
+  # 4. Transition from Theta (6 Hz) to Delta (2 Hz) with fade-out
   - type: transition
     start_frequency: 6 # Hz
     end_frequency: 2 # Hz
     duration: 7 # minutes
+    fade_out_duration: 0.2 # 12 seconds fade-out at the very end
 ```
 
 ## Script Library
@@ -185,8 +196,10 @@ using the `-o` command-line option with a `.wav` extension.
 - **`scripts/meditation_theta.yaml`**: Facilitates deep meditation and introspection using Theta waves (6 Hz).
 - **`scripts/sleep_delta.yaml`**: Guides the brain towards deep sleep states using Delta waves (2 Hz).
 - **`scripts/creativity_theta.yaml`**: Intended to foster an intuitive and creative mental state using Theta waves (7 Hz).
+- **`scripts/lucid_dreaming.yaml`**: Aims to facilitate REM sleep states potentially conducive to lucid dreaming.
+- **`scripts/migraine_relief.yaml`**: Uses specific frequencies and transitions aimed at reducing migraine symptoms.
 
-You can use these scripts directly or modify them to suit your needs.
+You can use these scripts directly or modify them to suit your needs, including adding fades.
 
 Example usage for WAV output:
 
@@ -197,7 +210,7 @@ python binaural.py scripts/sleep_delta.yaml -o audio/sleep_delta.wav
 ## File Structure
 
 - `binaural.py`: Main script that generates the binaural beats audio.
-- `example_script.yaml`: Example YAML script
+- `example_script.yaml`: Example YAML script with fades.
 - `scripts/`: Directory containing pre-defined YAML scripts for various use-cases.
   - `focus_beta.yaml`
   - `focus_gamma.yaml`
@@ -205,6 +218,8 @@ python binaural.py scripts/sleep_delta.yaml -o audio/sleep_delta.wav
   - `meditation_theta.yaml`
   - `sleep_delta.yaml`
   - `creativity_theta.yaml`
+  - `lucid_dreaming.yaml`
+  - `migraine_relief.yaml`
 - `bin/setup.sh`: Setup script to prepare the development environment.
 - `requirements.txt`: Python dependencies (numpy, PyYAML, soundfile).
 - `requirements-bootstrap.txt`: Bootstrap dependencies for setup (uv).
@@ -226,6 +241,11 @@ python binaural.py scripts/sleep_delta.yaml -o audio/sleep_delta.wav
 - Huang, T. L., & Charyton, C. (2008). A comprehensive review of the psychological effects of brainwave entrainment. Alternative Therapies in Health and Medicine, 14(5), 38-50.
 - Le Scouarnec, R. P., Poirier, R. M., Owens, J. E., Gauthier, J., Taylor, A. G., & Foresman, P. A. (2001). Use of binaural beat tapes for treatment of anxiety: A pilot study. Alternative Therapies in Health and Medicine, 7(1), 58-63.
 - Chaieb, L., Wilpert, E. C., Reber, T. P., & Fell, J. (2015). Auditory beat stimulation and its effects on cognition and mood states. Frontiers in Psychiatry, 6, 70.
+- Wahbeh, H., Calabrese, C., & Zwickey, H. (2007). Binaural beat technology in humans: a pilot study to assess psychologic and physiologic effects. Journal of Alternative and Complementary Medicine, 13(1), 25-32.
+- Kraus, J., & Porubanová, M. (2015). The effect of binaural beats on working memory capacity. Studia Psychologica, 57(2), 135-145.
+- Jirakittayakorn, N., & Wongsawat, Y. (2018). A novel insight of effects of a 3-Hz binaural beat on sleep stages during sleep. Frontiers in Human Neuroscience, 12, 387.
+- Stumbrys, T., Erlacher, D., & Schredl, M. (2014). Testing the potential of binaural beats to induce lucid dreams. Dreaming, 24(3), 208–217.
+- Prinsloo, S., Lyle, R., & Sewell, D. (2018). Alpha-Theta Neurofeedback for Chronic Pain: A Pilot Study. Journal of Neurotherapy, 22(3), 193-211.
 
 ## License
 

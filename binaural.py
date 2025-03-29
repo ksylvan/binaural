@@ -2,7 +2,8 @@
 
 """Binaural Beat Generator
 
-Generates binaural beat audio (WAV or FLAC) from a YAML configuration file.
+Generates binaural beat audio (WAV or FLAC) from a YAML configuration file,
+including optional volume fade-in and fade-out for each segment.
 """
 
 import argparse
@@ -27,10 +28,16 @@ def generate_tone(
     freq_diff_start: float,
     freq_diff_end: float,
     sample_rate: int,
+    fade_in_sec: float = 0.0,
+    fade_out_sec: float = 0.0,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Generates stereo audio data for binaural beats."""
-    # Calculate the number of samples required for the duration
+    """Generates stereo audio data for binaural beats with volume envelope."""
+    # Calculate the total number of samples required for the duration
     num_samples = int(sample_rate * duration_sec)
+    if num_samples == 0:
+        # Return empty arrays if duration is too short
+        return np.array([]), np.array([])
+
     # Create a time vector from 0 to duration_sec with num_samples points
     t = np.linspace(0, duration_sec, num_samples, endpoint=False)
     # Create a frequency difference vector linearly interpolating from start to end
@@ -40,6 +47,41 @@ def generate_tone(
     left_channel = np.sin(2 * np.pi * base_freq * t)
     # Generate the right channel sine wave at the base frequency plus the difference
     right_channel = np.sin(2 * np.pi * (base_freq + freq_diff) * t)
+
+    # --- Apply Volume Envelope ---
+    # Create a volume envelope array initialized to full volume (1.0)
+    envelope = np.ones(num_samples)
+
+    # Calculate fade-in samples
+    fade_in_samples = min(num_samples, int(sample_rate * fade_in_sec))
+    if fade_in_samples > 0:
+        # Apply linear fade-in ramp from 0 to 1
+        envelope[:fade_in_samples] = np.linspace(0, 1, fade_in_samples)
+
+    # Calculate fade-out samples
+    fade_out_samples = min(
+        num_samples - fade_in_samples, int(sample_rate * fade_out_sec)
+    )
+    if fade_out_samples > 0:
+        # Apply linear fade-out ramp from 1 to 0
+        # Ensure fade-out starts after any fade-in is complete
+        start_index = num_samples - fade_out_samples
+        # Make sure the fade-out doesn't overwrite the fade-in if they overlap
+        # (which shouldn't happen due to validation, but belt-and-suspenders)
+        if start_index < fade_in_samples:
+            start_index = fade_in_samples
+            fade_out_samples = num_samples - start_index
+            if fade_out_samples <= 0:
+                # No room left for fade out
+                fade_out_samples = 0
+
+        if fade_out_samples > 0:
+            envelope[start_index:] = np.linspace(1, 0, fade_out_samples)
+
+    # Apply the envelope to both channels
+    left_channel *= envelope
+    right_channel *= envelope
+    # --- End Volume Envelope ---
 
     # Return the generated left and right channels
     return left_channel, right_channel
@@ -69,8 +111,8 @@ def load_yaml_config(path: str) -> dict:
 
 def validate_step(
     step: dict, previous_freq: float | None
-) -> Tuple[str, float, float, float]:
-    """Validates and extracts necessary fields from a step."""
+) -> Tuple[str, float, float, float, float, float]:
+    """Validates and extracts necessary fields from a step, including fades."""
     # Get step type and duration
     step_type = step.get("type")
     duration_min = step.get("duration")
@@ -87,14 +129,38 @@ def validate_step(
     # Convert duration from minutes to seconds
     duration_sec = duration_min * 60.0
 
+    # --- Validate Fade Durations ---
+    fade_in_min = step.get("fade_in_duration", 0.0)
+    fade_out_min = step.get("fade_out_duration", 0.0)
+
+    # Validate fade_in_duration
+    if not isinstance(fade_in_min, (int, float)) or fade_in_min < 0:
+        raise ValueError("fade_in_duration must be a non-negative number in minutes.")
+    # Validate fade_out_duration
+    if not isinstance(fade_out_min, (int, float)) or fade_out_min < 0:
+        raise ValueError("fade_out_duration must be a non-negative number in minutes.")
+
+    # Convert fade durations to seconds
+    fade_in_sec = fade_in_min * 60.0
+    fade_out_sec = fade_out_min * 60.0
+
+    # Check if total fade time exceeds step duration
+    if fade_in_sec + fade_out_sec > duration_sec:
+        raise ValueError(
+            f"Sum of fade_in_duration ({fade_in_min}min) and "
+            f"fade_out_duration ({fade_out_min}min) cannot exceed "
+            f"step duration ({duration_min}min)."
+        )
+    # --- End Fade Validation ---
+
     # Handle 'stable' type steps
     if step_type == "stable":
         freq = step.get("frequency")
         # Validate frequency for stable step
         if not isinstance(freq, (int, float)):
             raise ValueError("Stable step must specify a valid 'frequency'.")
-        # Return type, duration, and start/end frequency (same for stable)
-        return step_type, duration_sec, freq, freq
+        # Return type, duration, start/end frequency (same for stable), and fades
+        return step_type, duration_sec, freq, freq, fade_in_sec, fade_out_sec
 
     # Handle 'transition' type steps
     # Use previous step's end frequency if start_frequency is not provided
@@ -108,15 +174,17 @@ def validate_step(
             "if the previous step's frequency is unknown."
         )
     if not isinstance(end_freq, (int, float)):
-        raise ValueError("Transition step must specify a valid numeric 'end_frequency'.")
+        raise ValueError(
+            "Transition step must specify a valid numeric 'end_frequency'."
+        )
     if not isinstance(start_freq, (int, float)):
         # This case should only happen if previous_freq was None and start_frequency wasn't set
         raise ValueError(
             "Transition step must specify valid numeric 'start_frequency' or have a previous step."
         )
 
-    # Return type, duration, start frequency, and end frequency
-    return step_type, duration_sec, start_freq, end_freq
+    # Return type, duration, start frequency, end frequency, and fades
+    return step_type, duration_sec, start_freq, end_freq, fade_in_sec, fade_out_sec
 
 
 def generate_audio_sequence(
@@ -133,20 +201,41 @@ def generate_audio_sequence(
     # Iterate through each step in the configuration
     for idx, step in enumerate(steps, start=1):
         try:
-            # Validate the current step and get its parameters
-            step_type, duration_sec, freq_start, freq_end = validate_step(
-                step, previous_freq
-            )
+            # Validate the current step and get its parameters, including fades
+            (
+                step_type,
+                duration_sec,
+                freq_start,
+                freq_end,
+                fade_in_sec,
+                fade_out_sec,
+            ) = validate_step(step, previous_freq)
+
             # Add step duration to total duration
             total_duration_sec += duration_sec
-            # Print progress information
+
+            # Print progress information, including fade details if present
+            fade_info = ""
+            if fade_in_sec > 0:
+                fade_info += f", fade-in {fade_in_sec/60.0:.2f}min"
+            if fade_out_sec > 0:
+                fade_info += f", fade-out {fade_out_sec/60.0:.2f}min"
+
             print(
                 f"Generating step {idx}: {step_type}, "
                 f"{freq_start}Hz -> {freq_end}Hz, duration {duration_sec / 60.0:.2f}min"
+                f"{fade_info}"
             )
-            # Generate the audio tones for the current step
+
+            # Generate the audio tones for the current step, applying fades
             left, right = generate_tone(
-                duration_sec, base_freq, freq_start, freq_end, sample_rate
+                duration_sec,
+                base_freq,
+                freq_start,
+                freq_end,
+                sample_rate,
+                fade_in_sec,
+                fade_out_sec,
             )
             # Append the generated audio data to the respective channel lists
             left_audio.append(left)
@@ -159,6 +248,9 @@ def generate_audio_sequence(
 
     # Concatenate all audio segments into single arrays for each channel
     # Return concatenated audio and the total duration in seconds
+    if not left_audio:  # Handle case with no valid steps
+        return np.array([]), np.array([]), 0.0
+
     return (
         np.concatenate(left_audio),
         np.concatenate(right_audio),
@@ -182,9 +274,20 @@ def save_audio_file(
             f"Supported formats are: {', '.join(SUPPORTED_FORMATS)}"
         )
 
+    # Check if there's any audio data to save
+    if left.size == 0 or right.size == 0:
+        print(
+            "Warning: No audio data generated. Output file will be empty or not created."
+        )
+        # Depending on soundfile behavior, it might create an empty file or error.
+        # We'll attempt to write, but handle potential errors.
+        # If you prefer not to create an empty file, you could exit here.
+
     # Stack the left and right channels vertically and transpose for
     # stereo format (samples, channels)
-    stereo_audio = np.vstack((left, right)).T
+    # Ensure they have the same length (should be guaranteed by generation)
+    min_len = min(left.size, right.size)
+    stereo_audio = np.vstack((left[:min_len], right[:min_len])).T
 
     # Ensure the output directory exists
     output_dir = os.path.dirname(filename)
