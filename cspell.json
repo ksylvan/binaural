@@ -1,5 +1,7 @@
 {
-    "cSpell.words": [
+    "version": "0.2",
+    "language": "en",
+    "words": [
         "celerybeat",
         "Chaieb",
         "Charyton",
@@ -32,6 +34,7 @@
         "pycache",
         "pyenv",
         "pyflow",
+        "pylint",
         "pypa",
         "pypackages",
         "pypirc",
@@ -54,5 +57,7 @@
         "webassets",
         "Wilpert",
         "Wongsawat"
-    ]
+    ],
+    "ignoreWords": [],
+    "ignorePaths": []
 }
