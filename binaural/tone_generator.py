@@ -8,7 +8,7 @@ import soundfile as sf
 
 from binaural.constants import SUPPORTED_FORMATS
 from binaural.fade import apply_fade
-from binaural.types import AudioStep, Tone
+from binaural.data_types import AudioStep, Tone
 from binaural.exceptions import AudioGenerationError, UnsupportedFormatError
 
 
