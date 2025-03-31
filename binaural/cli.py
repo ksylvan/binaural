@@ -24,7 +24,7 @@ def main() -> None:
         "-o", "--output", help="Output audio file path (overrides YAML setting)."
     )
     parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose logging."
+        "-v", "--verbose", action="store_true", help="Enable verbose logging."
     )
     args = parser.parse_args()
 

@@ -9,7 +9,7 @@ import soundfile as sf
 
 from binaural.constants import SUPPORTED_FORMATS
 from binaural.fade import apply_fade
-from binaural.data_types import AudioStep, Tone
+from binaural.data_types import AudioStep, FadeInfo, FrequencyRange, Tone
 from binaural.exceptions import (
     AudioGenerationError,
     UnsupportedFormatError,
@@ -18,6 +18,88 @@ from binaural.exceptions import (
 
 # Set up logger
 logger = logging.getLogger(__name__)
+
+
+def config_step_to_audio_step(step: dict, previous_freq: float | None) -> AudioStep:
+    """Converts a configuration step to an AudioStep object."""
+    if "type" not in step:
+        raise ConfigurationError("Step must contain 'type' key.")
+    if "duration" not in step:
+        raise ConfigurationError("Step must contain 'duration' key.")
+    if step["type"] == "stable":
+        if "frequency" not in step:
+            raise ConfigurationError("Stable step must contain 'frequency' key.")
+        return AudioStep(
+            duration=step["duration"],
+            fade=FadeInfo(
+                fade_in_sec=step.get("fade_in", 0.0),
+                fade_out_sec=step.get("fade_out", 0.0),
+            ),
+            freq=FrequencyRange(
+                type="stable", start=step["frequency"], end=step["frequency"]
+            ),
+        )
+    if step["type"] == "transition":
+        if "end_frequency" not in step:
+            raise ConfigurationError("Transition step must contain 'end_frequency'.")
+        if previous_freq is None:
+            if "start_frequency" not in step:
+                raise ConfigurationError(
+                    "Transition step must contain 'start_frequency' if no previous frequency set."
+                )
+        start_freq = step.get("start_frequency", previous_freq)
+        return AudioStep(
+            duration=step["duration"],
+            fade=FadeInfo(
+                fade_in_sec=step.get("fade_in", 0.0),
+                fade_out_sec=step.get("fade_out", 0.0),
+            ),
+            freq=FrequencyRange(
+                type="transition",
+                start=start_freq,
+                end=step["end_frequency"],
+            ),
+        )
+
+    raise ConfigurationError(
+        f"Invalid step type '{step['type']}'. Must be 'stable' or 'transition'."
+    )
+
+
+def generate_audio_sequence(
+    sample_rate: int, base_freq: float, steps: list[dict]
+) -> Tuple[np.ndarray, np.ndarray, float]:
+    """Generates the complete audio sequence."""
+    left_audio, right_audio = [], []
+    previous_freq: Optional[float] = None
+    total_duration_sec = 0.0
+
+    for idx, step in enumerate(steps, start=1):
+        audio_step = config_step_to_audio_step(step, previous_freq)
+
+        total_duration_sec += audio_step.duration
+        logger.debug("Generating step %s: %s", idx, audio_step)
+
+        left, right = generate_tone(
+            sample_rate,
+            audio_step.duration,
+            Tone(
+                base_freq,
+                audio_step.freq.start,
+                audio_step.freq.end,
+                audio_step.fade.fade_in_sec,
+                audio_step.fade.fade_out_sec,
+            ),
+        )
+
+        left_audio.append(left)
+        right_audio.append(right)
+        previous_freq = audio_step.freq.end
+
+    if not left_audio:
+        return np.array([]), np.array([]), 0.0
+
+    return np.concatenate(left_audio), np.concatenate(right_audio), total_duration_sec
 
 
 def generate_tone(
@@ -45,52 +127,6 @@ def generate_tone(
     )
 
     return left_channel, right_channel
-
-
-def generate_audio_sequence(
-    sample_rate: int, base_freq: float, steps: list[dict]
-) -> Tuple[np.ndarray, np.ndarray, float]:
-    """Generates the complete audio sequence."""
-    left_audio, right_audio = [], []
-    previous_freq: Optional[float] = None
-    total_duration_sec = 0.0
-
-    for idx, step in enumerate(steps, start=1):
-        audio_step = AudioStep(**step)
-
-        if audio_step.type == "transition":
-            if audio_step.start_frequency is None:
-                if previous_freq is None:
-                    raise ConfigurationError(
-                        f"Error in step {idx}: Transition step must specify 'start_frequency'."
-                    )
-                audio_step.start_frequency = previous_freq
-        else:
-            audio_step.start_frequency = audio_step.frequency
-
-        total_duration_sec += audio_step.duration
-        logger.debug("Generating step %s: %s", idx, audio_step)
-
-        left, right = generate_tone(
-            sample_rate,
-            audio_step.duration,
-            Tone(
-                base_freq,
-                audio_step.start_frequency,
-                audio_step.end_frequency,
-                audio_step.fade_in_duration,
-                audio_step.fade_out_duration,
-            ),
-        )
-
-        left_audio.append(left)
-        right_audio.append(right)
-        previous_freq = audio_step.end_frequency
-
-    if not left_audio:
-        return np.array([]), np.array([]), 0.0
-
-    return np.concatenate(left_audio), np.concatenate(right_audio), total_duration_sec
 
 
 def save_audio_file(
