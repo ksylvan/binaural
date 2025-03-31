@@ -1,6 +1,6 @@
 """Types used in the binaural module."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from types import NoneType
 from typing import Optional
 
@@ -23,10 +23,23 @@ class AudioStep:
     type: str
     duration: float
     frequency: Optional[float] = None
+    _frequency: Optional[float] = field(default=None, init=False, repr=False)
     start_frequency: Optional[float] = None
     end_frequency: Optional[float] = None
     fade_in_duration: float = 0.0
     fade_out_duration: float = 0.0
+
+    @property
+    def frequency(self) -> Optional[float]:  # noqa: F811
+        """Get the frequency for the step."""
+        if self.type == "stable":
+            return self._frequency
+        return None
+
+    @frequency.setter
+    def frequency(self, value: Optional[float]) -> None:
+        """Set the frequency for the step."""
+        self._frequency = value
 
     def __post_init__(self):
         """Validate the step type."""
