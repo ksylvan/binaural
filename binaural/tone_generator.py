@@ -16,7 +16,6 @@ from binaural.exceptions import (
     ConfigurationError,
 )
 
-# Set up logger
 logger = logging.getLogger(__name__)
 
 
@@ -42,12 +41,15 @@ def config_step_to_audio_step(step: dict, previous_freq: float | None) -> AudioS
     if step["type"] == "transition":
         if "end_frequency" not in step:
             raise ConfigurationError("Transition step must contain 'end_frequency'.")
-        if previous_freq is None:
-            if "start_frequency" not in step:
-                raise ConfigurationError(
-                    "Transition step must contain 'start_frequency' if no previous frequency set."
-                )
+        if previous_freq is None and "start_frequency" not in step:
+            raise ConfigurationError(
+                "Transition step must contain 'start_frequency' if no previous frequency set."
+            )
         start_freq = step.get("start_frequency", previous_freq)
+        if "start_frequency" not in step:
+            logger.debug(
+                "No start frequency provided. Using previous frequency: %s", start_freq
+            )
         return AudioStep(
             duration=step["duration"],
             fade=FadeInfo(
@@ -69,14 +71,16 @@ def config_step_to_audio_step(step: dict, previous_freq: float | None) -> AudioS
 def generate_audio_sequence(
     sample_rate: int, base_freq: float, steps: list[dict]
 ) -> Tuple[np.ndarray, np.ndarray, float]:
-    """Generates the complete audio sequence."""
+    """Generates complete audio sequence from steps."""
     left_audio, right_audio = [], []
     previous_freq: Optional[float] = None
     total_duration_sec = 0.0
 
+    if not steps:
+        raise ConfigurationError("No steps defined in configuration.")
+
     for idx, step in enumerate(steps, start=1):
         audio_step = config_step_to_audio_step(step, previous_freq)
-
         total_duration_sec += audio_step.duration
         logger.debug("Generating step %s: %s", idx, audio_step)
 
@@ -92,12 +96,12 @@ def generate_audio_sequence(
             ),
         )
 
+        if left.size == 0 or right.size == 0:
+            raise AudioGenerationError(f"Generated zero audio data for step {idx}.")
+
         left_audio.append(left)
         right_audio.append(right)
         previous_freq = audio_step.freq.end
-
-    if not left_audio:
-        return np.array([]), np.array([]), 0.0
 
     return np.concatenate(left_audio), np.concatenate(right_audio), total_duration_sec
 
