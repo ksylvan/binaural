@@ -1,7 +1,6 @@
 """Types used in the binaural module."""
 
 from dataclasses import dataclass, field
-from types import NoneType
 from typing import Optional
 
 
@@ -14,6 +13,14 @@ class Tone:
     freq_diff_end: float
     fade_in_sec: float = 0.0
     fade_out_sec: float = 0.0
+
+
+@dataclass
+class FrequencyRange:
+    """Frequency range data."""
+
+    min: float
+    max: float
 
 
 @dataclass
@@ -41,8 +48,8 @@ class AudioStep:
         """Set the frequency for the step."""
         self._frequency = value
 
-    def __post_init__(self):
-        """Validate the step type."""
+    def __post_init__(self) -> None:
+        """Validate the step type and parameters."""
         if self.type not in ("stable", "transition"):
             raise ValueError(
                 f"Invalid step type '{self.type}'. Must be 'stable' or 'transition'."
@@ -67,18 +74,19 @@ class AudioStep:
                 raise ValueError("Stable step must specify a valid 'frequency'.")
             self.start_frequency = self.end_frequency = self.frequency
         else:
-            if not isinstance(self.start_frequency, (int, float, NoneType)):
+            if self.start_frequency and not isinstance(
+                self.start_frequency, (int, float)
+            ):
                 raise ValueError(
                     "Transition step must specify a valid 'start_frequency'."
                 )
-            if not isinstance(self.end_frequency, (int, float, NoneType)):
+            if self.end_frequency and not isinstance(self.end_frequency, (int, float)):
                 raise ValueError(
                     "Transition step must specify a valid 'end_frequency'."
                 )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the AudioStep."""
-
         fade_info = ""
         if self.fade_in_duration > 0:
             fade_info += f", fade-in {self.fade_in_duration/60.0:.2f}min"
@@ -86,8 +94,6 @@ class AudioStep:
             fade_info += f", fade-out {self.fade_out_duration/60.0:.2f}min"
 
         return (
-            f"{self.type}, "
-            f"{self.start_frequency}Hz -> {self.end_frequency}Hz, "
-            f"duration {self.duration / 60.0:.2f}min"
-            f"{fade_info}"
+            f"{self.type}, {self.start_frequency}Hz -> {self.end_frequency}Hz, "
+            f"duration {self.duration/60.0:.2f}min{fade_info}"
         )

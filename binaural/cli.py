@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+import logging
 
 from binaural.constants import (
     DEFAULT_BASE_FREQUENCY,
@@ -22,7 +23,17 @@ def main() -> None:
     parser.add_argument(
         "-o", "--output", help="Output audio file path (overrides YAML setting)."
     )
+    parser.add_argument(
+        "--verbose", action="store_true", help="Enable verbose logging."
+    )
     args = parser.parse_args()
+
+    # Set up logging configuration based on verbose flag
+    logging_level = logging.DEBUG if args.verbose else logging.INFO
+    logging.basicConfig(
+        level=logging_level, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+    logger = logging.getLogger(__name__)
 
     try:
         config = load_yaml_config(args.script)
@@ -31,15 +42,19 @@ def main() -> None:
         output_filename = args.output or config.get(
             "output_filename", DEFAULT_OUTPUT_FILENAME
         )
+        logger.debug("Configuration loaded: %s", config)
 
         left_channel, right_channel, total_duration = generate_audio_sequence(
             sample_rate, base_freq, config["steps"]
         )
+        logger.info("Audio sequence generated successfully.")
 
         save_audio_file(
             output_filename, sample_rate, left_channel, right_channel, total_duration
         )
+        logger.info("Audio file saved successfully.")
     except BinauralError as e:
+        logger.error("Error: %s", e)
         sys.exit(f"Error: {e}")
 
 

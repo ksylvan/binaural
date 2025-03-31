@@ -8,6 +8,8 @@ This tool reads a YAML script defining a sequence of binaural beat frequencies, 
 
 The program uses a configurable base carrier frequency (defaulting to 100 Hz) and creates stereo audio. The frequency difference between the left and right channels creates the binaural beat effect, which is intended to influence brainwave activity.
 
+**Note:** All duration values (i.e., duration, fade_in_duration, and fade_out_duration) in the YAML configuration are specified in seconds.
+
 ## Background
 
 ### What Are Binaural Beats?
@@ -86,8 +88,8 @@ python binaural.py <path_to_script.yaml> [options]
 **Arguments:**
 
 - `<path_to_script.yaml>` (Required): Path to the YAML file defining the binaural beat sequence.
-- `-o <output_file>`, `--output <output_file>` (Optional): Specify the output audio file path. The file extension determines the format (e.g., `.wav` for WAV, `.flac` for FLAC). This overrides the `output_filename` setting in the YAML script.
-
+- `-o <output_file>`, `--output <output_file>` (Optional): Specify the output audio file path. The file extension determines the format (e.g., `.wav` for WAV, `.flac` for FLAC).
+- `--verbose` (Optional): Enable verbose logging output.
 **Example:**
 
 To use the example script provided (which defaults to FLAC output):
