@@ -14,8 +14,8 @@ from binaural.utils import load_yaml_config
 from binaural.exceptions import BinauralError
 
 
-def main() -> None:
-    """Main function to parse command line arguments and generate binaural beats audio."""
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Generate binaural beats audio (WAV or FLAC) from a YAML script."
     )
@@ -26,13 +26,21 @@ def main() -> None:
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="Enable verbose logging."
     )
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    # Set up logging configuration based on verbose flag
-    logging_level = logging.DEBUG if args.verbose else logging.INFO
+
+def configure_logging(verbose: bool) -> None:
+    """Configure logging based on verbosity."""
     logging.basicConfig(
-        level=logging_level, format="%(asctime)s - %(levelname)s - %(message)s"
+        level=logging.DEBUG if verbose else logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
     )
+
+
+def main() -> None:
+    """Main entry point for the CLI."""
+    args = parse_args()
+    configure_logging(args.verbose)
     logger = logging.getLogger(__name__)
 
     try:
@@ -42,20 +50,24 @@ def main() -> None:
         output_filename = args.output or config.get(
             "output_filename", DEFAULT_OUTPUT_FILENAME
         )
-        logger.debug("Configuration loaded: %s", config)
+
+        logger.debug("Loaded configuration: %s", config)
 
         left_channel, right_channel, total_duration = generate_audio_sequence(
             sample_rate, base_freq, config["steps"]
         )
+
         logger.info("Audio sequence generated successfully.")
 
         save_audio_file(
             output_filename, sample_rate, left_channel, right_channel, total_duration
         )
-        logger.info("Audio file saved successfully.")
+
+        logger.info("Audio file saved successfully to '%s'.", output_filename)
+
     except BinauralError as e:
         logger.error("Error: %s", e)
-        sys.exit(f"Error: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

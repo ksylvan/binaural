@@ -51,31 +51,39 @@ Research on binaural beats has shown mixed results, but several studies suggest 
 ### Requirements
 
 - Python 3.x
-- Dependencies listed in `requirements.txt`:
-  - `numpy`: For numerical operations and array handling.
-  - `PyYAML`: For parsing the configuration script.
-  - `soundfile`: For writing audio files (WAV, FLAC).
+- Dependencies listed in `requirements.txt`
 
 ### Setup
 
 1. **Automatic setup** with the provided script:
 
-    ```bash
-    ./bin/setup.sh
-    ```
+```bash
+./bin/setup.sh
+source .venv/bin/activate
+```
 
-    This script will:
-    - Install `uv` (a fast Python package installer/resolver) if not already installed.
-    - Create a virtual environment named `.venv` in the current directory.
-    - Install all required dependencies from `requirements.txt` and `requirements-bootstrap.txt` into the virtual environment.
+## Contributing
 
-2. **Activate the virtual environment**:
+- Fork the repository.
+- Create a feature branch (`git checkout -b feature/awesome-feature`).
+- Write clear, concise code.
+- Ensure new features are tested and add appropriate unit tests.
+- Ensure code passes linters (`pylint`) and tests (`pytest`).
+- Run tests:
 
-    ```bash
-    source .venv/bin/activate
-    ```
+  ```bash
+  pytest
+  ```
 
-    > Note: If using VS Code, the workspace is configured to run the setup script automatically when opening the folder.
+- Run linters:
+
+  ```bash
+  pylint binaural
+  ```
+
+- Submit a pull request with a clear description of your changes.
+
+  > Note: If using VS Code, the workspace is configured to run the setup script automatically when opening the folder.
 
 ## Usage
 
@@ -87,7 +95,7 @@ python generate.py <path_to_script.yaml> [options]
 
 **Arguments:**
 
-- `<path_to_script.yaml>` (Required): Path to the YAML file defining the binaural beat sequence.
+- `<path_to_script.yaml>`: YAML file defining the binaural beat sequence.
 - `-o <output_file>`, `--output <output_file>` (Optional): Specify the output audio file path. The file extension determines the format (e.g., `.wav` for WAV, `.flac` for FLAC).
 - `--verbose` (Optional): Enable verbose logging output.
 **Example:**
@@ -232,6 +240,11 @@ python generate.py scripts/sleep_delta.yaml -o audio/sleep_delta.wav
   - `creativity_theta.yaml`
   - `lucid_dreaming.yaml`
   - `migraine_relief.yaml`
+  - `tests/`: Directory of unit tests.
+    - `test_data_types.py`
+    - `test_fade.py`
+    - `test_tone_generator.py`
+    - `test_utils.py`
 - `bin/setup.sh`: Setup script to prepare the development environment.
 - `requirements.txt`: Python dependencies (numpy, PyYAML, soundfile).
 - `requirements-bootstrap.txt`: Bootstrap dependencies for setup (uv).
