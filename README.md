@@ -82,7 +82,7 @@ Research on binaural beats has shown mixed results, but several studies suggest 
 Run the script with the path to a YAML configuration file:
 
 ```bash
-python binaural.py <path_to_script.yaml> [options]
+python generate.py <path_to_script.yaml> [options]
 ```
 
 **Arguments:**
@@ -95,7 +95,7 @@ python binaural.py <path_to_script.yaml> [options]
 To use the example script provided (which defaults to FLAC output):
 
 ```bash
-python binaural.py example_script.yaml
+python generate.py example_script.yaml
 ```
 
 This will generate `example_fade.flac` (or the filename specified in `example_script.yaml`) in the `audio/` directory.
@@ -103,7 +103,7 @@ This will generate `example_fade.flac` (or the filename specified in `example_sc
 To use one of the pre-defined scripts from the library and output as WAV:
 
 ```bash
-python binaural.py scripts/relaxation_alpha.yaml -o audio/relaxation_alpha.wav
+python generate.py scripts/relaxation_alpha.yaml -o audio/relaxation_alpha.wav
 ```
 
 This will generate `relaxation_alpha.wav` in the `audio/` directory, overriding the default name in the script.
@@ -111,7 +111,7 @@ This will generate `relaxation_alpha.wav` in the `audio/` directory, overriding 
 To generate a FLAC file with a custom name:
 
 ```bash
-python binaural.py scripts/focus_beta.yaml -o my_focus_session.flac
+python generate.py scripts/focus_beta.yaml -o my_focus_session.flac
 ```
 
 ## YAML Script Format
@@ -216,12 +216,12 @@ You can use these scripts directly or modify them to suit your needs, including 
 Example usage for WAV output:
 
 ```bash
-python binaural.py scripts/sleep_delta.yaml -o audio/sleep_delta.wav
+python generate.py scripts/sleep_delta.yaml -o audio/sleep_delta.wav
 ```
 
 ## File Structure
 
-- `binaural.py`: Main script that generates the binaural beats audio.
+- `generate.py`: Main script that generates the binaural beats audio.
 - `example_script.yaml`: Example YAML script with fades.
 - `scripts/`: Directory containing pre-defined YAML scripts for various use-cases.
   - `focus_beta.yaml`
