@@ -1,44 +1,48 @@
-# Example Binaural Beat Generation Script with Fades
+# Example Binaural Beat Generation Script with Fades and Background Noise
 
-# Global settings (optional)
+# Global settings
 base_frequency: 100 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
-# Default output file name. Extension determines format (.wav or .flac).
-output_filename: "audio/example_fade.flac"
+output_filename: "audio/example_fade_noise.flac" # Default output file name
 
-# Sequence of audio generation steps (Total Duration: 25 minutes)
+# Background noise settings (optional)
+background_noise:
+  type: "pink" # Type of noise: "white", "pink", "brown", or "none"
+  amplitude: 0.15 # Relative amplitude (0.0 to 1.0)
+
+# Sequence of audio generation steps (Total Duration: 1500 seconds = 25 minutes)
 steps:
   # 1. Beta phase (stable 18 Hz beat) with fade-in
   - type: stable
     frequency: 18 # Hz (binaural beat frequency)
-    duration: 180 # 3 minutes
-    fade_in_duration: 6
+    duration: 180 # seconds (3 minutes)
+    fade_in_duration: 6 # seconds
 
   # 2. Transition from Beta (18 Hz) to Alpha (10 Hz)
   - type: transition
-    start_frequency: 18 # Hz
-    end_frequency: 10
-    duration: 300 # 5 minutes
+    start_frequency: 18 # Hz (explicit, could be implied)
+    end_frequency: 10 # Hz
+    duration: 300 # seconds (5 minutes)
 
-  # 3. Transition from Alpha (10 Hz) to Theta (6 Hz)
+  # 3. Transition from Alpha (10 Hz) to Theta (6 Hz) with fades
   - type: transition
-    # start_frequency: 10
-    end_frequency: 6
-    duration: 300 # 5 minutes
-    fade_in_duration: 3
-    fade_out_duration: 3
+    # start_frequency: 10 (implied from previous step)
+    end_frequency: 6 # Hz
+    duration: 300 # seconds (5 minutes)
+    fade_in_duration: 3 # seconds
+    fade_out_duration: 3 # seconds
 
   # 4. Transition from Theta (6 Hz) to Delta (2 Hz) with fade-out
   - type: transition
-    # start_frequency: 6
-    end_frequency: 2
-    duration: 420 # 7 minutes
-    fade_out_duration: 12
+    # start_frequency: 6 (implied)
+    end_frequency: 2 # Hz
+    duration: 420 # seconds (7 minutes)
+    fade_out_duration: 12 # seconds
 
-  # 5. Transition from Delta (2 Hz) to Gamma (40 Hz)
+  # 5. Transition from Delta (2 Hz) to Gamma (40 Hz) with fades
   - type: transition
-    # start_frequency: 2
-    end_frequency: 40
-    duration: 300 # 5 minutes
-    fade_in_duration: 6
-    fade_out_duration: 15
+    # start_frequency: 2 (implied)
+    end_frequency: 40 # Hz
+    duration: 300 # seconds (5 minutes)
+    fade_in_duration: 6 # seconds
+    fade_out_duration: 15 # seconds

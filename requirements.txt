@@ -2,4 +2,5 @@ numpy
 PyYAML
 pylint
 pytest
+scipy # Added for noise generation (FFT)
 soundfile

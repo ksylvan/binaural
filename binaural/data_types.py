@@ -60,6 +60,32 @@ class FadeInfo:
 
 
 @dataclass
+class NoiseConfig:
+    """Configuration for background noise."""
+
+    type: str = "none"  # e.g., "none", "white", "pink", "brown"
+    amplitude: float = 0.0  # Relative amplitude (0.0 to 1.0)
+
+    def __post_init__(self) -> None:
+        """Validate noise configuration."""
+        valid_types = ("none", "white", "pink", "brown")
+        if self.type not in valid_types:
+            raise ValueError(
+                f"Invalid noise type: '{self.type}'. Must be one of {valid_types}."
+            )
+        if not 0.0 <= self.amplitude <= 1.0:
+            raise ValueError(
+                f"Noise amplitude must be between 0.0 and 1.0 (inclusive), got {self.amplitude}."
+            )
+        if self.type == "none" and self.amplitude > 0.0:
+            # Warn or enforce? Let's enforce clarity.
+            self.amplitude = 0.0
+        if self.type != "none" and self.amplitude == 0.0:
+            # If amplitude is 0, effectively no noise is added.
+            self.type = "none"
+
+
+@dataclass
 class AudioStep:
     """Audio step data."""
 
@@ -81,11 +107,11 @@ class AudioStep:
         """String representation of the AudioStep."""
         fade_info = ""
         if self.fade.fade_in_sec > 0:
-            fade_info += f", fade-in {self.fade.fade_in_sec/60.0:.2f}min"
+            fade_info += f", fade-in {self.fade.fade_in_sec:.2f}s"
         if self.fade.fade_out_sec > 0:
-            fade_info += f", fade-out {self.fade.fade_out_sec/60.0:.2f}min"
+            fade_info += f", fade-out {self.fade.fade_out_sec:.2f}s"
 
         return (
             f"{self.freq.type}, {self.freq.start}Hz -> {self.freq.end}Hz, "
-            f"duration {self.duration/60.0:.2f}min{fade_info}"
+            f"duration {self.duration:.2f}s{fade_info}"
         )

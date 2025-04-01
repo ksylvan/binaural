@@ -1,12 +1,12 @@
 # Binaural
 
-Binaural is a Python tool that generates binaural beat audio (WAV or FLAC) designed to induce different brain wave states, configured via a simple YAML script.
+Binaural is a Python tool that generates binaural beat audio (WAV or FLAC) designed to induce different brain wave states, configured via a simple YAML script. It can optionally mix background noise (white, pink, or brown) with the binaural beats.
 
 ## Description
 
-This tool reads a YAML script defining a sequence of binaural beat frequencies, durations, and optional volume fades, then creates an audio file based on that sequence. It supports output in both WAV and FLAC formats. It allows for stable frequency segments, smooth transitions between frequencies, and gradual fade-in/fade-out for each segment.
+This tool reads a YAML script defining a sequence of binaural beat frequencies, durations, optional volume fades, and optional background noise settings. It then creates an audio file based on that sequence. It supports output in both WAV and FLAC formats. It allows for stable frequency segments, smooth transitions between frequencies, and gradual fade-in/fade-out for each segment.
 
-The program uses a configurable base carrier frequency (defaulting to 100 Hz) and creates stereo audio. The frequency difference between the left and right channels creates the binaural beat effect, which is intended to influence brainwave activity.
+The program uses a configurable base carrier frequency (defaulting to 100 Hz) and creates stereo audio. The frequency difference between the left and right channels creates the binaural beat effect, which is intended to influence brainwave activity. Background noise, if configured, is added equally to both channels.
 
 **Note:** All duration values (i.e., duration, fade_in_duration, and fade_out_duration) in the YAML configuration are specified in seconds.
 
@@ -17,6 +17,14 @@ The program uses a configurable base carrier frequency (defaulting to 100 Hz) an
 Binaural beats are an auditory illusion perceived when two slightly different frequencies are presented separately to each ear. The brain detects the phase difference between these frequencies and attempts to reconcile this difference, which creates the sensation of a third "beat" frequency equal to the difference between the two tones.
 
 For example, if a 100 Hz tone is presented to the left ear and a 110 Hz tone to the right ear, the brain perceives a 10 Hz binaural beat. This perceived frequency corresponds to specific brainwave patterns.
+
+### Background Noise Types
+
+- **White Noise**: Contains equal energy across all audible frequencies. Sounds like a hiss (e.g., static, fan).
+- **Pink Noise**: Energy decreases with increasing frequency (specifically, 3dB per octave). Sounds deeper than white noise (e.g., steady rainfall, wind).
+- **Brown Noise (Brownian/Red Noise)**: Energy decreases more steeply than pink noise (6dB per octave). Sounds even deeper (e.g., strong waterfall, thunder rumble).
+
+Adding background noise can help mask distracting environmental sounds or provide a constant auditory backdrop.
 
 ### Brainwave Entrainment
 
@@ -51,24 +59,26 @@ Research on binaural beats has shown mixed results, but several studies suggest 
 ### Requirements
 
 - Python 3.x
-- Dependencies listed in `requirements.txt`
+- Dependencies listed in `requirements.txt` (numpy, PyYAML, soundfile, scipy).
 
 ### Setup
 
 1. **Automatic setup** with the provided script:
 
-```bash
-./bin/setup.sh
-source .venv/bin/activate
-```
+    ```bash
+    ./bin/setup.sh
+    source .venv/bin/activate
+    ```
+
+    This creates a virtual environment, installs `uv`, and then uses `uv` to install the required packages.
 
 ## Contributing
 
 - Fork the repository.
 - Create a feature branch (`git checkout -b feature/awesome-feature`).
-- Write clear, concise code.
+- Write clear, concise code with type hints and docstrings.
 - Ensure new features are tested and add appropriate unit tests.
-- Ensure code passes linters (`pylint`) and tests (`pytest`).
+- Ensure code passes linters (`pylint binaural tests`) and tests (`pytest`).
 - Run tests:
 
   ```bash
@@ -78,7 +88,7 @@ source .venv/bin/activate
 - Run linters:
 
   ```bash
-  pylint binaural
+  pylint binaural tests
   ```
 
 - Submit a pull request with a clear description of your changes.
@@ -95,9 +105,10 @@ python generate.py <path_to_script.yaml> [options]
 
 **Arguments:**
 
-- `<path_to_script.yaml>`: YAML file defining the binaural beat sequence.
-- `-o <output_file>`, `--output <output_file>` (Optional): Specify the output audio file path. The file extension determines the format (e.g., `.wav` for WAV, `.flac` for FLAC).
+- `<path_to_script.yaml>`: YAML file defining the binaural beat sequence and settings.
+- `-o <output_file>`, `--output <output_file>` (Optional): Specify the output audio file path. The file extension determines the format (`.wav` or `.flac`) and overrides the `output_filename` in the YAML.
 - `--verbose` (Optional): Enable verbose logging output.
+
 **Example:**
 
 To use the example script provided (which defaults to FLAC output):
@@ -106,7 +117,7 @@ To use the example script provided (which defaults to FLAC output):
 python generate.py example_script.yaml
 ```
 
-This will generate `example_fade.flac` (or the filename specified in `example_script.yaml`) in the `audio/` directory.
+This will generate `audio/example_fade_noise.flac` (or the filename specified in `example_script.yaml`) in the `audio/` directory.
 
 To use one of the pre-defined scripts from the library and output as WAV:
 
@@ -130,25 +141,29 @@ The YAML script defines the parameters and sequence for audio generation.
 
 - `base_frequency`: The carrier frequency in Hz (e.g., 100). Default: `100`.
 - `sample_rate`: The audio sample rate in Hz (e.g., 44100). Default: `44100`.
-- `output_filename`: The default name for the output audio file (e.g., `"audio/my_session.flac"` or `"audio/my_session.wav"`).
-  The extension (`.wav` or `.flac`) determines the output format. Default: `"output.flac"`.
+- `output_filename`: The default name for the output audio file (e.g., `"audio/my_session.flac"` or `"audio/my_session.wav"`). The extension (`.wav` or `.flac`) determines the output format. Default: `"output.flac"`.
+- `background_noise` (Optional): Settings for adding background noise.
+  - `type`: The type of noise. Options: `"white"`, `"pink"`, `"brown"`, `"none"`. Default: `"none"`.
+  - `amplitude`: The relative amplitude (volume) of the noise, from `0.0` (silent) to `1.0` (maximum relative level). Default: `0.0`. The binaural beat signal is scaled down by `(1 - amplitude)` before mixing to prevent clipping.
 
 **Steps (Required):**
 
 A list under the `steps:` key, where each item defines an audio segment. Each step can be one of the following types:
 
 - **`type: stable`**: Holds a constant binaural beat frequency.
-  - `frequency`: The binaural beat frequency in Hz.
-  - `duration`: The duration of this segment in seconds.
-  - `fade_in_duration` (Optional): Duration of a linear volume fade-in at the beginning of the step, in minutes. Default: `0`.
-  - `fade_out_duration` (Optional): Duration of a linear volume fade-out at the end of the step, in minutes. Default: `0`.
+- `frequency`: The binaural beat frequency in Hz.
+- `duration`: The duration of this segment in seconds.
+- `fade_in_duration` (Optional): Duration of a linear volume fade-in at the beginning of the step, in seconds. Default: `0.0`.
+- `fade_out_duration` (Optional): Duration of a linear volume fade-out at the end of the step, in seconds. Default: `0.0`.
+
+For the `transition` step type, we have the following:
 
 - **`type: transition`**: Linearly changes the binaural beat frequency over time.
-  - `start_frequency`: The starting binaural beat frequency in Hz. If omitted, it uses the end frequency of the previous step for a smooth transition.
-  - `end_frequency`: The ending binaural beat frequency in Hz.
-  - `duration`: The duration of this transition in minutes.
-  - `fade_in_duration` (Optional): Duration of a linear volume fade-in at the beginning of the step, in seconds. Default: `0`.
-  - `fade_out_duration` (Optional): Duration of a linear volume fade-out at the end of the step, in seconds. Default: `0`.
+- `start_frequency`: The starting binaural beat frequency in Hz. If omitted, it uses the end frequency of the previous step for a smooth transition (cannot be omitted for the first step).
+- `end_frequency`: The ending binaural beat frequency in Hz.
+- `duration`: The duration of this transition in seconds.
+- `fade_in_duration` (Optional): Duration of a linear volume fade-in at the beginning of the step, in seconds. Default: `0.0`.
+- `fade_out_duration` (Optional): Duration of a linear volume fade-out at the end of the step, in seconds. Default: `0.0`.
 
 **Important Notes on Fades:**
 
@@ -158,57 +173,60 @@ A list under the `steps:` key, where each item defines an audio segment. Each st
 **Example YAML (`example_script.yaml`):**
 
 ```yaml
-# Example Binaural Beat Generation Script with Fades
+# Example Binaural Beat Generation Script with Fades and Background Noise
 
-# Global settings (optional)
+# Global settings
 base_frequency: 100 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
-# Default output file name. Extension determines format (.wav or .flac).
-output_filename: "audio/example_fade.flac"
+output_filename: "audio/example_fade_noise.flac" # Default output file name
 
-# Sequence of audio generation steps (Total Duration: 25 minutes)
+# Background noise settings (optional)
+background_noise:
+  type: "pink" # Type of noise: "white", "pink", "brown", or "none"
+  amplitude: 0.15 # Relative amplitude (0.0 to 1.0)
+
+# Sequence of audio generation steps (Total Duration: 1500 seconds = 25 minutes)
 steps:
   # 1. Beta phase (stable 18 Hz beat) with fade-in
   - type: stable
     frequency: 18 # Hz (binaural beat frequency)
-    duration: 180 # 3 minutes
-    fade_in_duration: 6
+    duration: 180 # seconds (3 minutes)
+    fade_in_duration: 6 # seconds
 
   # 2. Transition from Beta (18 Hz) to Alpha (10 Hz)
   - type: transition
-    start_frequency: 18 # Hz
-    end_frequency: 10
-    duration: 300 # 5 minutes
+    start_frequency: 18 # Hz (explicit, could be implied)
+    end_frequency: 10 # Hz
+    duration: 300 # seconds (5 minutes)
 
-  # 3. Transition from Alpha (10 Hz) to Theta (6 Hz)
+  # 3. Transition from Alpha (10 Hz) to Theta (6 Hz) with fades
   - type: transition
-    # start_frequency: 10
-    end_frequency: 6
-    duration: 300 # 5 minutes
-    fade_in_duration: 3
-    fade_out_duration: 3
+    # start_frequency: 10 (implied from previous step)
+    end_frequency: 6 # Hz
+    duration: 300 # seconds (5 minutes)
+    fade_in_duration: 3 # seconds
+    fade_out_duration: 3 # seconds
 
   # 4. Transition from Theta (6 Hz) to Delta (2 Hz) with fade-out
   - type: transition
-    # start_frequency: 6
-    end_frequency: 2
-    duration: 420 # 7 minutes
-    fade_out_duration: 12
+    # start_frequency: 6 (implied)
+    end_frequency: 2 # Hz
+    duration: 420 # seconds (7 minutes)
+    fade_out_duration: 12 # seconds
 
-  # 5. Transition from Delta (2 Hz) to Gamma (40 Hz)
+  # 5. Transition from Delta (2 Hz) to Gamma (40 Hz) with fades
   - type: transition
-    # start_frequency: 2
-    end_frequency: 40
-    duration: 300 # 5 minutes
-    fade_in_duration: 6
-    fade_out_duration: 15
+    # start_frequency: 2 (implied)
+    end_frequency: 40 # Hz
+    duration: 300 # seconds (5 minutes)
+    fade_in_duration: 6 # seconds
+    fade_out_duration: 15 # seconds
 ```
 
 ## Script Library
 
 A collection of pre-defined YAML scripts for common use-cases is available in the `scripts/` directory.
-These currently default to `.flac` output but can be easily changed by modifying the `output_filename` field or
-using the `-o` command-line option with a `.wav` extension.
+These currently default to `.flac` output and do not include background noise, but can be easily modified.
 
 - **`scripts/focus_beta.yaml`**: Designed to enhance concentration and alertness using Beta waves (14-18 Hz).
 - **`scripts/focus_gamma.yaml`**: Targets peak concentration and problem-solving with Gamma waves (40 Hz).
@@ -219,37 +237,43 @@ using the `-o` command-line option with a `.wav` extension.
 - **`scripts/lucid_dreaming.yaml`**: Aims to facilitate REM sleep states potentially conducive to lucid dreaming.
 - **`scripts/migraine_relief.yaml`**: Uses specific frequencies and transitions aimed at reducing migraine symptoms.
 
-You can use these scripts directly or modify them to suit your needs, including adding fades.
+You can use these scripts directly, modify them (e.g., add `background_noise`), or use the `-o` command-line option to change the output format/name.
 
-Example usage for WAV output:
+Example usage for WAV output with added noise (assuming you modify the script):
 
 ```bash
-python generate.py scripts/sleep_delta.yaml -o audio/sleep_delta.wav
+# (First, edit scripts/sleep_delta.yaml to add background_noise section)
+python generate.py scripts/sleep_delta.yaml -o audio/sleep_delta_with_noise.wav
 ```
 
 ## File Structure
 
-- `generate.py`: Main script that generates the binaural beats audio.
-- `example_script.yaml`: Example YAML script with fades.
-- `scripts/`: Directory containing pre-defined YAML scripts for various use-cases.
-  - `focus_beta.yaml`
-  - `focus_gamma.yaml`
-  - `relaxation_alpha.yaml`
-  - `meditation_theta.yaml`
-  - `sleep_delta.yaml`
-  - `creativity_theta.yaml`
-  - `lucid_dreaming.yaml`
-  - `migraine_relief.yaml`
-  - `tests/`: Directory of unit tests.
-    - `test_data_types.py`
-    - `test_fade.py`
-    - `test_tone_generator.py`
-    - `test_utils.py`
-- `bin/setup.sh`: Setup script to prepare the development environment.
-- `requirements.txt`: Python dependencies (numpy, PyYAML, soundfile).
+- `generate.py`: Main script entry point.
+- `example_script.yaml`: Example YAML script with fades and noise.
+- `scripts/`: Directory containing pre-defined YAML scripts.
+- `binaural/`: Source code package.
+  - `__init__.py`
+  - `cli.py`: Command-line interface logic.
+  - `constants.py`: Default values and constants.
+  - `data_types.py`: Dataclasses for configuration objects (AudioStep, NoiseConfig, etc.).
+  - `exceptions.py`: Custom exception classes.
+  - `fade.py`: Audio fade logic.
+  - `noise.py`: Background noise generation functions.
+  - `tone_generator.py`: Core audio generation logic for beats and mixing.
+  - `utils.py`: YAML loading and validation utilities.
+- `tests/`: Directory of unit tests.
+  - `test_data_types.py`
+  - `test_fade.py`
+  - `test_noise.py`
+  - `test_tone_generator.py`
+  - `test_utils.py`
+- `bin/setup.sh`: Setup script for development environment.
+- `requirements.txt`: Python dependencies (numpy, PyYAML, soundfile, scipy).
 - `requirements-bootstrap.txt`: Bootstrap dependencies for setup (uv).
 - `README.md`: This file.
 - `LICENSE`: Project license information.
+- `conftest.py`: Pytest configuration.
+- `cspell.json`: Spell checking configuration.
 
 ## Resources
 
