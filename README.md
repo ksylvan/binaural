@@ -234,6 +234,8 @@ These currently default to `.flac` output and do not include background noise, b
 - **`scripts/meditation_theta.yaml`**: Facilitates deep meditation and introspection using Theta waves (6 Hz).
 - **`scripts/sleep_delta.yaml`**: Guides the brain towards deep sleep states using Delta waves (2 Hz).
 - **`scripts/creativity_theta.yaml`**: Intended to foster an intuitive and creative mental state using Theta waves (7 Hz).
+- **`scripts/lucid_dream_pink.yaml`**: Aims to facilitate REM sleep states potentially conducive to lucid
+  dreaming (90 minutes, with pink noise).
 - **`scripts/lucid_dreaming.yaml`**: Aims to facilitate REM sleep states potentially conducive to lucid dreaming.
 - **`scripts/migraine_relief.yaml`**: Uses specific frequencies and transitions aimed at reducing migraine symptoms.
 
