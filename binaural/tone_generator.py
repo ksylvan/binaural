@@ -145,6 +145,144 @@ def generate_tone(
     return left_channel, right_channel
 
 
+def _process_beat_step(
+    idx: int,
+    step_dict: dict,
+    sample_rate: int,
+    base_freq: float,
+    previous_freq: Optional[float],
+) -> Tuple[np.ndarray, np.ndarray, float, float]:
+    """Process a single beat step and generate audio for it.
+
+    Returns:
+        Tuple containing left segment, right segment, step duration, and end frequency.
+    """
+    # Convert the dictionary step to a validated AudioStep object
+    audio_step = config_step_to_audio_step(step_dict, previous_freq)
+    logger.debug("Generating beat segment for step %d: %s", idx, audio_step)
+
+    # Generate the tone for the current step
+    tone = Tone(
+        base_freq=base_freq,
+        freq_diff_start=audio_step.freq.start,
+        freq_diff_end=audio_step.freq.end,
+        fade_in_sec=audio_step.fade.fade_in_sec,
+        fade_out_sec=audio_step.fade.fade_out_sec,
+    )
+    left_segment, right_segment = generate_tone(sample_rate, audio_step.duration, tone)
+
+    # Basic check for generated data
+    if left_segment.size == 0 or right_segment.size == 0:
+        logger.warning(
+            "Generated zero audio data for step %d (duration might be too small).",
+            idx,
+        )
+        if audio_step.duration > 0:
+            raise AudioGenerationError(
+                f"Generated zero audio data for non-zero duration step {idx}."
+            )
+
+    return left_segment, right_segment, audio_step.duration, audio_step.freq.end
+
+
+def _iterate_beat_steps(sample_rate: int, base_freq: float, steps: list[dict]) -> iter:
+    """Yields processed beat segments from configuration steps.
+
+    Yields:
+        Tuple containing left segment, right segment, and step duration.
+    """
+    previous_freq: Optional[float] = None
+    for idx, step_dict in enumerate(steps, start=1):
+        try:
+            left_segment, right_segment, step_duration, end_freq = _process_beat_step(
+                idx, step_dict, sample_rate, base_freq, previous_freq
+            )
+        except (ConfigurationError, ValueError, TypeError) as e:
+            raise ConfigurationError(f"Error processing step {idx}: {e}") from e
+        except AudioGenerationError:
+            raise
+        except Exception as e:
+            raise AudioGenerationError(
+                f"Unexpected error during step {idx} generation: {e}"
+            ) from e
+        previous_freq = end_freq
+        yield left_segment, right_segment, step_duration
+
+
+def _generate_beat_segments(
+    sample_rate: int, base_freq: float, steps: list[dict]
+) -> Tuple[np.ndarray, np.ndarray, float]:
+    """Generates binaural beat segments from configuration steps.
+
+    Returns:
+        Tuple containing left channel, right channel, and total duration.
+    """
+    segments = list(_iterate_beat_steps(sample_rate, base_freq, steps))
+    if not segments:
+        raise ConfigurationError("No steps defined in configuration.")
+
+    left_segments, right_segments, durations = zip(*segments)
+    return (
+        np.concatenate(left_segments),
+        np.concatenate(right_segments),
+        sum(durations),
+    )
+
+
+def _generate_and_mix_noise(
+    sample_rate: int,
+    total_duration_sec: float,
+    noise_config: NoiseConfig,
+    left_channel_beats: np.ndarray,
+    right_channel_beats: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Generates noise and mixes it with beat channels.
+
+    Returns:
+        Tuple containing final left and right channels with noise mixed.
+    """
+    total_num_samples = int(sample_rate * total_duration_sec)
+
+    # If no noise needed, return the original channels
+    if (
+        noise_config.type == "none"
+        or noise_config.amplitude <= 0
+        or total_num_samples <= 0
+    ):
+        return left_channel_beats, right_channel_beats
+
+    logger.info(
+        "Generating '%s' noise with amplitude %.2f...",
+        noise_config.type,
+        noise_config.amplitude,
+    )
+
+    try:
+        # Generate appropriate noise type
+        noise_signal = np.zeros(total_num_samples)
+        if noise_config.type == "white":
+            noise_signal = generate_white_noise(total_num_samples)
+        elif noise_config.type == "pink":
+            noise_signal = generate_pink_noise(total_num_samples)
+        elif noise_config.type == "brown":
+            noise_signal = generate_brown_noise(total_num_samples)
+        else:
+            logger.warning("Unsupported noise type '%s' specified.", noise_config.type)
+            return left_channel_beats, right_channel_beats
+
+        # Scale noise and mix with beats
+        noise_signal *= noise_config.amplitude
+        beat_scale_factor = 1.0 - noise_config.amplitude
+
+        left_final = left_channel_beats * beat_scale_factor + noise_signal
+        right_final = right_channel_beats * beat_scale_factor + noise_signal
+
+        return left_final, right_final
+
+    except Exception as e:
+        raise AudioGenerationError(f"Error generating or mixing noise: {e}") from e
+
+
 def generate_audio_sequence(
     sample_rate: int,
     base_freq: float,
@@ -159,7 +297,6 @@ def generate_audio_sequence(
         base_freq: The base carrier frequency in Hz.
         steps: A list of dictionaries, each representing an audio generation step.
         noise_config: A NoiseConfig object specifying background noise settings.
-        global_config: The full loaded configuration dictionary.
 
     Returns:
         A tuple containing:
@@ -171,136 +308,21 @@ def generate_audio_sequence(
         ConfigurationError: If the steps list is empty or contains invalid steps.
         AudioGenerationError: If errors occur during tone or noise generation.
     """
-    left_audio_segments, right_audio_segments = [], []
-    previous_freq: Optional[float] = None
-    total_duration_sec = 0.0
-
-    # Ensure there are steps to process
-    if not steps:
-        raise ConfigurationError("No steps defined in configuration.")
-
-    # --- Generate Binaural Beats Segments ---
-    # Iterate through each step defined in the configuration
-    for idx, step_dict in enumerate(steps, start=1):
-        try:
-            # Convert the dictionary step to a validated AudioStep object
-            audio_step = config_step_to_audio_step(step_dict, previous_freq)
-            total_duration_sec += audio_step.duration
-            logger.debug("Generating beat segment for step %d: %s", idx, audio_step)
-
-            # Generate the tone for the current step
-            left_segment, right_segment = generate_tone(
-                sample_rate,
-                audio_step.duration,
-                Tone(
-                    base_freq=base_freq,
-                    freq_diff_start=audio_step.freq.start,
-                    freq_diff_end=audio_step.freq.end,
-                    fade_in_sec=audio_step.fade.fade_in_sec,
-                    fade_out_sec=audio_step.fade.fade_out_sec,
-                ),
-            )
-
-            # Basic check for generated data
-            if left_segment.size == 0 or right_segment.size == 0:
-                # This case should ideally be handled by generate_tone returning empty arrays
-                # but adding a check here for robustness.
-                logger.warning(
-                    "Generated zero audio data for step %d (duration might be too small).",
-                    idx,
-                )
-                # Continue if duration was zero, raise if unexpected
-                if audio_step.duration > 0:
-                    raise AudioGenerationError(
-                        f"Generated zero audio data for non-zero duration step {idx}."
-                    )
-
-            # Append the generated segments to the lists
-            left_audio_segments.append(left_segment)
-            right_audio_segments.append(right_segment)
-
-            # Update the ending frequency for the next iteration
-            previous_freq = audio_step.freq.end
-
-        except (ConfigurationError, ValueError, TypeError) as e:
-            # Catch configuration errors specific to this step
-            raise ConfigurationError(f"Error processing step {idx}: {e}") from e
-        except AudioGenerationError as e:
-            # Re-raise audio generation errors
-            raise e
-        except Exception as e:
-            # Catch unexpected errors during step processing
-            raise AudioGenerationError(
-                f"Unexpected error during step {idx} generation: {e}"
-            ) from e
-
-    # Concatenate all generated segments into single left and right channels
-    left_channel_beats = (
-        np.concatenate(left_audio_segments) if left_audio_segments else np.array([])
-    )
-    right_channel_beats = (
-        np.concatenate(right_audio_segments) if right_audio_segments else np.array([])
+    # Generate the binaural beat segments
+    left_beats, right_beats, total_duration_sec = _generate_beat_segments(
+        sample_rate, base_freq, steps
     )
 
-    # --- Generate and Mix Background Noise ---
-    total_num_samples = int(sample_rate * total_duration_sec)
-    noise_signal = np.zeros(total_num_samples)
-
-    if (
-        noise_config.type != "none"
-        and noise_config.amplitude > 0
-        and total_num_samples > 0
-    ):
-        logger.info(
-            "Generating '%s' noise with amplitude %.2f...",
-            noise_config.type,
-            noise_config.amplitude,
-        )
-        try:
-            # Select the appropriate noise generation function
-            if noise_config.type == "white":
-                noise_signal = generate_white_noise(total_num_samples)
-            elif noise_config.type == "pink":
-                noise_signal = generate_pink_noise(total_num_samples)
-            elif noise_config.type == "brown":
-                noise_signal = generate_brown_noise(total_num_samples)
-            else:
-                # This case should be prevented by NoiseConfig validation, but handle defensively
-                logger.warning(
-                    "Unsupported noise type '%s' specified.", noise_config.type
-                )
-
-            # Scale the noise by its configured amplitude
-            noise_signal *= noise_config.amplitude
-
-            # Mix noise with beats: scale both to prevent clipping
-            # combined = beat_signal * (1 - noise_amplitude) + noise_signal
-            # Note: noise_signal already includes amplitude scaling
-            beat_scale_factor = 1.0 - noise_config.amplitude
-
-            left_channel_final = left_channel_beats * beat_scale_factor + noise_signal
-            right_channel_final = right_channel_beats * beat_scale_factor + noise_signal
-
-            # Optional: Re-normalize final signal if concerned about minor clipping
-            # max_amp = np.max(np.abs(np.concatenate((left_channel_final, right_channel_final))))
-            # if max_amp > 1.0:
-            #     logger.warning("Potential clipping detected after mixing noise. Re-normalizing.")
-            #     left_channel_final /= max_amp
-            #     right_channel_final /= max_amp
-
-        except Exception as e:
-            # Catch errors during noise generation or mixing
-            raise AudioGenerationError(f"Error generating or mixing noise: {e}") from e
-    else:
-        # If no noise, the final channels are just the beat channels
-        left_channel_final = left_channel_beats
-        right_channel_final = right_channel_beats
+    # Generate and mix noise with the beat segments
+    left_final, right_final = _generate_and_mix_noise(
+        sample_rate, total_duration_sec, noise_config, left_beats, right_beats
+    )
 
     # Ensure output arrays are float type (soundfile expects float or int)
-    left_channel_final = left_channel_final.astype(np.float64)
-    right_channel_final = right_channel_final.astype(np.float64)
+    left_final = left_final.astype(np.float64)
+    right_final = right_final.astype(np.float64)
 
-    return left_channel_final, right_channel_final, total_duration_sec
+    return left_final, right_final, total_duration_sec
 
 
 def save_audio_file(
