@@ -25,7 +25,13 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["black>=25.1.0", "isort>=6.0.1", "pytest>=8.3.5", "pylint>=3.3.6"]
+dev = [
+    "black>=25.1.0",
+    "isort>=6.0.1",
+    "pytest>=8.3.5",
+    "pylint>=3.3.6",
+    "hypothesis>=6.130.8",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/ksylvan/binaural"
@@ -48,7 +54,3 @@ python_files = "test_*.py"
 
 [tool.uv]
 required-version = ">=0.6.11"
-
-[console_scripts]
-binaural = "binaural:main"
-
