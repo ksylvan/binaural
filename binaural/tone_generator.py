@@ -44,19 +44,18 @@ def config_step_to_audio_step(step: dict, previous_freq: float | None) -> AudioS
         ConfigurationError: If the step dictionary is missing required keys or has
                             invalid values.
     """
-    # Basic validation for required keys
-    if "type" not in step:
-        raise ConfigurationError("Step dictionary must contain a 'type' key.")
-    if "duration" not in step:
-        raise ConfigurationError("Step dictionary must contain a 'duration' key.")
+
+    for key in ["type", "duration"]:
+        if key not in step:
+            raise ConfigurationError(f"Step dictionary must contain a '{key}' key.")
 
     step_type = step["type"]
     duration = step["duration"]
 
     # Extract fade information, defaulting to 0
     fade_info = FadeInfo(
-        fade_in_sec=step.get("fade_in_duration", 0.0),  # Corrected key name
-        fade_out_sec=step.get("fade_out_duration", 0.0),  # Corrected key name
+        fade_in_sec=step.get("fade_in_duration", 0.0),
+        fade_out_sec=step.get("fade_out_duration", 0.0),
     )
 
     try:
@@ -85,7 +84,7 @@ def config_step_to_audio_step(step: dict, previous_freq: float | None) -> AudioS
 
             if "start_frequency" not in step:
                 logger.debug(
-                    "Transition step using implicit start frequency from previous step: %.2f Hz",
+                    "Using start frequency from previous step: %.2f Hz",
                     start_freq,
                 )
 
@@ -348,8 +347,9 @@ def save_audio_file(
     # Extract file extension to determine format and check support
     _, ext = os.path.splitext(filename)
     if ext.lower() not in SUPPORTED_FORMATS:
+        format_list = ", ".join(SUPPORTED_FORMATS)
         raise UnsupportedFormatError(
-            f"Unsupported format '{ext}'. Supported formats: {', '.join(SUPPORTED_FORMATS)}"
+            f"Unsupported format '{ext}'. Supported formats: {format_list}",
         )
 
     # Check if there is any audio data to save

@@ -102,24 +102,10 @@ which uv >/dev/null 2>&1 || {
     fi
 }
 
-# create virtual environment if it doesn't exist
-if [ ! -d "./${VENV}" ]; then
-    write_step "Creating virtual environment in the ${PWD}/${VENV} directory..."
-    uv venv "${VENV}" || red_and_exit "Failed to create virtual environment! Exiting...\n"
-    green "Done.\n"
-fi
+# At this point, we should have uv installed
 
-if [ ! -r "$BOOTSTRAP" ]; then
-    yellow_and_exit "No bootstrap requirements ($BOOTSTRAP) file found! Exiting...\n"
-fi
-if [ ! -r "$REQ_MAIN" ]; then
-    yellow_and_exit "No main requirements ($REQ_MAIN) file found! Exiting...\n"
-fi
-
-pip_install_requirement "Bootstrap" -r "${BOOTSTRAP}"
-# shellcheck source=/dev/null
-. "${VENV}/bin/activate"
-pip_install_requirement "Main Install" --exact -r "${BOOTSTRAP}" -r "${REQ_MAIN}"
+write_step "Updating or creating .venv/ and packages..."
+uv sync --group dev || red_and_exit "Failed to sync the environment! Exiting...\n"
 
 printf "\n\nSetup script complete!\n\n"
 printf "You can now run \n"

@@ -52,7 +52,7 @@ def main() -> None:
         sample_rate = config.get("sample_rate", DEFAULT_SAMPLE_RATE)
         base_freq = config.get("base_frequency", DEFAULT_BASE_FREQUENCY)
 
-        # Determine the output filename: use command-line override first, then YAML, then default
+        # Output file: use command-line override first, then YAML, then default
         output_filename = args.output or config.get(
             "output_filename", DEFAULT_OUTPUT_FILENAME
         )

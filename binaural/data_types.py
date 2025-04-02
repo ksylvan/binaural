@@ -27,7 +27,8 @@ class FrequencyRange:
         """Validate the frequency range type and parameters."""
         if self.type not in ("stable", "transition"):
             raise ValueError(
-                f"Invalid frequency range type '{self.type}'. Must be 'stable' or 'transition'."
+                f"Invalid frequency range type '{self.type}'. "
+                "Must be 'stable' or 'transition'."
             )
         if self.type == "stable":
             if not isinstance(self.start, (int, float)):
@@ -70,12 +71,13 @@ class NoiseConfig:
         """Validate noise configuration."""
         valid_types = ("none", "white", "pink", "brown")
         if self.type not in valid_types:
-            raise ValueError(
+            raise TypeError(
                 f"Invalid noise type: '{self.type}'. Must be one of {valid_types}."
             )
         if not 0.0 <= self.amplitude <= 1.0:
             raise ValueError(
-                f"Noise amplitude must be between 0.0 and 1.0 (inclusive), got {self.amplitude}."
+                "Noise amplitude must be between 0.0 and 1.0 (inclusive), got "
+                f"{self.amplitude}."
             )
         if self.type == "none" and self.amplitude > 0.0:
             # Warn or enforce? Let's enforce clarity.
@@ -100,7 +102,8 @@ class AudioStep:
         if self.fade.fade_in_sec + self.fade.fade_out_sec > self.duration:
             raise ValueError(
                 f"Sum of fade-in ({self.fade.fade_in_sec}s) and fade-out "
-                f"({self.fade.fade_out_sec}s) cannot exceed step duration ({self.duration}s)."
+                f"({self.fade.fade_out_sec}s) cannot exceed step duration "
+                f"({self.duration}s)."
             )
 
     def __str__(self) -> str:

@@ -62,7 +62,8 @@ def load_yaml_config(path: str) -> dict:
                 type=noise_type, amplitude=float(noise_amplitude)
             )
         except (ValueError, TypeError) as e:
-            # Catch errors during NoiseConfig creation (e.g., invalid type, non-float amplitude)
+            # Catch errors during NoiseConfig creation
+            # (e.g., invalid type, non-float amplitude)
             raise ConfigurationError(
                 f"Invalid 'background_noise' configuration: {e}"
             ) from e

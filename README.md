@@ -58,8 +58,8 @@ Research on binaural beats has shown mixed results, but several studies suggest 
 
 ### Requirements
 
-- Python 3.x
-- Dependencies listed in `requirements.txt` (numpy, PyYAML, soundfile, scipy).
+- Python 3.12+
+- Dependencies listed in `pyproject.toml` (numpy, PyYAML, soundfile, scipy).
 
 ### Setup
 
@@ -70,7 +70,11 @@ Research on binaural beats has shown mixed results, but several studies suggest 
     source .venv/bin/activate
     ```
 
-    This creates a virtual environment, installs `uv`, and then uses `uv` to install the required packages.
+    This installs `uv` if it's not already installed, and uses it to create the `.venv/` virtual
+    environment and installs the required packages.
+
+    > Note: If using VS Code, the workspace is configured to run the setup script automatically when opening
+      the folder.
 
 ## Contributing
 
@@ -92,8 +96,6 @@ Research on binaural beats has shown mixed results, but several studies suggest 
   ```
 
 - Submit a pull request with a clear description of your changes.
-
-  > Note: If using VS Code, the workspace is configured to run the setup script automatically when opening the folder.
 
 ## Usage
 

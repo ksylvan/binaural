@@ -1,0 +1,54 @@
+[project]
+name = "binaural"
+version = "0.1.0"
+description = "Generate binaural beat audio with background noise for brainwave entrainment"
+authors = [{ name = "Kayvan Sylvan", email = "kayvan@sylvan.com" }]
+license = "MIT"
+readme = "README.md"
+keywords = ["audio", "binaural", "beats", "meditation", "sound"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.12 :: Only",
+    "Topic :: Multimedia :: Sound/Audio",
+]
+
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.2.4",
+    "pyyaml>=6.0.2",
+    "scipy>=1.15.2",
+    "soundfile>=0.13.1",
+]
+
+[dependency-groups]
+dev = ["black>=25.1.0", "isort>=6.0.1", "pytest>=8.3.5", "pylint>=3.3.6"]
+
+[project.urls]
+"Homepage" = "https://github.com/ksylvan/binaural"
+"Repository" = "https://github.com/ksylvan/binaural"
+"Bug Tracker" = "https://github.com/ksylvan/binaural/issues"
+"Documentation" = "https://github.com/ksylvan/binaural#readme"
+
+[tool.black]
+line-length = 88
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.pylint.design]
+max-args = 8
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+
+[tool.uv]
+required-version = ">=0.6.11"
+
+[console_scripts]
+binaural = "binaural:main"
+
