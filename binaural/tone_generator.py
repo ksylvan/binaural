@@ -19,17 +19,12 @@ from binaural.exceptions import (
     ConfigurationError,
 )
 
-# Import noise generation functions
-from binaural.noise import (
-    generate_white_noise,
-    generate_pink_noise,
-    generate_brown_noise,
-)
+from binaural.noise import NoiseFactory
 
 logger = logging.getLogger(__name__)
 
 
-def config_step_to_audio_step(step: dict, previous_freq: float | None) -> AudioStep:
+def config_step_to_audio_step(step: dict, previous_freq: Optional[float]) -> AudioStep:
     """Converts a configuration step dictionary into a validated AudioStep object.
 
     Args:
@@ -53,10 +48,17 @@ def config_step_to_audio_step(step: dict, previous_freq: float | None) -> AudioS
     duration = step["duration"]
 
     # Extract fade information, defaulting to 0
-    fade_info = FadeInfo(
-        fade_in_sec=step.get("fade_in_duration", 0.0),
-        fade_out_sec=step.get("fade_out_duration", 0.0),
-    )
+    fade_in_sec = step.get("fade_in_duration", 0.0)
+    fade_out_sec = step.get("fade_out_duration", 0.0)
+
+    # Validate fades against duration before creating objects
+    if fade_in_sec + fade_out_sec > duration:
+        raise ConfigurationError(
+            f"Sum of fade-in ({fade_in_sec}s) and fade-out "
+            f"({fade_out_sec}s) cannot exceed step duration ({duration}s)."
+        )
+
+    fade_info = FadeInfo(fade_in_sec=fade_in_sec, fade_out_sec=fade_out_sec)
 
     try:
         # Handle 'stable' type steps
@@ -84,7 +86,7 @@ def config_step_to_audio_step(step: dict, previous_freq: float | None) -> AudioS
 
             if "start_frequency" not in step:
                 logger.debug(
-                    "Using start frequency from previous step: %.2f Hz",
+                    "Using implicit start frequency from previous step: %.2f Hz",
                     start_freq,
                 )
 
@@ -257,17 +259,9 @@ def _generate_and_mix_noise(
     )
 
     try:
-        # Generate appropriate noise type
-        noise_signal = np.zeros(total_num_samples)
-        if noise_config.type == "white":
-            noise_signal = generate_white_noise(total_num_samples)
-        elif noise_config.type == "pink":
-            noise_signal = generate_pink_noise(total_num_samples)
-        elif noise_config.type == "brown":
-            noise_signal = generate_brown_noise(total_num_samples)
-        else:
-            logger.warning("Unsupported noise type '%s' specified.", noise_config.type)
-            return left_channel_beats, right_channel_beats
+        # Use the Strategy pattern to get the appropriate noise generator
+        noise_strategy = NoiseFactory.get_strategy(noise_config.type)
+        noise_signal = noise_strategy.generate(total_num_samples)
 
         # Scale noise and mix with beats
         noise_signal *= noise_config.amplitude
