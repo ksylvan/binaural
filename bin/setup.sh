@@ -10,9 +10,6 @@ YELLOW='\033[0;33m'
 RED='\033[0;31m'
 NO_COLOR='\033[0m'
 
-BOOTSTRAP="${_topdir}/requirements-bootstrap.txt" # only "uv"
-REQ_MAIN="${_topdir}/requirements.txt"            # main requirements
-
 # Official trusted install script
 UV_INSTALL_URL=https://astral.sh/uv/install.sh
 
@@ -39,25 +36,9 @@ write_step() {
     step=$((step + 1))
 }
 
-yellow_and_exit() {
-    yellow "${1}\n"
-    exit 1
-}
-
 red_and_exit() {
     red "${1}\n"
     exit 1
-}
-
-pip_install_requirement() {
-    # args: $1 - Message to print
-    #       $2 - $n - the rest of the args to "uv pip install"
-    #
-    msg="$1"
-    shift
-    write_step "${msg}\nRunning uv pip install ${*}...\n"
-    uv pip install "$@" || red_and_exit "Failed to install ${msg} requirements! Exiting...\n"
-    green "Done.\n"
 }
 
 opt_force=0
@@ -103,12 +84,11 @@ which uv >/dev/null 2>&1 || {
 }
 
 # At this point, we should have uv installed
-
 write_step "Updating or creating .venv/ and packages..."
 uv sync --group dev || red_and_exit "Failed to sync the environment! Exiting...\n"
 
 printf "\n\nSetup script complete!\n\n"
 printf "You can now run \n"
 printf "source %s/bin/activate\n" "${VENV}"
-printf "to activate the newly created virtual environment.\n\n"
+printf "to activate the virtual environment.\n\n"
 exit 0
