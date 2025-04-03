@@ -1,13 +1,15 @@
 """Utility functions for loading and validating YAML configuration files."""
 
 import logging
+
 import yaml
+
 from binaural.data_types import NoiseConfig
 from binaural.exceptions import (
     BinauralError,
     ConfigFileNotFoundError,
-    YAMLParsingError,
     ConfigurationError,
+    YAMLParsingError,
 )
 
 logger = logging.getLogger(__name__)

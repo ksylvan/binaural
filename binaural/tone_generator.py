@@ -5,7 +5,7 @@ with volume envelope and optional background noise.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional, Tuple
 
 import numpy as np
 import soundfile as sf
@@ -29,8 +29,54 @@ from binaural.noise import NoiseFactory
 logger = logging.getLogger(__name__)
 
 
+def _process_stable_step(
+    step: dict[str, Any], duration: float, fade_info: FadeInfo
+) -> AudioStep:
+    """Process a 'stable' type step and return an AudioStep."""
+    if "frequency" not in step:
+        raise ConfigurationError("Stable step must contain 'frequency' key.")
+    freq = float(step["frequency"])
+    # FrequencyRange validates non-negative frequency
+    freq_range = FrequencyRange(type="stable", start=freq, end=freq)
+    # AudioStep validates duration and fade sum
+    return AudioStep(duration=duration, fade=fade_info, freq=freq_range)
+
+
+def _process_transition_step(
+    step: dict[str, Any],
+    previous_freq: Optional[float],
+    duration: float,
+    fade_info: FadeInfo,
+) -> AudioStep:
+    """Process a 'transition' type step and return an AudioStep."""
+    if "end_frequency" not in step:
+        raise ConfigurationError("Transition step must contain 'end_frequency'.")
+    end_freq = float(step["end_frequency"])
+
+    # Determine start frequency: explicit, implicit from previous, or error
+    if "start_frequency" in step:
+        start_freq = float(step["start_frequency"])
+    elif previous_freq is not None:
+        start_freq = previous_freq
+        logger.debug(
+            "Using implicit start frequency from previous step: %.2f Hz",
+            start_freq,
+        )
+    else:
+        # This happens if it's the first step and start_frequency is omitted
+        raise ConfigurationError(
+            "First transition step must explicitly define 'start_frequency' "
+            "or follow another step."
+        )
+
+    # FrequencyRange validates non-negative frequencies
+    freq_range = FrequencyRange(type="transition", start=start_freq, end=end_freq)
+    # AudioStep validates duration and fade sum
+    return AudioStep(duration=duration, fade=fade_info, freq=freq_range)
+
+
 def config_step_to_audio_step(
-    step: Dict[str, Any], previous_freq: Optional[float]
+    step: dict[str, Any], previous_freq: Optional[float]
 ) -> AudioStep:
     """Converts a configuration step dictionary into a validated AudioStep object.
 
@@ -52,7 +98,7 @@ def config_step_to_audio_step(
     # Check for mandatory keys 'type' and 'duration'
     for key in ["type", "duration"]:
         if key not in step:
-            raise ConfigurationError(f"Step dictionary must contain a '{key}' key.")
+            raise ConfigurationError(f"Step dictionary must contain a f'{key}' key.")
 
     step_type = step["type"]
     duration = step["duration"]
@@ -80,48 +126,11 @@ def config_step_to_audio_step(
     fade_info = FadeInfo(fade_in_sec=fade_in_sec, fade_out_sec=fade_out_sec)
 
     try:
-        # Handle 'stable' type steps
+        # Dispatch to appropriate handler based on step type
         if step_type == "stable":
-            if "frequency" not in step:
-                raise ConfigurationError("Stable step must contain 'frequency' key.")
-            freq = float(step["frequency"])
-            # FrequencyRange validates non-negative frequency
-            freq_range = FrequencyRange(type="stable", start=freq, end=freq)
-            # AudioStep validates duration and fade sum
-            return AudioStep(duration=duration, fade=fade_info, freq=freq_range)
-
-        # Handle 'transition' type steps
+            return _process_stable_step(step, duration, fade_info)
         if step_type == "transition":
-            if "end_frequency" not in step:
-                raise ConfigurationError(
-                    "Transition step must contain 'end_frequency'."
-                )
-            end_freq = float(step["end_frequency"])
-
-            # Determine start frequency: explicit, implicit from previous, or error
-            if "start_frequency" in step:
-                start_freq = float(step["start_frequency"])
-            elif previous_freq is not None:
-                start_freq = previous_freq
-                logger.debug(
-                    "Using implicit start frequency from previous step: %.2f Hz",
-                    start_freq,
-                )
-            else:
-                # This happens if it's the first step and start_frequency is omitted
-                raise ConfigurationError(
-                    "First transition step must explicitly define 'start_frequency' "
-                    "or follow another step."
-                )
-
-            # FrequencyRange validates non-negative frequencies
-            freq_range = FrequencyRange(
-                type="transition", start=start_freq, end=end_freq
-            )
-            # AudioStep validates duration and fade sum
-            return AudioStep(duration=duration, fade=fade_info, freq=freq_range)
-
-        # Handle invalid step types
+            return _process_transition_step(step, previous_freq, duration, fade_info)
         raise ConfigurationError(
             f"Invalid step type '{step_type}'. Must be 'stable' or 'transition'."
         )
@@ -187,7 +196,7 @@ def generate_tone(
 
 def _process_beat_step(
     idx: int,
-    step_dict: Dict[str, Any],
+    step_dict: dict[str, Any],
     sample_rate: int,
     base_freq: float,
     previous_freq: Optional[float],
@@ -249,7 +258,7 @@ def _process_beat_step(
 
 
 def _iterate_beat_steps(
-    sample_rate: int, base_freq: float, steps: List[Dict[str, Any]]
+    sample_rate: int, base_freq: float, steps: list[dict[str, Any]]
 ) -> iter:
     """Iterates through configuration steps, yielding processed beat segments.
 
@@ -293,7 +302,7 @@ def _iterate_beat_steps(
 
 
 def _generate_beat_segments(
-    sample_rate: int, base_freq: float, steps: List[Dict[str, Any]]
+    sample_rate: int, base_freq: float, steps: list[dict[str, Any]]
 ) -> Tuple[np.ndarray, np.ndarray, float]:
     """Generates and concatenates all binaural beat segments from config steps.
 
@@ -418,7 +427,7 @@ def _generate_and_mix_noise(
 def generate_audio_sequence(
     sample_rate: int,
     base_freq: float,
-    steps: List[Dict[str, Any]],
+    steps: list[dict[str, Any]],
     noise_config: NoiseConfig,
 ) -> Tuple[np.ndarray, np.ndarray, float]:
     """Generates the complete stereo audio sequence based on the YAML steps,
