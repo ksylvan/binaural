@@ -5,16 +5,6 @@ from scipy import signal
 
 from binaural.noise import NoiseFactory
 
-(
-    generate_white_noise,
-    generate_pink_noise,
-    generate_brown_noise,
-) = (
-    NoiseFactory.get_strategy("white").generate,
-    NoiseFactory.get_strategy("pink").generate,
-    NoiseFactory.get_strategy("brown").generate,
-)
-
 # Define constants for tests
 SAMPLE_RATE = 44100
 DURATION = 1  # seconds
@@ -23,6 +13,9 @@ NUM_SAMPLES = SAMPLE_RATE * DURATION
 
 def test_generate_white_noise():
     """Test white noise generation."""
+
+    generate_white_noise = NoiseFactory.get_strategy("white").generate
+
     # Test generation with valid number of samples
     noise = generate_white_noise(NUM_SAMPLES)
     assert isinstance(noise, np.ndarray), "Output should be a numpy array"
@@ -43,6 +36,9 @@ def test_generate_white_noise():
 
 def test_generate_pink_noise():
     """Test pink noise generation."""
+
+    generate_pink_noise = NoiseFactory.get_strategy("pink").generate
+
     # Test generation with valid number of samples
     noise = generate_pink_noise(NUM_SAMPLES)
     assert isinstance(noise, np.ndarray), "Output should be a numpy array"
@@ -74,6 +70,9 @@ def test_generate_pink_noise():
 
 def test_generate_brown_noise():
     """Test brown noise generation."""
+
+    generate_brown_noise = NoiseFactory.get_strategy("brown").generate
+
     # Test generation with valid number of samples
     noise = generate_brown_noise(NUM_SAMPLES)
     assert isinstance(noise, np.ndarray), "Output should be a numpy array"

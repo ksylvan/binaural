@@ -40,6 +40,7 @@
         "NREM",
         "numpy",
         "Oster",
+        "pathlib",
         "pathspec",
         "pipenv",
         "Pipfile",

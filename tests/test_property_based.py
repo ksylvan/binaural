@@ -19,16 +19,6 @@ from binaural.tone_generator import (
 )
 from binaural.noise import NoiseFactory
 
-(
-    generate_white_noise,
-    generate_pink_noise,
-    generate_brown_noise,
-) = (
-    NoiseFactory.get_strategy("white").generate,
-    NoiseFactory.get_strategy("pink").generate,
-    NoiseFactory.get_strategy("brown").generate,
-)
-
 # Define common test constants
 SAMPLE_RATES = [22050, 44100, 48000]  # Common sample rates
 STANDARD_SAMPLE_RATE = 44100
@@ -199,9 +189,9 @@ def test_generate_tone_properties(tone: Tone, duration_sample_rate: Tuple[float,
 def test_noise_generators_properties(num_samples: int):
     """Property-based test for the noise generators."""
     # Generate different types of noise
-    white = generate_white_noise(num_samples)
-    pink = generate_pink_noise(num_samples)
-    brown = generate_brown_noise(num_samples)
+    white = NoiseFactory.get_strategy("white").generate(num_samples)
+    pink = NoiseFactory.get_strategy("pink").generate(num_samples)
+    brown = NoiseFactory.get_strategy("brown").generate(num_samples)
 
     # Check basic properties
     for noise in [white, pink, brown]:
