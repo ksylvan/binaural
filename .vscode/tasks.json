@@ -4,10 +4,36 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Make sure the environment is set up",
+            "label": "Set up environment",
             "type": "shell",
             "command": "${workspaceFolder}/bin/setup.sh",
             "runOptions": {"runOn": "folderOpen"}
+        },
+        {
+            "label": "Run Test Suite",
+            "type": "shell",
+            "command": "cd ${workspaceFolder} && pytest",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": ["$python"],
+            "presentation": {
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Lint Code",
+            "type": "shell",
+            "command": "cd ${workspaceFolder} && pylint binaural tests",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": ["$python"],
+            "presentation": {
+                "reveal": "always"
+            }
         }
     ]
 }
