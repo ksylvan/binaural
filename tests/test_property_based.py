@@ -17,10 +17,16 @@ from binaural.tone_generator import (
     save_audio_file,
     config_step_to_audio_step,
 )
-from binaural.noise import (
+from binaural.noise import NoiseFactory
+
+(
     generate_white_noise,
     generate_pink_noise,
     generate_brown_noise,
+) = (
+    NoiseFactory.get_strategy("white").generate,
+    NoiseFactory.get_strategy("pink").generate,
+    NoiseFactory.get_strategy("brown").generate,
 )
 
 # Define common test constants
