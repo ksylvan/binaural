@@ -114,6 +114,8 @@ Research on binaural beats has shown mixed results, but several studies suggest 
 
 ## Usage
 
+### Command Line Interface
+
 Run the script with the path to a YAML configuration file:
 
 ```bash
@@ -125,6 +127,24 @@ python generate.py <path_to_script.yaml> [options]
 - `<path_to_script.yaml>`: YAML file defining the binaural beat sequence and settings.
 - `-o <output_file>`, `--output <output_file>` (Optional): Specify the output audio file path. The file extension determines the format (`.wav` or `.flac`) and overrides the `output_filename` in the YAML.
 - `--verbose` (Optional): Enable verbose logging output.
+
+### Web Interface
+
+For a more interactive experience, run the web-based user interface:
+
+```bash
+python run_webapp.py
+```
+
+This launches a Streamlit-based web interface that allows you to:
+
+- Create and edit audio sequences through a visual interface
+- Load example configurations
+- Preview audio before generating the full file
+- Customize background noise settings
+- Download generated audio and configuration files
+
+Once launched, open your web browser and navigate to `http://localhost:8501` to access the interface.
 
 **Example:**
 

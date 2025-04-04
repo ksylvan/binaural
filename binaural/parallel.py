@@ -8,12 +8,9 @@ import numpy as np
 
 from binaural.data_types import AudioStep, NoiseConfig
 from binaural.exceptions import AudioGenerationError
-from binaural.tone_generator import (
-    _generate_and_mix_noise,
-    _process_beat_step,
-    config_step_to_audio_step,
-    generate_tone,
-)
+from binaural.tone_generator import (_generate_and_mix_noise,
+                                     _process_beat_step,
+                                     config_step_to_audio_step, generate_tone)
 
 logger = logging.getLogger(__name__)
 
