@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+import multiprocessing
 import sys
 import time
 from dataclasses import dataclass
@@ -40,6 +41,7 @@ def parse_args() -> argparse.Namespace:
         "--threads",
         type=int,
         help="Number of threads to use for parallel processing. Defaults to CPU count.",
+        default=multiprocessing.cpu_count(),
     )
     return parser.parse_args()
 

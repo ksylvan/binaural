@@ -8,9 +8,12 @@ import numpy as np
 
 from binaural.data_types import AudioStep, NoiseConfig
 from binaural.exceptions import AudioGenerationError
-from binaural.tone_generator import (_generate_and_mix_noise,
-                                     _process_beat_step,
-                                     config_step_to_audio_step, generate_tone)
+from binaural.tone_generator import (
+    _generate_and_mix_noise,
+    _process_beat_step,
+    config_step_to_audio_step,
+    generate_tone,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -182,6 +185,8 @@ def _generate_audio_segments_parallel(
         ConfigurationError: If steps list is empty or contains invalid steps.
         AudioGenerationError: If errors occur during audio generation.
     """
+    logger.debug("Generating audio segments in parallel with %d workers.", max_workers)
+    logger.debug("Steps to be generated: %s", steps)
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         # Submit all tone generation tasks to the thread pool
         futures = _submit_tone_generation_tasks(

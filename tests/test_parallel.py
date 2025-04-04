@@ -1,14 +1,13 @@
 """Tests for the parallel processing utilities."""
 
 import time
-import pytest
+
 import numpy as np
+import pytest
 
 from binaural.data_types import AudioStep, NoiseConfig
-from binaural.parallel import (
-    prepare_audio_steps,
-    generate_audio_sequence_parallel,
-)
+from binaural.parallel import (generate_audio_sequence_parallel,
+                               prepare_audio_steps)
 from binaural.tone_generator import generate_audio_sequence
 
 
