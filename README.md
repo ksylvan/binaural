@@ -20,11 +20,19 @@ For example, if a 100 Hz tone is presented to the left ear and a 110 Hz tone to 
 
 ### Background Noise Types
 
+#### Standard Noise Types
+
 - **White Noise**: Contains equal energy across all audible frequencies. Sounds like a hiss (e.g., static, fan).
 - **Pink Noise**: Energy decreases with increasing frequency (specifically, 3dB per octave). Sounds deeper than white noise (e.g., steady rainfall, wind).
 - **Brown Noise (Brownian/Red Noise)**: Energy decreases more steeply than pink noise (6dB per octave). Sounds even deeper (e.g., strong waterfall, thunder rumble).
 
-Adding background noise can help mask distracting environmental sounds or provide a constant auditory backdrop.
+#### Advanced Noise Types
+
+- **Blue Noise (Azure Noise)**: Energy increases with frequency (specifically, 3dB per octave). Has more high-frequency content than white noise, creating a "brighter" sound.
+- **Violet Noise (Purple Noise)**: Energy increases steeply with frequency (6dB per octave). Strong emphasis on high frequencies, creating a "sharp" or "hissing" sound.
+- **Grey Noise**: White noise filtered to match the ear's frequency response. Emphasizes frequencies where human hearing is most sensitive (2-5 kHz), creating a perceptually balanced sound.
+
+Adding background noise can help mask distracting environmental sounds or provide a constant auditory backdrop. Different noise types may be beneficial for different use cases based on their frequency characteristics.
 
 ### Brainwave Entrainment
 
@@ -145,7 +153,11 @@ The YAML script defines the parameters and sequence for audio generation.
 - `sample_rate`: The audio sample rate in Hz (e.g., 44100). Default: `44100`.
 - `output_filename`: The default name for the output audio file (e.g., `"audio/my_session.flac"` or `"audio/my_session.wav"`). The extension (`.wav` or `.flac`) determines the output format. Default: `"output.flac"`.
 - `background_noise` (Optional): Settings for adding background noise.
-  - `type`: The type of noise. Options: `"white"`, `"pink"`, `"brown"`, `"none"`. Default: `"none"`.
+  - `type`: The type of noise. Options:
+    - Standard: `"white"`, `"pink"`, `"brown"`
+    - Advanced: `"blue"`, `"violet"`, `"grey"`
+    - No noise: `"none"`
+    - Default: `"none"`.
   - `amplitude`: The relative amplitude (volume) of the noise, from `0.0` (silent) to `1.0` (maximum relative level). Default: `0.0`. The binaural beat signal is scaled down by `(1 - amplitude)` before mixing to prevent clipping.
 
 **Steps (Required):**
@@ -228,13 +240,21 @@ steps:
 ## Script Library
 
 A collection of pre-defined YAML scripts for common use-cases is available in the `scripts/` directory.
-These currently default to `.flac` output and do not include background noise, but can be easily modified.
+Most scripts default to `.flac` output. Some include background noise as noted below.
+
+### Standard Scripts
 
 - **`scripts/focus_beta.yaml`**: Designed to enhance concentration and alertness using Beta waves (14-18 Hz).
 - **`scripts/focus_gamma.yaml`**: Targets peak concentration and problem-solving with Gamma waves (40 Hz).
 - **`scripts/relaxation_alpha.yaml`**: Aims to reduce stress and promote calmness using Alpha waves (8-10 Hz).
 - **`scripts/meditation_theta.yaml`**: Facilitates deep meditation and introspection using Theta waves (6 Hz).
 - **`scripts/sleep_delta.yaml`**: Guides the brain towards deep sleep states using Delta waves (2 Hz).
+
+### Advanced Scripts with Specialized Noise
+
+- **`scripts/focus_violet.yaml`**: Concentration enhancement with Gamma waves (40 Hz) and violet noise for heightened alertness.
+- **`scripts/relaxation_grey.yaml`**: Stress reduction with Alpha waves (8-10 Hz) and perceptually balanced grey noise.
+- **`scripts/creativity_blue.yaml`**: Creative flow enhancement with Theta waves (6-7.83 Hz) and blue noise for clarity.
 - **`scripts/creativity_theta.yaml`**: Intended to foster an intuitive and creative mental state using Theta waves (7 Hz).
 - **`scripts/lucid_dream_pink.yaml`**: Aims to facilitate REM sleep states potentially conducive to lucid
   dreaming (90 minutes, with pink noise).

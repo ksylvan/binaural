@@ -1,0 +1,51 @@
+# Relaxation Grey: Perceptually Balanced Relaxation
+# A relaxation session using alpha waves with grey noise for a natural ambient sound
+# Grey noise is filtered to match the human ear's frequency response, creating a
+# perceptually balanced sound that feels more natural and less artificial.
+
+# Global settings
+base_frequency: 100 # Hz (carrier frequency)
+sample_rate: 44100 # Hz (audio sample rate)
+output_filename: "audio/relaxation_grey.flac" # Default output file name
+
+# Background noise settings
+background_noise:
+  type: "grey" # Grey noise has a perceptually flat frequency spectrum
+  amplitude: 0.18 # Moderate amplitude for ambient presence
+
+# Sequence of audio generation steps (Total Duration: 20 minutes)
+steps:
+  # 1. Transition from waking (Beta) to relaxed (Alpha) state
+  - type: transition
+    start_frequency: 14 # Hz (beta - normal waking state)
+    end_frequency: 10 # Hz (high alpha - relaxed but alert)
+    duration: 180 # seconds (3 minutes)
+    fade_in_duration: 20 # seconds
+
+  # 2. First relaxation plateau - high alpha
+  - type: stable
+    frequency: 10 # Hz (high alpha - relaxed alertness)
+    duration: 240 # seconds (4 minutes)
+
+  # 3. Transition to deeper relaxation
+  - type: transition
+    # start_frequency: 10 (implied from previous step)
+    end_frequency: 8 # Hz (lower alpha - deeper relaxation)
+    duration: 180 # seconds (3 minutes)
+
+  # 4. Deep relaxation plateau - low alpha
+  - type: stable
+    frequency: 8 # Hz (low alpha - deeply relaxed)
+    duration: 360 # seconds (6 minutes)
+
+  # 5. Brief transition to high alpha for re-alerting
+  - type: transition
+    # start_frequency: 8 (implied from previous step)
+    end_frequency: 10 # Hz (high alpha - return to relaxed alertness)
+    duration: 180 # seconds (3 minutes)
+
+  # 6. Completion - high alpha with fade out
+  - type: stable
+    frequency: 10 # Hz (high alpha)
+    duration: 60 # seconds (1 minute)
+    fade_out_duration: 30 # seconds

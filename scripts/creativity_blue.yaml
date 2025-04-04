@@ -1,0 +1,51 @@
+# Creativity Blue: Enhanced Creative Flow
+# A creativity session using theta waves with blue noise for a bright backdrop
+# Blue noise emphasizes mid to high frequencies, creating a "crisp" sound quality
+# that may help maintain clarity while in creative theta states.
+
+# Global settings
+base_frequency: 100 # Hz (carrier frequency)
+sample_rate: 44100 # Hz (audio sample rate)
+output_filename: "audio/creativity_blue.flac" # Default output file name
+
+# Background noise settings
+background_noise:
+  type: "blue" # Blue noise has energy proportional to f (brighter sound)
+  amplitude: 0.15 # Moderate amplitude to provide subtle brightness
+
+# Sequence of audio generation steps (Total Duration: 25 minutes)
+steps:
+  # 1. Transition from normal awareness to creative state
+  - type: transition
+    start_frequency: 12 # Hz (lower beta - normal awareness)
+    end_frequency: 7.83 # Hz (Schumann resonance - earth's natural frequency)
+    duration: 240 # seconds (4 minutes)
+    fade_in_duration: 20 # seconds
+
+  # 2. Schumann resonance plateau - align with earth's natural frequency
+  - type: stable
+    frequency: 7.83 # Hz (Schumann resonance - natural frequency)
+    duration: 180 # seconds (3 minutes)
+
+  # 3. Transition to deeper theta for inspiration
+  - type: transition
+    # start_frequency: 7.83 (implied from previous step)
+    end_frequency: 6 # Hz (mid-theta - inspiration and creativity)
+    duration: 180 # seconds (3 minutes)
+
+  # 4. Creative inspiration state - mid-theta
+  - type: stable
+    frequency: 6 # Hz (mid-theta - idea generation)
+    duration: 600 # seconds (10 minutes)
+
+  # 5. Transition back to grounded awareness
+  - type: transition
+    # start_frequency: 6 (implied from previous step)
+    end_frequency: 10 # Hz (alpha - relaxed but aware)
+    duration: 240 # seconds (4 minutes)
+
+  # 6. Return to normal awareness with fade out
+  - type: stable
+    frequency: 10 # Hz (alpha)
+    duration: 60 # seconds (1 minute)
+    fade_out_duration: 30 # seconds
