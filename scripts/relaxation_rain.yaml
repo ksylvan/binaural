@@ -1,0 +1,39 @@
+# Binaural Beat Script for Relaxation with Rain Sounds
+# Aims to reduce stress and promote deep relaxation with a rain ambience.
+
+# Global settings
+base_frequency: 100 # Hz
+sample_rate: 44100 # Hz
+output_filename: "audio/relaxation_rain.flac"
+background_noise:
+  type: "rain" # Rain noise for a soothing, natural background
+  amplitude: 0.4 # Slightly prominent but not overwhelming
+
+# Sequence (Total Duration: 20 minutes)
+steps:
+  # 1. Start in Beta for initial awareness (180 seconds)
+  - type: stable
+    frequency: 12 # Hz (Low Beta)
+    duration: 180 # seconds
+
+  # 2. Transition down to Alpha for relaxation (300 seconds)
+  - type: transition
+    # start_frequency: 12 (implied)
+    end_frequency: 10 # Hz (Mid Alpha)
+    duration: 300 # seconds
+
+  # 3. Hold Mid Alpha for relaxation with rain (600 seconds)
+  - type: stable
+    frequency: 10 # Hz (Mid Alpha)
+    duration: 600 # seconds
+
+  # 4. Transition to low Alpha for deeper calm (240 seconds)
+  - type: transition
+    # start_frequency: 10 (implied)
+    end_frequency: 8 # Hz (Low Alpha)
+    duration: 240 # seconds
+
+  # 5. Hold Low Alpha with the sound of rain (480 seconds)
+  - type: stable
+    frequency: 8 # Hz (Low Alpha)
+    duration: 480 # seconds

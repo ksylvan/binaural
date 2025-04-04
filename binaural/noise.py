@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Type
 
 import numpy as np
+from scipy import signal
 from scipy.fft import fft, ifft
 
 rng = np.random.default_rng()
@@ -398,6 +399,178 @@ class GreyNoiseStrategy(NoiseStrategy):
         return grey_noise
 
 
+class RainNoiseStrategy(NoiseStrategy):
+    """
+    Rain noise generation strategy.
+    Simulates the sound of rainfall by combining filtered noise
+    with temporal amplitude modulation to create droplet patterns.
+    """
+
+    # Parameters for rain simulation
+    DROP_RATE = 10  # Average number of droplets per second
+    SAMPLE_RATE = 44100  # Standard audio sample rate
+
+    def generate(self, num_samples: int) -> np.ndarray:
+        """Generate rain noise samples using filtered noise with temporal patterns.
+
+        Simulates rainfall by:
+        1. Creating a base noise with appropriate frequency content
+        2. Adding temporal amplitude variations to simulate individual droplets
+        3. Applying mild reverb-like effects for environmental realism
+
+        Args:
+            num_samples: The number of samples to generate.
+
+        Returns:
+            A numpy array containing rain noise samples normalized to [-1, 1].
+        """
+        # Return empty array if no samples requested
+        if num_samples <= 0:
+            return np.array([])
+
+        # Create base spectrally-shaped rain noise
+        rain_base = self._create_spectral_base(num_samples)
+
+        # Apply droplet patterns and effects for longer samples
+        if num_samples > 100:
+            # Add droplet patterns to the base noise
+            rain_noise = self._add_droplet_patterns(rain_base, num_samples)
+
+            # Add reverb for more realism if we have enough samples
+            reverb_length = min(int(0.05 * self.SAMPLE_RATE), num_samples // 4)
+            if reverb_length > 10:
+                rain_noise = self._add_reverb(rain_noise, reverb_length)
+        else:
+            # For very short samples, just use the filtered base noise
+            rain_noise = rain_base
+
+        # Normalize the resulting rain noise to the range [-1, 1]
+        max_abs_noise = np.max(np.abs(rain_noise))
+        if max_abs_noise > 1e-9:
+            rain_noise /= max_abs_noise
+
+        return rain_noise
+
+    def _create_spectral_base(self, num_samples: int) -> np.ndarray:
+        """Create the spectrally shaped base for rain noise.
+
+        Args:
+            num_samples: The number of samples to generate.
+
+        Returns:
+            Base rain noise with appropriate spectral characteristics.
+        """
+        # Generate initial white noise
+        base_noise = rng.standard_normal(num_samples)
+
+        # First create a filtered background "patter" noise
+        fft_base = fft(base_noise)
+        frequencies = np.abs(np.fft.fftfreq(num_samples)) * self.SAMPLE_RATE
+
+        # Create spectral shaping for rain-like characteristics
+        scaling = np.ones_like(frequencies, dtype=float)
+        non_zero_freq_indices = frequencies > 0.1  # Avoid potential division by zero
+
+        # Define frequency bands for rain sound profile
+        very_low = (frequencies < 100) & non_zero_freq_indices
+        low_band = (frequencies >= 100) & (frequencies < 500) & non_zero_freq_indices
+        mid_low = (frequencies >= 500) & (frequencies < 2000) & non_zero_freq_indices
+        # Mid-high frequency band (2-6 kHz)
+        mid_high = (frequencies >= 2000) & (frequencies < 6000) & non_zero_freq_indices
+        # High frequency band (6-12 kHz)
+        high_band = (
+            (frequencies >= 6000) & (frequencies < 12000) & non_zero_freq_indices
+        )
+        very_high = (frequencies >= 12000) & non_zero_freq_indices
+
+        # Apply spectral shaping to create rain-like frequency distribution
+        scaling[very_low] = 0.01  # Almost silent at very low frequencies
+        scaling[low_band] = 0.2  # Some low frequency content for distant rumble
+        scaling[mid_low] = 0.7  # Moderate mid-low frequency content
+        scaling[mid_high] = 1.0  # Main rain sound (mid-high frequencies)
+        scaling[high_band] = 0.8  # Slightly reduced high frequencies
+        scaling[very_high] = 0.3  # Further reduced very high frequencies
+
+        # Apply the frequency scaling
+        fft_rain = fft_base * scaling
+
+        # Create the base rain noise with appropriate spectral balance
+        return np.real(ifft(fft_rain))
+
+    def _add_droplet_patterns(
+        self, base_noise: np.ndarray, num_samples: int
+    ) -> np.ndarray:
+        """Add individual droplet patterns to the base noise.
+
+        Args:
+            base_noise: The spectrally shaped base noise.
+            num_samples: The number of samples in the noise.
+
+        Returns:
+            Rain noise with droplet patterns applied.
+        """
+        # Calculate the number of droplet events based on the DROP_RATE
+        num_droplets = int(self.DROP_RATE * num_samples / self.SAMPLE_RATE)
+
+        # Ensure at least one droplet
+        num_droplets = max(1, num_droplets)
+
+        # Create random droplet positions
+        droplet_positions = rng.integers(0, num_samples, num_droplets)
+
+        # Create a droplet amplitude envelope by adding decaying impulses
+        droplet_envelope = np.zeros(num_samples)
+
+        # Different droplet sizes/intensities
+        droplet_sizes = rng.uniform(0.1, 1.0, num_droplets)
+
+        # Apply each droplet as a short attack and longer decay envelope
+        for pos, size in zip(droplet_positions, droplet_sizes):
+            # Decay length varies with droplet size
+            decay_length = int(200 + size * 1000)  # 200-1200 samples
+            decay_length = min(decay_length, num_samples - pos)
+
+            if decay_length > 0:
+                # Create exponential decay for each droplet
+                decay = np.exp(-np.arange(decay_length) / (decay_length * 0.2))
+                # Scale by droplet size and add to envelope
+                end_pos = min(pos + decay_length, num_samples)
+                droplet_envelope[pos:end_pos] += size * decay[: end_pos - pos]
+
+        # Normalize the envelope to [0.3, 1.0] to maintain a background patter
+        if np.max(droplet_envelope) > 0:
+            # Scale the envelope to keep some background rain sounds
+            max_env = np.max(droplet_envelope)
+            droplet_envelope = 0.3 + 0.7 * (droplet_envelope / max_env)
+        else:
+            droplet_envelope = np.ones(num_samples)
+
+        # Apply the droplet envelope to the base rain noise
+        return base_noise * droplet_envelope
+
+    def _add_reverb(self, rain_noise: np.ndarray, reverb_length: int) -> np.ndarray:
+        """Add a simple reverb effect to simulate rainfall in an environment.
+
+        Args:
+            rain_noise: The rain noise with droplet patterns.
+            reverb_length: The length of the reverb impulse response.
+
+        Returns:
+            Rain noise with reverb applied.
+        """
+        # Create a simple exponential decay impulse response
+        decay_factor = reverb_length * 0.3
+        reverb_impulse = np.exp(-np.arange(reverb_length) / decay_factor)
+        # Normalize to preserve volume
+        reverb_impulse /= np.sum(reverb_impulse)
+
+        # Apply convolution for reverb effect
+        rain_reverb = signal.convolve(rain_noise, reverb_impulse, mode="same")
+
+        # Mix dry and wet signals
+        return 0.7 * rain_noise + 0.3 * rain_reverb
+
+
 class NoiseFactory:
     """Factory class for creating noise generator strategy instances."""
 
@@ -409,6 +582,7 @@ class NoiseFactory:
         "blue": BlueNoiseStrategy,
         "violet": VioletNoiseStrategy,
         "grey": GreyNoiseStrategy,
+        "rain": RainNoiseStrategy,
         "none": NullNoiseStrategy,  # Include 'none' for the Null strategy
     }
 

@@ -6,6 +6,7 @@ from binaural.noise import (
     BlueNoiseStrategy,
     GreyNoiseStrategy,
     NoiseFactory,
+    RainNoiseStrategy,
     VioletNoiseStrategy,
 )
 
@@ -107,19 +108,22 @@ class TestNewNoiseTypes:
         assert "blue" in strategies
         assert "violet" in strategies
         assert "grey" in strategies
+        assert "rain" in strategies
 
         # Check that the factory returns the correct strategy instances
         blue_strategy = NoiseFactory.get_strategy("blue")
         violet_strategy = NoiseFactory.get_strategy("violet")
         grey_strategy = NoiseFactory.get_strategy("grey")
+        rain_strategy = NoiseFactory.get_strategy("rain")
 
         assert isinstance(blue_strategy, BlueNoiseStrategy)
         assert isinstance(violet_strategy, VioletNoiseStrategy)
         assert isinstance(grey_strategy, GreyNoiseStrategy)
+        assert isinstance(rain_strategy, RainNoiseStrategy)
 
     def test_empty_input(self):
         """Test that all strategies handle empty input correctly."""
-        for noise_type in ["blue", "violet", "grey"]:
+        for noise_type in ["blue", "violet", "grey", "rain"]:
             strategy = NoiseFactory.get_strategy(noise_type)
             result = strategy.generate(0)
             assert isinstance(result, np.ndarray)
@@ -127,7 +131,7 @@ class TestNewNoiseTypes:
 
     def test_small_input(self):
         """Test with very small input sizes."""
-        for noise_type in ["blue", "violet", "grey"]:
+        for noise_type in ["blue", "violet", "grey", "rain"]:
             strategy = NoiseFactory.get_strategy(noise_type)
             result = strategy.generate(10)
             assert len(result) == 10

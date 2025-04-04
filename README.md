@@ -32,6 +32,10 @@ For example, if a 100 Hz tone is presented to the left ear and a 110 Hz tone to 
 - **Violet Noise (Purple Noise)**: Energy increases steeply with frequency (6dB per octave). Strong emphasis on high frequencies, creating a "sharp" or "hissing" sound.
 - **Grey Noise**: White noise filtered to match the ear's frequency response. Emphasizes frequencies where human hearing is most sensitive (2-5 kHz), creating a perceptually balanced sound.
 
+#### Nature Sounds
+
+- **Rain**: Natural rain sound simulation that provides a calming and consistent audio backdrop. Helps mask external distractions while creating a soothing ambience.
+
 Adding background noise can help mask distracting environmental sounds or provide a constant auditory backdrop. Different noise types may be beneficial for different use cases based on their frequency characteristics.
 
 ### Brainwave Entrainment
@@ -156,6 +160,7 @@ The YAML script defines the parameters and sequence for audio generation.
   - `type`: The type of noise. Options:
     - Standard: `"white"`, `"pink"`, `"brown"`
     - Advanced: `"blue"`, `"violet"`, `"grey"`
+    - Nature: `"rain"`
     - No noise: `"none"`
     - Default: `"none"`.
   - `amplitude`: The relative amplitude (volume) of the noise, from `0.0` (silent) to `1.0` (maximum relative level). Default: `0.0`. The binaural beat signal is scaled down by `(1 - amplitude)` before mixing to prevent clipping.
@@ -254,6 +259,7 @@ Most scripts default to `.flac` output. Some include background noise as noted b
 
 - **`scripts/focus_violet.yaml`**: Concentration enhancement with Gamma waves (40 Hz) and violet noise for heightened alertness.
 - **`scripts/relaxation_grey.yaml`**: Stress reduction with Alpha waves (8-10 Hz) and perceptually balanced grey noise.
+- **`scripts/relaxation_rain.yaml`**: Calming experience with Alpha waves (8-10 Hz) and natural rain sounds.
 - **`scripts/creativity_blue.yaml`**: Creative flow enhancement with Theta waves (6-7.83 Hz) and blue noise for clarity.
 - **`scripts/creativity_theta.yaml`**: Intended to foster an intuitive and creative mental state using Theta waves (7 Hz).
 - **`scripts/lucid_dream_pink.yaml`**: Aims to facilitate REM sleep states potentially conducive to lucid

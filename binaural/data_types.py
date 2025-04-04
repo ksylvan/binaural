@@ -69,7 +69,16 @@ class NoiseConfig:
 
     def __post_init__(self) -> None:
         """Validate noise configuration."""
-        valid_types = ("none", "white", "pink", "brown", "blue", "violet", "grey")
+        valid_types = (
+            "none",
+            "white",
+            "pink",
+            "brown",
+            "blue",
+            "violet",
+            "grey",
+            "rain",
+        )
         if self.type not in valid_types:
             raise TypeError(
                 f"Invalid noise type: '{self.type}'. Must be one of {valid_types}."
