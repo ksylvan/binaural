@@ -92,6 +92,15 @@ def format_time(seconds: int) -> str:
     return f"{int(minutes):02d}:{int(seconds):02d}"
 
 
+def _extract_noise_config(config: Dict[str, Any]) -> NoiseConfig:
+    """Extract noise configuration from the given config."""
+    noise_dict = config.get("background_noise", {"type": "none", "amplitude": 0.0})
+    return NoiseConfig(
+        type=noise_dict.get("type", "none"),
+        amplitude=noise_dict.get("amplitude", 0.0),
+    )
+
+
 def generate_preview_audio(
     config: Dict[str, Any], duration: int = 30
 ) -> Optional[Tuple[np.ndarray, np.ndarray, int]]:
@@ -103,11 +112,7 @@ def generate_preview_audio(
         steps = config.get("steps", [])
 
         # Extract noise configuration
-        noise_dict = config.get("background_noise", {"type": "none", "amplitude": 0.0})
-        noise_config = NoiseConfig(
-            type=noise_dict.get("type", "none"),
-            amplitude=noise_dict.get("amplitude", 0.0),
-        )
+        noise_config = _extract_noise_config(config)
 
         # Create shortened steps for preview
         preview_steps = []
@@ -158,6 +163,134 @@ def generate_preview_audio(
         return None
 
 
+def _get_implied_start_frequency(
+    step_index: int, step: Dict[str, Any], all_steps: List[Dict[str, Any]]
+) -> Optional[float]:
+    """Get the implied start frequency for transition steps."""
+    if (
+        step.get("type") == "transition"
+        and "start_frequency" not in step
+        and step_index > 0
+    ):
+        try:
+            current_steps = all_steps[: step_index + 1]
+            processed_steps = prepare_audio_steps(current_steps)
+            return processed_steps[-1].freq.start
+        except (IndexError, AttributeError, ValueError, BinauralError):
+            return None
+    return None
+
+
+def _handle_stable_step(
+    step_index: int, step: Dict[str, Any], step_type: str, duration: int
+) -> Dict[str, Any]:
+    """Handle editing for stable frequency step type."""
+    freq_value = float(step.get("frequency", 10.0))
+    frequency = st.number_input(
+        "Frequency (Hz)",
+        min_value=0.1,
+        max_value=100.0,
+        value=freq_value,
+        step=0.1,
+        format="%.1f",
+        key=f"frequency_{step_index}",
+    )
+
+    return {
+        "type": step_type,
+        "frequency": frequency,
+        "duration": duration,
+    }
+
+
+def _handle_transition_step(
+    step_index: int,
+    step: Dict[str, Any],
+    step_type: str,
+    duration: int,
+    implied_start_freq: Optional[float],
+) -> Dict[str, Any]:
+    """Handle editing for transition step type."""
+    implied_label = ""
+
+    if implied_start_freq is not None:
+        start_freq_value = float(implied_start_freq)
+        implied_label = " (implied)"
+    else:
+        start_freq_value = float(step.get("start_frequency", 10.0))
+
+    start_freq = st.number_input(
+        f"Start Frequency (Hz){implied_label}",
+        min_value=0.1,
+        max_value=100.0,
+        value=start_freq_value,
+        step=0.1,
+        format="%.1f",
+        key=f"start_freq_{step_index}",
+    )
+
+    end_freq_value = float(step.get("end_frequency", 4.0))
+    end_freq = st.number_input(
+        "End Frequency (Hz)",
+        min_value=0.1,
+        max_value=100.0,
+        value=end_freq_value,
+        step=0.1,
+        format="%.1f",
+        key=f"end_freq_{step_index}",
+    )
+
+    updated_step = {
+        "type": step_type,
+        "end_frequency": end_freq,
+        "duration": duration,
+    }
+
+    # Only include start_frequency if it was in the original step
+    # This preserves the implied frequency behavior in YAML
+    if "start_frequency" in step or implied_label == "":
+        updated_step["start_frequency"] = start_freq
+
+    return updated_step
+
+
+def _add_fade_controls(
+    step_index: int, step: Dict[str, Any], updated_step: Dict[str, Any], duration: int
+) -> Dict[str, Any]:
+    """Add fade in/out controls to the step."""
+    col1, col2 = st.columns(2)
+
+    with col1:
+        fade_in = st.number_input(
+            "Fade In (seconds)",
+            min_value=0.0,
+            max_value=float(duration / 2),
+            value=float(step.get("fade_in_duration", 0.0)),
+            step=0.5,
+            format="%.1f",
+            key=f"fade_in_{step_index}",
+        )
+
+        if fade_in > 0:
+            updated_step["fade_in_duration"] = fade_in
+
+    with col2:
+        fade_out = st.number_input(
+            "Fade Out (seconds)",
+            min_value=0.0,
+            max_value=float(duration / 2),
+            value=float(step.get("fade_out_duration", 0.0)),
+            step=0.5,
+            format="%.1f",
+            key=f"fade_out_{step_index}",
+        )
+
+        if fade_out > 0:
+            updated_step["fade_out_duration"] = fade_out
+
+    return updated_step
+
+
 def ui_step_editor(
     step_index: int,
     step: Dict[str, Any],
@@ -165,24 +298,7 @@ def ui_step_editor(
     on_delete=None,
 ) -> Dict[str, Any]:
     """UI component for editing a single audio step."""
-    # Process all steps up to this one to properly handle implied start frequencies
-    current_steps = all_steps[: step_index + 1]
-    processed_steps = None
-
-    # Get implied start frequency for transition steps (if not explicitly defined)
-    implied_start_freq = None
-    if (
-        step.get("type") == "transition"
-        and "start_frequency" not in step
-        and step_index > 0
-    ):
-        try:
-            processed_steps = prepare_audio_steps(current_steps)
-            # The current step's prepared version will have the correct start frequency
-            implied_start_freq = processed_steps[-1].freq.start
-        except (IndexError, AttributeError, ValueError, BinauralError):
-            # Fallback if there's any error in preprocessing
-            implied_start_freq = None
+    implied_start_freq = _get_implied_start_frequency(step_index, step, all_steps)
 
     with st.expander(
         f"Step {step_index + 1}: {step.get('type', 'stable')} -"
@@ -199,7 +315,6 @@ def ui_step_editor(
                 key=f"step_type_{step_index}",
             )
 
-            # Convert duration to int to avoid type conflicts
             duration_value = int(step.get("duration", DEFAULT_STEP_DURATION))
             duration = st.number_input(
                 "Duration (seconds)",
@@ -210,101 +325,16 @@ def ui_step_editor(
 
         with col2:
             if step_type == "stable":
-                # For stable frequency
-                # Ensure value is a float to match min_value and max_value types
-                freq_value = float(step.get("frequency", 10.0))
-                frequency = st.number_input(
-                    "Frequency (Hz)",
-                    min_value=0.1,
-                    max_value=100.0,
-                    value=freq_value,
-                    step=0.1,
-                    format="%.1f",
-                    key=f"frequency_{step_index}",
+                updated_step = _handle_stable_step(
+                    step_index, step, step_type, duration
                 )
-
-                # Build the step dict
-                updated_step = {
-                    "type": step_type,
-                    "frequency": frequency,
-                    "duration": duration,
-                }
-
             else:  # transition
-                # For transition
-                # If this step has an implied start frequency, use it
-                if implied_start_freq is not None:
-                    start_freq_value = float(implied_start_freq)
-                    implied_label = " (implied)"
-                else:
-                    # Otherwise use the explicitly defined one or default
-                    start_freq_value = float(step.get("start_frequency", 10.0))
-                    implied_label = ""
-
-                start_freq = st.number_input(
-                    f"Start Frequency (Hz){implied_label}",
-                    min_value=0.1,
-                    max_value=100.0,
-                    value=start_freq_value,
-                    step=0.1,
-                    format="%.1f",
-                    key=f"start_freq_{step_index}",
+                updated_step = _handle_transition_step(
+                    step_index, step, step_type, duration, implied_start_freq
                 )
 
-                # Ensure value is a float
-                end_freq_value = float(step.get("end_frequency", 4.0))
-                end_freq = st.number_input(
-                    "End Frequency (Hz)",
-                    min_value=0.1,
-                    max_value=100.0,
-                    value=end_freq_value,
-                    step=0.1,
-                    format="%.1f",
-                    key=f"end_freq_{step_index}",
-                )
-
-                # For YAML display, only include start_frequency if it was explicitly
-                # defined in the original step
-                updated_step = {
-                    "type": step_type,
-                    "end_frequency": end_freq,
-                    "duration": duration,
-                }
-
-                # Only include start_frequency if it was in the original step
-                # This preserves the implied frequency behavior in YAML
-                if "start_frequency" in step or implied_label == "":
-                    updated_step["start_frequency"] = start_freq
-
-        # Fade controls
-        col1, col2 = st.columns(2)
-        with col1:
-            fade_in = st.number_input(
-                "Fade In (seconds)",
-                min_value=0.0,
-                max_value=float(duration / 2),
-                value=float(step.get("fade_in_duration", 0.0)),
-                step=0.5,
-                format="%.1f",
-                key=f"fade_in_{step_index}",
-            )
-
-            if fade_in > 0:
-                updated_step["fade_in_duration"] = fade_in
-
-        with col2:
-            fade_out = st.number_input(
-                "Fade Out (seconds)",
-                min_value=0.0,
-                max_value=float(duration / 2),
-                value=float(step.get("fade_out_duration", 0.0)),
-                step=0.5,
-                format="%.1f",
-                key=f"fade_out_{step_index}",
-            )
-
-            if fade_out > 0:
-                updated_step["fade_out_duration"] = fade_out
+        # Add fade controls
+        updated_step = _add_fade_controls(step_index, step, updated_step, duration)
 
         # Delete button
         if on_delete:
