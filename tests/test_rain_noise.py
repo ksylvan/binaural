@@ -3,6 +3,7 @@
 import numpy as np
 
 from binaural.noise import NoiseFactory, RainNoiseStrategy
+from tests.test_common import check_basic_noise_properties
 
 # Test sample parameters
 NUM_SAMPLES = 2**14  # Power of 2 for efficient FFT
@@ -19,9 +20,7 @@ class TestRainNoiseStrategy:
         noise = noise_generator.generate(NUM_SAMPLES)
 
         # Check basic properties
-        assert len(noise) == NUM_SAMPLES
-        assert -1.0 <= np.min(noise) <= 0
-        assert 0 <= np.max(noise) <= 1.0
+        check_basic_noise_properties(noise, NUM_SAMPLES)
 
         # Analyze frequency content
         psd = np.abs(np.fft.rfft(noise))

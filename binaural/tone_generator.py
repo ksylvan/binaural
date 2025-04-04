@@ -11,18 +11,10 @@ import numpy as np
 import soundfile as sf
 
 from binaural.constants import SUPPORTED_FORMATS
-from binaural.data_types import (
-    AudioStep,
-    FadeInfo,
-    FrequencyRange,
-    NoiseConfig,
-    Tone,
-)
-from binaural.exceptions import (
-    AudioGenerationError,
-    ConfigurationError,
-    UnsupportedFormatError,
-)
+from binaural.data_types import (AudioStep, FadeInfo, FrequencyRange,
+                                 NoiseConfig, Tone)
+from binaural.exceptions import (AudioGenerationError, ConfigurationError,
+                                 UnsupportedFormatError)
 from binaural.fade import apply_fade
 from binaural.noise import NoiseFactory
 
@@ -229,13 +221,7 @@ def _process_beat_step(
     logger.debug("Generating beat segment for step %d: %s", idx, audio_step)
 
     # Create a Tone object from the validated AudioStep
-    tone = Tone(
-        base_freq=base_freq,
-        freq_diff_start=audio_step.freq.start,
-        freq_diff_end=audio_step.freq.end,
-        fade_in_sec=audio_step.fade.fade_in_sec,
-        fade_out_sec=audio_step.fade.fade_out_sec,
-    )
+    tone = audio_step.to_tone(base_freq)
 
     # Generate the audio segments for this step
     left_segment, right_segment = generate_tone(sample_rate, audio_step.duration, tone)

@@ -101,6 +101,9 @@ Research on binaural beats has shown mixed results, but several studies suggest 
   pytest
   ```
 
+  You can also use the `--run-performance` flag to run normally skipped tests marked as `performance` in the tests. These
+  are usually skipped.
+
 - Run linters:
 
   ```bash

@@ -2,44 +2,15 @@
 
 import numpy as np
 
-from binaural.noise import (
-    BlueNoiseStrategy,
-    GreyNoiseStrategy,
-    NoiseFactory,
-    RainNoiseStrategy,
-    VioletNoiseStrategy,
-)
+from binaural.noise import (BlueNoiseStrategy, GreyNoiseStrategy, NoiseFactory,
+                            RainNoiseStrategy, VioletNoiseStrategy)
+from tests.test_common import (check_basic_noise_properties,
+                               estimate_spectral_slope)
 
 # Test sample parameters
 NUM_SAMPLES = 2**14  # Power of 2 for efficient FFT
 SAMPLE_RATE = 44100
 FREQS = np.fft.rfftfreq(NUM_SAMPLES, 1 / SAMPLE_RATE)
-
-
-def estimate_spectral_slope(noise_samples, freqs):
-    """
-    Estimates the spectral slope of noise from its power spectral density.
-    Returns the slope of a linear fit to the log-log PSD.
-
-    Args:
-        noise_samples: Noise samples array
-        freqs: Frequency array corresponding to the PSD bins
-
-    Returns:
-        Estimated spectral slope
-    """
-    # Compute power spectral density
-    freqs = freqs[1:]  # Remove DC component
-    psd = np.abs(np.fft.rfft(noise_samples))[1:]  # Remove DC component
-
-    # Compute log-log values for linear fit
-    log_freqs = np.log10(freqs)
-    log_psd = np.log10(psd)
-
-    # Use polynomial fit to estimate slope
-    # First degree polynomial: y = mx + b
-    coefficients = np.polyfit(log_freqs, log_psd, 1)
-    return coefficients[0]  # Return the slope
 
 
 class TestNewNoiseTypes:
@@ -51,9 +22,7 @@ class TestNewNoiseTypes:
         noise = noise_generator.generate(NUM_SAMPLES)
 
         # Check basic properties
-        assert len(noise) == NUM_SAMPLES
-        assert -1.0 <= np.min(noise) <= 0
-        assert 0 <= np.max(noise) <= 1.0
+        check_basic_noise_properties(noise, NUM_SAMPLES)
 
         # Check spectral properties (slope should be approximately +1)
         slope = estimate_spectral_slope(noise, FREQS)
@@ -65,9 +34,7 @@ class TestNewNoiseTypes:
         noise = noise_generator.generate(NUM_SAMPLES)
 
         # Check basic properties
-        assert len(noise) == NUM_SAMPLES
-        assert -1.0 <= np.min(noise) <= 0
-        assert 0 <= np.max(noise) <= 1.0
+        check_basic_noise_properties(noise, NUM_SAMPLES)
 
         # Check spectral properties (slope should be approximately +2)
         slope = estimate_spectral_slope(noise, FREQS)
@@ -79,9 +46,7 @@ class TestNewNoiseTypes:
         noise = noise_generator.generate(NUM_SAMPLES)
 
         # Check basic properties
-        assert len(noise) == NUM_SAMPLES
-        assert -1.0 <= np.min(noise) <= 0
-        assert 0 <= np.max(noise) <= 1.0
+        check_basic_noise_properties(noise, NUM_SAMPLES)
 
         # Grey noise should have energy concentrated in mid frequencies (2-5 kHz)
         # We'll use a simple check to verify frequency content

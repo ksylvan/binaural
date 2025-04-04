@@ -115,6 +115,23 @@ class AudioStep:
                 f"({self.duration}s)."
             )
 
+    def to_tone(self, base_freq: float) -> Tone:
+        """Convert AudioStep to a Tone for audio generation.
+
+        Args:
+            base_freq: The base carrier frequency in Hz
+
+        Returns:
+            A Tone object configured according to this AudioStep
+        """
+        return Tone(
+            base_freq=base_freq,
+            freq_diff_start=self.freq.start,
+            freq_diff_end=self.freq.end,
+            fade_in_sec=self.fade.fade_in_sec,
+            fade_out_sec=self.fade.fade_out_sec,
+        )
+
     def __str__(self) -> str:
         """String representation of the AudioStep."""
         fade_info = ""

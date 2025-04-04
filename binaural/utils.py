@@ -5,12 +5,8 @@ import logging
 import yaml
 
 from binaural.data_types import NoiseConfig
-from binaural.exceptions import (
-    BinauralError,
-    ConfigFileNotFoundError,
-    ConfigurationError,
-    YAMLParsingError,
-)
+from binaural.exceptions import (BinauralError, ConfigFileNotFoundError,
+                                 ConfigurationError, YAMLParsingError)
 
 logger = logging.getLogger(__name__)
 
