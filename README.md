@@ -2,6 +2,37 @@
 
 Binaural is a Python tool that generates binaural beat audio (WAV or FLAC) designed to induce different brain wave states, configured via a simple YAML script. It can optionally mix background noise (white, pink, or brown) with the binaural beats.
 
+## Table of Contents
+
+- [Binaural](#binaural)
+  - [Table of Contents](#table-of-contents)
+  - [Description](#description)
+  - [Background](#background)
+    - [What Are Binaural Beats?](#what-are-binaural-beats)
+    - [Background Noise Types](#background-noise-types)
+      - [Standard Noise Types](#standard-noise-types)
+      - [Advanced Noise Types](#advanced-noise-types)
+      - [Nature Sounds](#nature-sounds)
+    - [Brainwave Entrainment](#brainwave-entrainment)
+    - [Brainwave States](#brainwave-states)
+  - [Scientific Research](#scientific-research)
+  - [Installation](#installation)
+    - [Requirements](#requirements)
+    - [Setup](#setup)
+  - [Contributing](#contributing)
+  - [Usage](#usage)
+    - [Web Interface](#web-interface)
+    - [Command Line Interface](#command-line-interface)
+  - [YAML Script Format](#yaml-script-format)
+  - [Script Library](#script-library)
+    - [Standard Scripts](#standard-scripts)
+    - [Advanced Scripts with Specialized Noise](#advanced-scripts-with-specialized-noise)
+  - [File Structure](#file-structure)
+  - [Resources](#resources)
+    - [Further Reading](#further-reading)
+    - [References](#references)
+  - [License](#license)
+
 ## Description
 
 This tool reads a YAML script defining a sequence of binaural beat frequencies, durations, optional volume fades, and optional background noise settings. It then creates an audio file based on that sequence. It supports output in both WAV and FLAC formats. It allows for stable frequency segments, smooth transitions between frequencies, and gradual fade-in/fade-out for each segment.
@@ -114,20 +145,6 @@ Research on binaural beats has shown mixed results, but several studies suggest 
 
 ## Usage
 
-### Command Line Interface
-
-Run the script with the path to a YAML configuration file:
-
-```bash
-python generate.py <path_to_script.yaml> [options]
-```
-
-**Arguments:**
-
-- `<path_to_script.yaml>`: YAML file defining the binaural beat sequence and settings.
-- `-o <output_file>`, `--output <output_file>` (Optional): Specify the output audio file path. The file extension determines the format (`.wav` or `.flac`) and overrides the `output_filename` in the YAML.
-- `--verbose` (Optional): Enable verbose logging output.
-
 ### Web Interface
 
 For a more interactive experience, run the web-based user interface:
@@ -145,6 +162,20 @@ This launches a Streamlit-based web interface that allows you to:
 - Download generated audio and configuration files
 
 Once launched, open your web browser and navigate to `http://localhost:8501` to access the interface.
+
+### Command Line Interface
+
+Run the script with the path to a YAML configuration file:
+
+```bash
+python generate.py <path_to_script.yaml> [options]
+```
+
+**Arguments:**
+
+- `<path_to_script.yaml>`: YAML file defining the binaural beat sequence and settings.
+- `-o <output_file>`, `--output <output_file>` (Optional): Specify the output audio file path. The file extension determines the format (`.wav` or `.flac`) and overrides the `output_filename` in the YAML.
+- `--verbose` (Optional): Enable verbose logging output.
 
 **Example:**
 
