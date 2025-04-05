@@ -6,8 +6,7 @@ import numpy as np
 import pytest
 
 from binaural.data_types import AudioStep, NoiseConfig
-from binaural.parallel import (generate_audio_sequence_parallel,
-                               prepare_audio_steps)
+from binaural.parallel import generate_audio_sequence_parallel, prepare_audio_steps
 from binaural.tone_generator import generate_audio_sequence
 
 

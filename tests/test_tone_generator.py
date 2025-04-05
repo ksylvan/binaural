@@ -5,11 +5,17 @@ import pytest
 import soundfile as sf
 
 from binaural.data_types import NoiseConfig, Tone
-from binaural.exceptions import (AudioGenerationError, ConfigurationError,
-                                 UnsupportedFormatError)
-from binaural.tone_generator import (config_step_to_audio_step,
-                                     generate_audio_sequence, generate_tone,
-                                     save_audio_file)
+from binaural.exceptions import (
+    AudioGenerationError,
+    ConfigurationError,
+    UnsupportedFormatError,
+)
+from binaural.tone_generator import (
+    config_step_to_audio_step,
+    generate_audio_sequence,
+    generate_tone,
+    save_audio_file,
+)
 
 # Constants for tests
 SAMPLE_RATE = 44100

@@ -2,11 +2,15 @@
 
 import numpy as np
 
-from binaural.noise import (BlueNoiseStrategy, GreyNoiseStrategy, NoiseFactory,
-                            OceanNoiseStrategy, RainNoiseStrategy,
-                            VioletNoiseStrategy)
-from tests.test_common import (check_basic_noise_properties,
-                               estimate_spectral_slope)
+from binaural.noise import (
+    BlueNoiseStrategy,
+    GreyNoiseStrategy,
+    NoiseFactory,
+    OceanNoiseStrategy,
+    RainNoiseStrategy,
+    VioletNoiseStrategy,
+)
+from tests.test_common import check_basic_noise_properties, estimate_spectral_slope
 
 # Test sample parameters
 NUM_SAMPLES = 2**14  # Power of 2 for efficient FFT
@@ -75,20 +79,20 @@ class TestNewNoiseTypes:
         assert "violet" in strategies
         assert "grey" in strategies
         assert "rain" in strategies
-        assert "ocean" in strategies # Check for ocean
+        assert "ocean" in strategies  # Check for ocean
 
         # Check that the factory returns the correct strategy instances
         blue_strategy = NoiseFactory.get_strategy("blue")
         violet_strategy = NoiseFactory.get_strategy("violet")
         grey_strategy = NoiseFactory.get_strategy("grey")
         rain_strategy = NoiseFactory.get_strategy("rain")
-        ocean_strategy = NoiseFactory.get_strategy("ocean") # Get ocean
+        ocean_strategy = NoiseFactory.get_strategy("ocean")  # Get ocean
 
         assert isinstance(blue_strategy, BlueNoiseStrategy)
         assert isinstance(violet_strategy, VioletNoiseStrategy)
         assert isinstance(grey_strategy, GreyNoiseStrategy)
         assert isinstance(rain_strategy, RainNoiseStrategy)
-        assert isinstance(ocean_strategy, OceanNoiseStrategy) # Check ocean type
+        assert isinstance(ocean_strategy, OceanNoiseStrategy)  # Check ocean type
 
     def test_empty_input(self):
         """Test that all strategies handle empty input correctly."""

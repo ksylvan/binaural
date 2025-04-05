@@ -6,13 +6,19 @@ import streamlit as st
 
 from binaural.noise import NoiseFactory
 from binaural_webui.components.audio_handlers import (
-    display_audio_players, handle_full_audio_generation,
-    handle_preview_generation)
+    display_audio_players,
+    handle_full_audio_generation,
+    handle_preview_generation,
+)
 from binaural_webui.components.sidebar import render_sidebar
 from binaural_webui.components.step_editor import ui_step_editor
 from binaural_webui.components.ui_utils import (
-    display_total_duration, display_yaml_config, initialize_session_state,
-    render_add_step_buttons, render_frequency_preset_selector)
+    display_total_duration,
+    display_yaml_config,
+    initialize_session_state,
+    render_add_step_buttons,
+    render_frequency_preset_selector,
+)
 
 
 def render_main_content(config: dict[str, Any]) -> None:

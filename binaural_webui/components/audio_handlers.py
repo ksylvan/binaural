@@ -112,6 +112,44 @@ def handle_preview_generation(config: dict[str, Any]) -> Optional[io.BytesIO]:
     return None
 
 
+def _create_audio_file(
+    sample_rate: int,
+    base_freq: float,
+    steps: list[dict[str, Any]],
+    noise_config: NoiseConfig,
+    output_filename: str,
+) -> Tuple[bytes, float]:
+    """Create and save audio file, return the file data and duration."""
+    left_channel, right_channel, total_duration = generate_audio_sequence(
+        sample_rate=sample_rate,
+        base_freq=base_freq,
+        steps=steps,
+        noise_config=noise_config,
+    )
+
+    suffix = ".flac" if output_filename.lower().endswith(".flac") else ".wav"
+
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+        tmp_name = tmp.name
+        save_audio_file(
+            filename=tmp_name,
+            sample_rate=sample_rate,
+            left=left_channel,
+            right=right_channel,
+            total_duration_sec=total_duration,
+        )
+
+    with open(tmp_name, "rb") as f:
+        audio_data = f.read()
+
+    try:
+        os.unlink(tmp_name)
+    except OSError as unlink_err:
+        st.warning(f"Could not delete temporary file {tmp_name}: {unlink_err}")
+
+    return audio_data, total_duration
+
+
 def handle_full_audio_generation(config: dict[str, Any]) -> Optional[dict[str, Any]]:
     """Handle the 'Generate Full Audio' button click and audio generation/saving."""
     if not st.button("Generate Full Audio"):
@@ -127,34 +165,11 @@ def handle_full_audio_generation(config: dict[str, Any]) -> Optional[dict[str, A
             base_freq = config.get("base_frequency", DEFAULT_BASE_FREQUENCY)
             steps = config["steps"]
             noise_config = _extract_noise_config(config)
-
-            left_channel, right_channel, total_duration = generate_audio_sequence(
-                sample_rate=sample_rate,
-                base_freq=base_freq,
-                steps=steps,
-                noise_config=noise_config,
-            )
-
             output_filename = config["output_filename"]
-            suffix = ".flac" if output_filename.lower().endswith(".flac") else ".wav"
 
-            with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-                tmp_name = tmp.name
-                save_audio_file(
-                    filename=tmp_name,
-                    sample_rate=sample_rate,
-                    left=left_channel,
-                    right=right_channel,
-                    total_duration_sec=total_duration,
-                )
-
-            with open(tmp_name, "rb") as f:
-                audio_data = f.read()
-
-            try:
-                os.unlink(tmp_name)
-            except OSError as unlink_err:
-                st.warning(f"Could not delete temporary file {tmp_name}: {unlink_err}")
+            audio_data, total_duration = _create_audio_file(
+                sample_rate, base_freq, steps, noise_config, output_filename
+            )
 
             return {
                 "data": audio_data,

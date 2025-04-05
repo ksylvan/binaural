@@ -5,8 +5,13 @@ from typing import Any
 
 import streamlit as st
 
-from binaural.constants import (AUTHOR_EMAIL, AUTHOR_NAME,
-                                DEFAULT_BASE_FREQUENCY, GITHUB_URL, LICENSE)
+from binaural.constants import (
+    AUTHOR_EMAIL,
+    AUTHOR_NAME,
+    DEFAULT_BASE_FREQUENCY,
+    GITHUB_URL,
+    LICENSE,
+)
 from binaural_webui.components.config_utils import load_config_file
 from binaural_webui.constants import BRAINWAVE_PRESETS, EXAMPLE_CONFIGS
 
@@ -89,7 +94,7 @@ def _render_repo_info():
     """Render the repository information in the sidebar."""
     st.markdown("## Repository Information")
     st.markdown(
-        f"Binaural Beat Generator project is licensed under {LICENSE}. "
+        f"Binaural Beat Generator project is licensed under the {LICENSE}. "
         f"Find the source code and contribute on [GitHub]({GITHUB_URL})."
     )
     st.markdown(f"Copyright © 2025 [{AUTHOR_NAME}](mailto:{AUTHOR_EMAIL}) ")

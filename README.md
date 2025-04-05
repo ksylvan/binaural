@@ -139,7 +139,7 @@ Research on binaural beats has shown mixed results, but several studies suggest 
 - Run linters:
 
   ```bash
-  pylint *.py binaural binaural_webui tests
+  pylint .
   ```
 
 - Submit a pull request with a clear description of your changes.

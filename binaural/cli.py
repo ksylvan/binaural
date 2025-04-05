@@ -10,8 +10,11 @@ from typing import Any, Optional
 
 import numpy as np
 
-from binaural.constants import (DEFAULT_BASE_FREQUENCY,
-                                DEFAULT_OUTPUT_FILENAME, DEFAULT_SAMPLE_RATE)
+from binaural.constants import (
+    DEFAULT_BASE_FREQUENCY,
+    DEFAULT_OUTPUT_FILENAME,
+    DEFAULT_SAMPLE_RATE,
+)
 from binaural.data_types import NoiseConfig
 from binaural.exceptions import BinauralError
 from binaural.parallel import generate_audio_sequence_parallel

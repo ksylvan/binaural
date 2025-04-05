@@ -2,8 +2,11 @@
 
 import pytest
 
-from binaural.exceptions import (ConfigFileNotFoundError, ConfigurationError,
-                                 YAMLParsingError)
+from binaural.exceptions import (
+    ConfigFileNotFoundError,
+    ConfigurationError,
+    YAMLParsingError,
+)
 from binaural.utils import load_yaml_config
 
 

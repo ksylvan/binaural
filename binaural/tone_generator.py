@@ -11,10 +11,12 @@ import numpy as np
 import soundfile as sf
 
 from binaural.constants import SUPPORTED_FORMATS
-from binaural.data_types import (AudioStep, FadeInfo, FrequencyRange,
-                                 NoiseConfig, Tone)
-from binaural.exceptions import (AudioGenerationError, ConfigurationError,
-                                 UnsupportedFormatError)
+from binaural.data_types import AudioStep, FadeInfo, FrequencyRange, NoiseConfig, Tone
+from binaural.exceptions import (
+    AudioGenerationError,
+    ConfigurationError,
+    UnsupportedFormatError,
+)
 from binaural.fade import apply_fade
 from binaural.noise import NoiseFactory
 
