@@ -25,7 +25,13 @@ from binaural.parallel import prepare_audio_steps
 from binaural.tone_generator import generate_audio_sequence, save_audio_file
 
 # Get available noise types from the NoiseFactory
-NOISE_TYPES = NoiseFactory.strategies()
+# Ensure 'none' is first and list is sorted otherwise
+all_noise_types = NoiseFactory.strategies()
+if "none" in all_noise_types:
+    all_noise_types.remove("none")
+    NOISE_TYPES = ["none"] + sorted(all_noise_types)
+else:
+    NOISE_TYPES = sorted(all_noise_types)
 
 # Constants for the UI
 BRAINWAVE_PRESETS = {
@@ -57,6 +63,7 @@ EXAMPLE_CONFIGS = {
     "Focus (Violet Noise)": "scripts/focus_violet.yaml",
     "Relaxation (Grey Noise)": "scripts/relaxation_grey.yaml",
     "Relaxation (Rain)": "scripts/relaxation_rain.yaml",
+    "Relaxation (Ocean)": "scripts/relaxation_ocean.yaml",  # Added Ocean example
     "Lucid Dreaming": "scripts/lucid_dreaming.yaml",
     "Lucid Dreaming (Pink Noise)": "scripts/lucid_dream_pink_noise.yaml",
     "Migraine Relief": "scripts/migraine_relief.yaml",
@@ -497,8 +504,8 @@ def _render_global_settings():
 def _render_noise_settings():
     """Render background noise settings controls in the sidebar."""
     st.subheader("Background Noise")
-    # Ensure 'none' is an option
-    noise_options = NOISE_TYPES if "none" in NOISE_TYPES else ["none"] + NOISE_TYPES
+    # Use the globally defined NOISE_TYPES
+    noise_options = NOISE_TYPES
 
     # Determine the current noise type and its index safely
     current_noise = st.session_state.config.get("background_noise", {}).get(
@@ -507,7 +514,7 @@ def _render_noise_settings():
     try:
         index = noise_options.index(current_noise)
     except ValueError:
-        index = 0  # Default to 'none' if current type is invalid
+        index = 0  # Default to 'none' if current type is invalid or not found
 
     # Select box for noise type
     noise_type = st.selectbox("Noise Type", noise_options, index=index)

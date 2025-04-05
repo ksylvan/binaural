@@ -66,6 +66,7 @@ For example, if a 100 Hz tone is presented to the left ear and a 110 Hz tone to 
 #### Nature Sounds
 
 - **Rain**: Natural rain sound simulation that provides a calming and consistent audio backdrop. Helps mask external distractions while creating a soothing ambience.
+- **Ocean**: Simulates the rhythmic sound of ocean waves, combining a low-frequency rumble with periodic wave crests. Creates a dynamic yet calming natural soundscape.
 
 Adding background noise can help mask distracting environmental sounds or provide a constant auditory backdrop. Different noise types may be beneficial for different use cases based on their frequency characteristics.
 
@@ -214,7 +215,7 @@ The YAML script defines the parameters and sequence for audio generation.
   - `type`: The type of noise. Options:
     - Standard: `"white"`, `"pink"`, `"brown"`
     - Advanced: `"blue"`, `"violet"`, `"grey"`
-    - Nature: `"rain"`
+    - Nature: `"rain"`, `"ocean"`
     - No noise: `"none"`
     - Default: `"none"`.
   - `amplitude`: The relative amplitude (volume) of the noise, from `0.0` (silent) to `1.0` (maximum relative level). Default: `0.0`. The binaural beat signal is scaled down by `(1 - amplitude)` before mixing to prevent clipping.
@@ -255,7 +256,7 @@ output_filename: "audio/example_fade_noise.flac" # Default output file name
 
 # Background noise settings (optional)
 background_noise:
-  type: "pink" # Type of noise: "white", "pink", "brown", or "none"
+  type: "pink" # Type of noise: "white", "pink", "brown", "blue", "violet", "grey", "rain", "ocean", or "none"
   amplitude: 0.15 # Relative amplitude (0.0 to 1.0)
 
 # Sequence of audio generation steps (Total Duration: 1500 seconds = 25 minutes)
@@ -314,6 +315,7 @@ Most scripts default to `.flac` output. Some include background noise as noted b
 - **`scripts/focus_violet.yaml`**: Concentration enhancement with Gamma waves (40 Hz) and violet noise for heightened alertness.
 - **`scripts/relaxation_grey.yaml`**: Stress reduction with Alpha waves (8-10 Hz) and perceptually balanced grey noise.
 - **`scripts/relaxation_rain.yaml`**: Calming experience with Alpha waves (8-10 Hz) and natural rain sounds.
+- **`scripts/relaxation_ocean.yaml`**: Deep relaxation with Alpha waves (8-10 Hz) and simulated ocean sounds.
 - **`scripts/creativity_blue.yaml`**: Creative flow enhancement with Theta waves (6-7.83 Hz) and blue noise for clarity.
 - **`scripts/creativity_theta.yaml`**: Intended to foster an intuitive and creative mental state using Theta waves (7 Hz).
 - **`scripts/lucid_dream_pink.yaml`**: Aims to facilitate REM sleep states potentially conducive to lucid
@@ -343,21 +345,30 @@ python generate.py scripts/sleep_delta.yaml -o audio/sleep_delta_with_noise.wav
   - `exceptions.py`: Custom exception classes.
   - `fade.py`: Audio fade logic.
   - `noise.py`: Background noise generation functions.
+  - `parallel.py`: Parallel processing utilities.
   - `tone_generator.py`: Core audio generation logic for beats and mixing.
   - `utils.py`: YAML loading and validation utilities.
+  - `webui.py`: Streamlit web user interface.
 - `tests/`: Directory of unit tests.
+  - `test_common.py`: Common test utilities.
   - `test_data_types.py`
   - `test_fade.py`
-  - `test_noise.py`
+  - `test_noise.py`: Tests for standard noise types.
+  - `test_new_noise_types.py`: Tests for advanced/nature noise types.
+  - `test_ocean_noise.py`: Specific tests for ocean noise.
+  - `test_parallel.py`: Tests for parallel generation.
+  - `test_property_based.py`: Hypothesis property-based tests.
+  - `test_rain_noise.py`: Specific tests for rain noise.
   - `test_tone_generator.py`
   - `test_utils.py`
 - `bin/setup.sh`: Setup script for development environment.
-- `requirements.txt`: Python dependencies (numpy, PyYAML, soundfile, scipy).
-- `requirements-bootstrap.txt`: Bootstrap dependencies for setup (uv).
+- `pyproject.toml`: Project configuration and dependencies.
+- `.python-version`: Specifies Python version.
 - `README.md`: This file.
 - `LICENSE`: Project license information.
 - `conftest.py`: Pytest configuration.
 - `cspell.json`: Spell checking configuration.
+- `run_webapp.py`: Script to launch the web UI.
 
 ## Resources
 

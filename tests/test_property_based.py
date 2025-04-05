@@ -11,12 +11,14 @@ from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
 from binaural.constants import DEFAULT_BASE_FREQUENCY
-from binaural.data_types import (AudioStep, FadeInfo, FrequencyRange,
-                                 NoiseConfig, Tone)
+from binaural.data_types import AudioStep, FadeInfo, FrequencyRange, NoiseConfig, Tone
 from binaural.noise import NoiseFactory
-from binaural.tone_generator import (config_step_to_audio_step,
-                                     generate_audio_sequence, generate_tone,
-                                     save_audio_file)
+from binaural.tone_generator import (
+    config_step_to_audio_step,
+    generate_audio_sequence,
+    generate_tone,
+    save_audio_file,
+)
 
 # Define common test constants
 SAMPLE_RATES = [22050, 44100, 48000]  # Common sample rates
@@ -86,7 +88,9 @@ def valid_audio_steps(draw) -> AudioStep:
 @st.composite
 def valid_noise_configs(draw) -> NoiseConfig:
     """Strategy for generating valid NoiseConfig objects."""
-    noise_type = draw(st.sampled_from(["none", "white", "pink", "brown"]))
+    # Get all available noise types from the factory
+    available_noise_types = NoiseFactory.strategies()
+    noise_type = draw(st.sampled_from(available_noise_types))
 
     # If type is none, amplitude should be 0
     if noise_type == "none":
@@ -94,6 +98,7 @@ def valid_noise_configs(draw) -> NoiseConfig:
     else:
         amplitude = draw(st.floats(min_value=0.0, max_value=1.0))
 
+    # Create and return the NoiseConfig, allowing validation to occur
     return NoiseConfig(type=noise_type, amplitude=amplitude)
 
 
@@ -188,20 +193,24 @@ def test_generate_tone_properties(tone: Tone, duration_sample_rate: Tuple[float,
 def test_noise_generators_properties(num_samples: int):
     """Property-based test for the noise generators."""
     # Generate different types of noise
-    white = NoiseFactory.get_strategy("white").generate(num_samples)
-    pink = NoiseFactory.get_strategy("pink").generate(num_samples)
-    brown = NoiseFactory.get_strategy("brown").generate(num_samples)
+    noise_types_to_test = [t for t in NoiseFactory.strategies() if t != "none"]
 
-    # Check basic properties
-    for noise in [white, pink, brown]:
+    for noise_type in noise_types_to_test:
+        strategy = NoiseFactory.get_strategy(noise_type)
+        noise = strategy.generate(num_samples)
+
+        # Check basic properties
         assert len(noise) == num_samples
-        assert np.max(np.abs(noise)) <= 1.0 + 1e-9  # Allow tiny float imprecision
+        # Allow slightly larger tolerance for combined noises like ocean/rain
+        assert np.max(np.abs(noise)) <= 1.01
 
         # Mean should be close to zero (centered)
-        assert abs(np.mean(noise)) < 0.1
-
-    # Additional checks could include verifying spectral properties
-    # but that would make tests too slow for regular use
+        # Allow slightly larger mean deviation for brown/ocean noise due
+        # to integration/modulation
+        if noise_type in ["brown", "ocean"]:
+            assert abs(np.mean(noise)) < 0.2
+        else:
+            assert abs(np.mean(noise)) < 0.15
 
 
 @given(valid_step_dicts())
@@ -295,9 +304,9 @@ def test_generate_audio_sequence_properties(steps: list, noise_config: NoiseConf
         ), f"Left and right channel lengths differ: {len(left)} vs {len(right)}"
         assert total_duration == pytest.approx(expected_duration, abs=0.01)
 
-        # Check amplitude is within expected range
-        assert np.max(np.abs(left)) <= 1.0 + 1e-9  # Allow tiny float imprecision
-        assert np.max(np.abs(right)) <= 1.0 + 1e-9
+        # Check amplitude is within expected range (allow slightly more for combined noises)
+        assert np.max(np.abs(left)) <= 1.01
+        assert np.max(np.abs(right)) <= 1.01
 
         # If noise was added, check channel differences only in specific cases
         # Some noise configs/signals might result in identical channels

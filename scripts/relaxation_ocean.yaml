@@ -1,0 +1,41 @@
+# Binaural Beat Script for Relaxation with Ocean Sounds
+# Aims to reduce stress and promote deep relaxation using Alpha waves and simulated ocean ambience.
+
+# Global settings
+base_frequency: 100 # Hz
+sample_rate: 44100 # Hz
+output_filename: "audio/relaxation_ocean.flac"
+background_noise:
+  type: "ocean" # Ocean noise for a dynamic, natural background
+  amplitude: 0.35 # Moderate amplitude for immersive feel
+
+# Sequence (Total Duration: 25 minutes)
+steps:
+  # 1. Gentle fade-in to low Beta (initial state) (180 seconds)
+  - type: stable
+    frequency: 12 # Hz (Low Beta)
+    duration: 180 # seconds
+    fade_in_duration: 15 # seconds
+
+  # 2. Transition down to Mid Alpha (300 seconds)
+  - type: transition
+    # start_frequency: 12 (implied)
+    end_frequency: 10 # Hz (Mid Alpha)
+    duration: 300 # seconds
+
+  # 3. Hold Mid Alpha for main relaxation phase (600 seconds)
+  - type: stable
+    frequency: 10 # Hz (Mid Alpha)
+    duration: 600 # seconds
+
+  # 4. Transition to Low Alpha for deeper calm (240 seconds)
+  - type: transition
+    # start_frequency: 10 (implied)
+    end_frequency: 8 # Hz (Low Alpha)
+    duration: 240 # seconds
+
+  # 5. Hold Low Alpha with the ocean sounds (180 seconds)
+  - type: stable
+    frequency: 8 # Hz (Low Alpha)
+    duration: 180 # seconds
+    fade_out_duration: 30 # seconds

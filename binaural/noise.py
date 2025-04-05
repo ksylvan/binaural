@@ -571,6 +571,132 @@ class RainNoiseStrategy(NoiseStrategy):
         return 0.7 * rain_noise + 0.3 * rain_reverb
 
 
+class OceanNoiseStrategy(NoiseStrategy):
+    """
+    Ocean noise generation strategy.
+    Simulates the sound of ocean waves using filtered noise and amplitude modulation.
+    Combines a low-frequency rumble with periodic wave crests.
+    """
+
+    # Parameters for ocean simulation
+    WAVE_INTERVAL_MEAN = 8  # seconds (average time between wave crests)
+    WAVE_INTERVAL_STD = 2  # seconds (variation in time between waves)
+    WAVE_DURATION_MEAN = 4  # seconds (average duration of a wave crest)
+    WAVE_DURATION_STD = 1  # seconds (variation in wave duration)
+    SAMPLE_RATE = 44100  # Standard audio sample rate
+
+    def generate(self, num_samples: int) -> np.ndarray:
+        """Generate ocean noise samples.
+
+        Simulates ocean sound by:
+        1. Creating a base low-frequency rumble (filtered brown/pink noise).
+        2. Generating periodic wave crests with varying intensity and timing.
+        3. Combining the rumble and wave sounds.
+
+        Args:
+            num_samples: The number of samples to generate.
+
+        Returns:
+            A numpy array containing ocean noise samples normalized to [-1, 1].
+        """
+        # Return empty array if no samples requested
+        if num_samples <= 0:
+            return np.array([])
+
+        # 1. Create the base low-frequency rumble
+        # Use brown noise for deep rumble, filter out higher frequencies
+        rumble_base = BrownNoiseStrategy().generate(num_samples)
+        # Apply a low-pass filter to emphasize the rumble (e.g., cutoff at 500 Hz)
+        sos = signal.butter(4, 500, btype="low", fs=self.SAMPLE_RATE, output="sos")
+        rumble = signal.sosfilt(sos, rumble_base)
+
+        # 2. Generate the wave crests
+        # Use pink noise for the wave sound, filter for mid-frequencies
+        wave_noise_base = PinkNoiseStrategy().generate(num_samples)
+        # Apply band-pass filter for wave sound (e.g., 300 Hz to 4000 Hz)
+        sos_wave = signal.butter(
+            4, [300, 4000], btype="bandpass", fs=self.SAMPLE_RATE, output="sos"
+        )
+        wave_noise_filtered = signal.sosfilt(sos_wave, wave_noise_base)
+
+        # Create the wave amplitude envelope
+        wave_envelope = self._generate_wave_envelope(num_samples)
+
+        # Apply the envelope to the filtered wave noise
+        waves = wave_noise_filtered * wave_envelope
+
+        # 3. Combine rumble and waves
+        # Adjust relative levels (e.g., rumble slightly lower than waves)
+        combined_noise = 0.6 * rumble + 0.9 * waves
+
+        # Normalize the final combined noise to [-1, 1]
+        max_abs_noise = np.max(np.abs(combined_noise))
+        if max_abs_noise > 1e-9:
+            combined_noise /= max_abs_noise
+
+        return combined_noise
+
+    def _generate_wave_envelope(self, num_samples: int) -> np.ndarray:
+        """Generate the amplitude envelope for the ocean waves."""
+        envelope = np.zeros(num_samples)
+        current_sample = 0
+
+        while current_sample < num_samples:
+            # Determine time until the next wave crest
+            interval_sec = max(
+                0.5,  # Minimum interval
+                rng.normal(self.WAVE_INTERVAL_MEAN, self.WAVE_INTERVAL_STD),
+            )
+            interval_samples = int(interval_sec * self.SAMPLE_RATE)
+
+            # Determine the duration and intensity of the wave
+            duration_sec = max(
+                1.0,  # Minimum duration
+                rng.normal(self.WAVE_DURATION_MEAN, self.WAVE_DURATION_STD),
+            )
+            duration_samples = int(duration_sec * self.SAMPLE_RATE)
+            intensity = rng.uniform(0.5, 1.0)  # Random intensity for the wave
+
+            # Calculate start and end of the wave crest within the envelope
+            wave_start = current_sample + interval_samples
+            wave_end = wave_start + duration_samples
+
+            # Ensure wave stays within bounds
+            wave_start = min(wave_start, num_samples)
+            wave_end = min(wave_end, num_samples)
+            actual_duration = wave_end - wave_start
+
+            if actual_duration > 0:
+                # Create a wave shape (e.g., asymmetric sine or custom shape)
+                # Using a simple sine squared shape for attack/decay
+                t_wave = np.linspace(0, np.pi, actual_duration)
+                wave_shape = intensity * (np.sin(t_wave) ** 2)
+
+                # Add the wave shape to the envelope
+                envelope[wave_start:wave_end] += wave_shape
+
+            # Move to the end of the current wave for the next interval calculation
+            current_sample = wave_end
+
+        # Smooth the envelope slightly to avoid abrupt changes
+        if num_samples > 100:
+            smoothing_window = int(0.05 * self.SAMPLE_RATE)  # 50ms smoothing
+            if smoothing_window > 1:
+                # Use a simple moving average for smoothing
+                kernel = np.ones(smoothing_window) / smoothing_window
+                envelope = np.convolve(envelope, kernel, mode="same")
+
+        # Normalize envelope to have peaks around 1.0
+        max_env = np.max(envelope)
+        if max_env > 1e-9:
+            envelope /= max_env
+
+        # Add a small baseline level to the envelope to ensure continuous sound
+        envelope = 0.1 + 0.9 * envelope
+
+        return envelope
+
+
 class NoiseFactory:
     """Factory class for creating noise generator strategy instances."""
 
@@ -583,6 +709,7 @@ class NoiseFactory:
         "violet": VioletNoiseStrategy,
         "grey": GreyNoiseStrategy,
         "rain": RainNoiseStrategy,
+        "ocean": OceanNoiseStrategy,
         "none": NullNoiseStrategy,  # Include 'none' for the Null strategy
     }
 
@@ -598,7 +725,7 @@ class NoiseFactory:
 
         Args:
             noise_type: The type of noise to generate (case-sensitive string,
-                        e.g., "white", "pink", "brown", "none").
+                        e.g., "white", "pink", "brown", "none", "ocean").
 
         Returns:
             A NoiseStrategy instance corresponding to the requested noise type.

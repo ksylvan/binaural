@@ -78,6 +78,7 @@ class NoiseConfig:
             "violet",
             "grey",
             "rain",
+            "ocean",
         )
         if self.type not in valid_types:
             raise TypeError(
