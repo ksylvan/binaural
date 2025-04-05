@@ -12,7 +12,7 @@
         {
             "label": "Run Test Suite",
             "type": "shell",
-            "command": "cd ${workspaceFolder} && pytest",
+            "command": "cd ${workspaceFolder} && pytest --run-performance",
             "group": {
                 "kind": "test",
                 "isDefault": true

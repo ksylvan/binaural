@@ -10,7 +10,14 @@ import soundfile as sf
 import streamlit as st
 import yaml
 
-from binaural.constants import DEFAULT_BASE_FREQUENCY, DEFAULT_SAMPLE_RATE
+from binaural.constants import (
+    AUTHOR_EMAIL,
+    AUTHOR_NAME,
+    DEFAULT_BASE_FREQUENCY,
+    DEFAULT_SAMPLE_RATE,
+    GITHUB_URL,
+    LICENSE,
+)
 from binaural.data_types import NoiseConfig
 from binaural.exceptions import BinauralError
 from binaural.noise import NoiseFactory
@@ -559,6 +566,16 @@ def _render_brainwave_info():
             st.markdown(f"**{wave}**: {description}")
 
 
+def _render_repo_info():
+    """Render the repository information in the sidebar."""
+    st.markdown("## Repository Information")
+    st.markdown(
+        f"Binaural Beat Generator project is licensed under {LICENSE}. "
+        f"Find the source code and contribute on [GitHub]({GITHUB_URL})."
+    )
+    st.markdown(f"Copyright © 2025 [{AUTHOR_NAME}](mailto:{AUTHOR_EMAIL}) ")
+
+
 def _render_sidebar():
     """Render the entire sidebar content."""
     with st.sidebar:
@@ -570,6 +587,7 @@ def _render_sidebar():
         _render_output_settings()
         st.divider()
         _render_brainwave_info()
+        _render_repo_info()
 
 
 def _render_frequency_preset_selector():
@@ -933,6 +951,20 @@ def main():
     st.set_page_config(
         page_title="Binaural Beat Generator", page_icon="🔊", layout="wide"
     )
+
+    sine_svg = r"""
+<svg width="100%" height="50" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="sinePattern" patternUnits="userSpaceOnUse" width="200" height="50">
+      <!-- One cycle of a sine wave -->
+      <path d="M0,25 Q50,0 100,25 T200,25" fill="none" stroke="#000" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <!-- Fill a rectangle with the repeating pattern -->
+  <rect width="100%" height="50" fill="url(#sinePattern)"/>
+</svg>
+"""
+    st.markdown(sine_svg, unsafe_allow_html=True)
 
     # Set the main title and introductory markdown
     st.title("Binaural Beat Generator")
