@@ -253,6 +253,7 @@ class BlueNoiseStrategy(NoiseStrategy):
 
         # Apply the scaling to the FFT of the white noise
         fft_blue = fft_white * scaling
+        fft_blue[0] = 0  # Ensure DC component is zero
 
         # Compute the Inverse FFT
         blue_noise = np.real(ifft(fft_blue))
@@ -315,6 +316,7 @@ class VioletNoiseStrategy(NoiseStrategy):
 
         # Apply the scaling to the FFT of the white noise
         fft_violet = fft_white * scaling
+        fft_violet[0] = 0  # Ensure DC component is zero
 
         # Compute the Inverse FFT
         violet_noise = np.real(ifft(fft_violet))
@@ -388,6 +390,7 @@ class GreyNoiseStrategy(NoiseStrategy):
 
         # Apply the scaling to the FFT of the white noise
         fft_grey = fft_white * scaling
+        fft_grey[0] = 0  # Ensure DC component is zero
 
         # Compute the Inverse FFT
         grey_noise = np.real(ifft(fft_grey))
@@ -629,6 +632,9 @@ class OceanNoiseStrategy(NoiseStrategy):
         # Adjust relative levels (e.g., rumble slightly lower than waves)
         combined_noise = 0.6 * rumble + 0.9 * waves
 
+        # Center the combined signal before final normalization
+        combined_noise -= np.mean(combined_noise)
+
         # Normalize the final combined noise to [-1, 1]
         max_abs_noise = np.max(np.abs(combined_noise))
         if max_abs_noise > 1e-9:
@@ -636,65 +642,72 @@ class OceanNoiseStrategy(NoiseStrategy):
 
         return combined_noise
 
-    def _generate_wave_envelope(self, num_samples: int) -> np.ndarray:
-        """Generate the amplitude envelope for the ocean waves."""
-        envelope = np.zeros(num_samples)
-        current_sample = 0
+    def _generate_wave_shape(self, duration: int, intensity: float) -> np.ndarray:
+        """Generate a single wave shape of specified duration and intensity."""
+        t_wave = np.linspace(0, np.pi, duration)
+        return intensity * (np.sin(t_wave) ** 2)
 
-        while current_sample < num_samples:
-            # Determine time until the next wave crest
-            interval_sec = max(
-                0.5,  # Minimum interval
-                rng.normal(self.WAVE_INTERVAL_MEAN, self.WAVE_INTERVAL_STD),
-            )
-            interval_samples = int(interval_sec * self.SAMPLE_RATE)
-
-            # Determine the duration and intensity of the wave
-            duration_sec = max(
-                1.0,  # Minimum duration
-                rng.normal(self.WAVE_DURATION_MEAN, self.WAVE_DURATION_STD),
-            )
-            duration_samples = int(duration_sec * self.SAMPLE_RATE)
-            intensity = rng.uniform(0.5, 1.0)  # Random intensity for the wave
-
-            # Calculate start and end of the wave crest within the envelope
-            wave_start = current_sample + interval_samples
-            wave_end = wave_start + duration_samples
-
-            # Ensure wave stays within bounds
-            wave_start = min(wave_start, num_samples)
-            wave_end = min(wave_end, num_samples)
-            actual_duration = wave_end - wave_start
-
-            if actual_duration > 0:
-                # Create a wave shape (e.g., asymmetric sine or custom shape)
-                # Using a simple sine squared shape for attack/decay
-                t_wave = np.linspace(0, np.pi, actual_duration)
-                wave_shape = intensity * (np.sin(t_wave) ** 2)
-
-                # Add the wave shape to the envelope
-                envelope[wave_start:wave_end] += wave_shape
-
-            # Move to the end of the current wave for the next interval calculation
-            current_sample = wave_end
-
-        # Smooth the envelope slightly to avoid abrupt changes
+    def _smooth_envelope(self, envelope: np.ndarray, num_samples: int) -> np.ndarray:
+        """Smooth the envelope with a moving average filter."""
         if num_samples > 100:
             smoothing_window = int(0.05 * self.SAMPLE_RATE)  # 50ms smoothing
             if smoothing_window > 1:
                 # Use a simple moving average for smoothing
                 kernel = np.ones(smoothing_window) / smoothing_window
                 envelope = np.convolve(envelope, kernel, mode="same")
+        return envelope
 
-        # Normalize envelope to have peaks around 1.0
+    def _generate_wave_envelope(self, num_samples: int) -> np.ndarray:
+        """Generate the amplitude envelope for the ocean waves."""
+        envelope = np.zeros(num_samples)
+        current_sample = 0
+
+        while current_sample < num_samples:
+            # Determine wave timing and characteristics
+            interval_sec = max(
+                0.5,  # Minimum interval
+                rng.normal(self.WAVE_INTERVAL_MEAN, self.WAVE_INTERVAL_STD),
+            )
+            interval_samples = int(interval_sec * self.SAMPLE_RATE)
+
+            duration_sec = max(
+                1.0,  # Minimum duration
+                rng.normal(self.WAVE_DURATION_MEAN, self.WAVE_DURATION_STD),
+            )
+            duration_samples = int(duration_sec * self.SAMPLE_RATE)
+
+            # Calculate wave position and ensure it's within bounds
+            wave_start = min(current_sample + interval_samples, num_samples)
+            wave_end = min(wave_start + duration_samples, num_samples)
+            actual_duration = wave_end - wave_start
+
+            # Add wave shape to envelope if there's space
+            if actual_duration > 0:
+                intensity = rng.uniform(0.5, 1.0)
+                wave_shape = self._generate_wave_shape(actual_duration, intensity)
+                envelope[wave_start:wave_end] += wave_shape
+
+            # Move to next position
+            current_sample = wave_end
+
+        # Apply smoothing and ensure correct length
+        envelope = self._smooth_envelope(envelope, num_samples)
+
+        # Ensure envelope length matches num_samples exactly
+        if len(envelope) != num_samples:
+            envelope = np.pad(
+                envelope[: min(len(envelope), num_samples)],
+                (0, max(0, num_samples - len(envelope))),
+                "constant",
+                constant_values=envelope[-1] if len(envelope) > 0 else 0.1,
+            )
+
+        # Normalize and add baseline
         max_env = np.max(envelope)
         if max_env > 1e-9:
             envelope /= max_env
 
-        # Add a small baseline level to the envelope to ensure continuous sound
-        envelope = 0.1 + 0.9 * envelope
-
-        return envelope
+        return 0.1 + 0.9 * envelope
 
 
 class NoiseFactory:

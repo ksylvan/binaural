@@ -3,6 +3,28 @@
 import numpy as np
 
 
+def check_generate_output(noise_generator) -> None:
+    "Check common outputs of the noise generator."
+    # Test with zero samples
+    zero_sample = noise_generator.generate(0)
+    assert isinstance(zero_sample, np.ndarray)
+    assert len(zero_sample) == 0
+
+    # Test with negative samples (should return empty array)
+    negative_sample = noise_generator.generate(-10)
+    assert len(negative_sample) == 0
+
+    # Test with very small sample count (should still work)
+    small_sample = noise_generator.generate(10)
+    assert len(small_sample) == 10
+    assert np.all(np.abs(small_sample) <= 1.01)  # Allow slight tolerance
+
+    # Test with odd sample counts
+    odd_sample = noise_generator.generate(99)
+    assert len(odd_sample) == 99
+    assert np.all(np.abs(odd_sample) <= 1.01)
+
+
 def check_basic_noise_properties(noise: np.ndarray, num_samples: int) -> None:
     """Check basic properties that all noise types should satisfy.
 

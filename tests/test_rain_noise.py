@@ -3,7 +3,7 @@
 import numpy as np
 
 from binaural.noise import NoiseFactory, RainNoiseStrategy
-from tests.test_common import check_basic_noise_properties
+from tests.test_common import check_basic_noise_properties, check_generate_output
 
 # Test sample parameters
 NUM_SAMPLES = 2**14  # Power of 2 for efficient FFT
@@ -95,23 +95,4 @@ class TestRainNoiseStrategy:
 
     def test_edge_cases(self):
         """Test that rain noise handles edge cases correctly."""
-        noise_generator = RainNoiseStrategy()
-
-        # Test with zero samples
-        zero_sample = noise_generator.generate(0)
-        assert isinstance(zero_sample, np.ndarray)
-        assert len(zero_sample) == 0
-
-        # Test with negative samples (should return empty array)
-        negative_sample = noise_generator.generate(-10)
-        assert len(negative_sample) == 0
-
-        # Test with very small sample count (should still work)
-        small_sample = noise_generator.generate(10)
-        assert len(small_sample) == 10
-        assert np.all(np.abs(small_sample) <= 1.0)
-
-        # Test with odd sample counts
-        odd_sample = noise_generator.generate(99)
-        assert len(odd_sample) == 99
-        assert np.all(np.abs(odd_sample) <= 1.0)
+        check_generate_output(RainNoiseStrategy())

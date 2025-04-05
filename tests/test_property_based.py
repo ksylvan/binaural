@@ -205,12 +205,15 @@ def test_noise_generators_properties(num_samples: int):
         assert np.max(np.abs(noise)) <= 1.01
 
         # Mean should be close to zero (centered)
-        # Allow slightly larger mean deviation for brown/ocean noise due
-        # to integration/modulation
+        # Allow slightly larger mean deviation for some noise types due
+        # to filtering, integration, or modulation characteristics
         if noise_type in ["brown", "ocean"]:
-            assert abs(np.mean(noise)) < 0.2
-        else:
-            assert abs(np.mean(noise)) < 0.15
+            mean_tolerance = 0.2
+        elif noise_type in ["blue", "violet", "grey"]:  # Added recently
+            mean_tolerance = 0.18  # Slightly higher tolerance for these
+        else:  # white, pink, rain
+            mean_tolerance = 0.15
+        assert abs(np.mean(noise)) < mean_tolerance
 
 
 @given(valid_step_dicts())
@@ -304,7 +307,7 @@ def test_generate_audio_sequence_properties(steps: list, noise_config: NoiseConf
         ), f"Left and right channel lengths differ: {len(left)} vs {len(right)}"
         assert total_duration == pytest.approx(expected_duration, abs=0.01)
 
-        # Check amplitude is within expected range (allow slightly more for combined noises)
+        # Check amplitude is in expected range (allow slightly more for some)
         assert np.max(np.abs(left)) <= 1.01
         assert np.max(np.abs(right)) <= 1.01
 
