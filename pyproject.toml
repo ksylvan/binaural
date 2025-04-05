@@ -23,6 +23,7 @@ dependencies = [
     "scipy>=1.15.2",
     "soundfile>=0.13.1",
     "streamlit>=1.44.1",
+    "watchdog>=6.0.0",
 ]
 
 [dependency-groups]
