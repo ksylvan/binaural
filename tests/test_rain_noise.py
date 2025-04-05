@@ -3,7 +3,8 @@
 import numpy as np
 
 from binaural.noise import NoiseFactory, RainNoiseStrategy
-from tests.test_common import check_basic_noise_properties, check_generate_output
+from tests.test_common import (check_basic_noise_properties,
+                               check_generate_output)
 
 # Test sample parameters
 NUM_SAMPLES = 2**14  # Power of 2 for efficient FFT

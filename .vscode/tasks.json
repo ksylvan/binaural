@@ -25,7 +25,7 @@
         {
             "label": "Lint Code",
             "type": "shell",
-            "command": "cd ${workspaceFolder} && pylint *.py binaural tests",
+            "command": "cd ${workspaceFolder} && pylint *.py binaural binaural_webui tests",
             "group": {
                 "kind": "test",
                 "isDefault": true

@@ -13,7 +13,7 @@ def main():
     script_dir = Path(__file__).parent.absolute()
 
     # Path to the Streamlit app
-    app_path = script_dir / "binaural" / "webui.py"
+    app_path = script_dir / "binaural_webui" / "main.py"
 
     # Check if the file exists
     if not app_path.exists():

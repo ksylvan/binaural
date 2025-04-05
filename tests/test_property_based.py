@@ -11,14 +11,12 @@ from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
 from binaural.constants import DEFAULT_BASE_FREQUENCY
-from binaural.data_types import AudioStep, FadeInfo, FrequencyRange, NoiseConfig, Tone
+from binaural.data_types import (AudioStep, FadeInfo, FrequencyRange,
+                                 NoiseConfig, Tone)
 from binaural.noise import NoiseFactory
-from binaural.tone_generator import (
-    config_step_to_audio_step,
-    generate_audio_sequence,
-    generate_tone,
-    save_audio_file,
-)
+from binaural.tone_generator import (config_step_to_audio_step,
+                                     generate_audio_sequence, generate_tone,
+                                     save_audio_file)
 
 # Define common test constants
 SAMPLE_RATES = [22050, 44100, 48000]  # Common sample rates

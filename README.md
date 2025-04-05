@@ -139,7 +139,7 @@ Research on binaural beats has shown mixed results, but several studies suggest 
 - Run linters:
 
   ```bash
-  pylint binaural tests
+  pylint *.py binaural binaural_webui tests
   ```
 
 - Submit a pull request with a clear description of your changes.
@@ -348,11 +348,20 @@ python generate.py scripts/sleep_delta.yaml -o audio/sleep_delta_with_noise.wav
   - `parallel.py`: Parallel processing utilities.
   - `tone_generator.py`: Core audio generation logic for beats and mixing.
   - `utils.py`: YAML loading and validation utilities.
-  - `webui.py`: Streamlit web user interface.
+- `binaural_webui/`: Modular web UI implementation for the Binaural Beat Generator.
+  - `__init__.py`
+  - `main.py`: Main Streamlit application entry point.
+  - `constants.py`: Constants for UI components (brainwave presets, step types, etc.).
+  - `components/`: Directory containing modular UI code.
+    - `audio_handlers.py`: Audio generation & handling logic (preview and full audio clips).
+    - `config_utils.py`: Configuration loading/parsing utilities.
+    - `sidebar.py`: Sidebar layout and controls.
+    - `step_editor.py`: Editing components for individual steps.
+    - `ui_utils.py`: Common Streamlit UI helpers.
 - `tests/`: Directory of unit tests.
   - `test_common.py`: Common test utilities.
-  - `test_data_types.py`
-  - `test_fade.py`
+  - `test_data_types.py`: data type/validation tests.
+  - `test_fade.py`: fade data type tests.
   - `test_noise.py`: Tests for standard noise types.
   - `test_new_noise_types.py`: Tests for advanced/nature noise types.
   - `test_ocean_noise.py`: Specific tests for ocean noise.
