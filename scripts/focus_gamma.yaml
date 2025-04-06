@@ -2,7 +2,7 @@
 # Aims for high-level cognitive processing and problem-solving.
 
 # Global settings
-title: "Focus (Gamma)"
+title: Focus (Gamma)
 base_frequency: 150 # Hz (slightly higher carrier for potentially clearer high freq beats)
 sample_rate: 44100 # Hz
 output_filename: "audio/focus_gamma.flac"

@@ -24,6 +24,7 @@ def generate_step_in_parallel(
     sample_rate: int,
     base_freq: float,
     previous_freq: Optional[float],
+    *,  # Keyword-only arguments separator
     title: str = "Binaural Beat",
 ) -> Tuple[int, np.ndarray, np.ndarray, float, float]:
     """Generate audio for a single step, to be used in parallel processing.
@@ -47,7 +48,7 @@ def generate_step_in_parallel(
         - end_freq: The binaural beat frequency at the end of this step.
     """
     left_segment, right_segment, step_duration, end_freq = _process_beat_step(
-        idx, step_dict, sample_rate, base_freq, previous_freq, title
+        idx, step_dict, sample_rate, base_freq, previous_freq, title=title
     )
     return idx, left_segment, right_segment, step_duration, end_freq
 
@@ -89,6 +90,7 @@ def _submit_tone_generation_tasks(
     audio_steps: list[AudioStep],
     sample_rate: int,
     base_freq: float,
+    *,  # Keyword-only arguments separator
     title: str = "Binaural Beat",
 ) -> list:
     """Submit tone generation tasks to the thread pool.
@@ -167,6 +169,7 @@ def _generate_audio_segments_parallel(
     base_freq: float,
     steps: list[dict[str, Any]],
     audio_steps: list[AudioStep],
+    *,  # Keyword-only arguments separator
     title: str = "Binaural Beat",
     max_workers: Optional[int] = None,
 ) -> tuple[list, float]:
@@ -196,7 +199,7 @@ def _generate_audio_segments_parallel(
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         # Submit all tone generation tasks to the thread pool
         futures = _submit_tone_generation_tasks(
-            executor, steps, audio_steps, sample_rate, base_freq, title
+            executor, steps, audio_steps, sample_rate, base_freq, title=title
         )
 
         # Collect and process results
@@ -240,6 +243,7 @@ def generate_audio_sequence_parallel(
     base_freq: float,
     steps: list[dict[str, Any]],
     noise_config: NoiseConfig,
+    *,  # Keyword-only arguments separator
     title: str = "Binaural Beat",
     max_workers: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray, float]:
@@ -276,7 +280,7 @@ def generate_audio_sequence_parallel(
 
     # Generate audio segments in parallel
     step_results, total_duration = _generate_audio_segments_parallel(
-        sample_rate, base_freq, steps, audio_steps, title, max_workers
+        sample_rate, base_freq, steps, audio_steps, title=title, max_workers=max_workers
     )
 
     # Combine the segments into continuous channels

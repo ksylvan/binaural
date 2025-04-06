@@ -2,7 +2,7 @@
 # Aims to foster an intuitive and creative mental state.
 
 # Global settings
-title: "Creativity (Theta)"
+title: Creativity (Theta)
 base_frequency: 110 # Hz
 sample_rate: 44100 # Hz
 output_filename: "audio/creativity_theta.flac"

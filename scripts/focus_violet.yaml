@@ -4,7 +4,7 @@
 # that may help maintain alertness during concentration tasks.
 
 # Global settings
-title: "Focus (Violet Noise)"
+title: Focus (Violet Noise)
 base_frequency: 100 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
 output_filename: "audio/focus_violet.flac" # Default output file name

@@ -2,7 +2,7 @@
 # Aims to facilitate deep meditation and introspection.
 
 # Global settings
-title: "Meditation (Theta)"
+title: Meditation (Theta)
 base_frequency: 100 # Hz
 sample_rate: 44100 # Hz
 output_filename: "audio/meditation_theta.flac"

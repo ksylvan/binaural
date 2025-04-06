@@ -2,7 +2,7 @@
 # Aims to guide the brain towards deep sleep states.
 
 # Global settings
-title: "Sleep (Delta)"
+title: Sleep (Delta)
 base_frequency: 90 # Hz (Lower carrier might feel 'softer')
 sample_rate: 44100 # Hz
 output_filename: "audio/sleep_delta.flac"

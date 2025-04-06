@@ -3,7 +3,7 @@
 # Purpose: To reduce migraine pain and related symptoms through progressive relaxation
 
 # Global settings
-title: "Migraine Relief (Alpha/Theta/Delta)"
+title: Migraine Relief (Alpha/Theta/Delta)
 base_frequency: 144 # Hz (carrier frequency optimized for headache relief)
 sample_rate: 48000 # Hz (higher sample rate for improved fidelity)
 output_filename: "audio/migraine_relief.flac"

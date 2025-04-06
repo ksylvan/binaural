@@ -2,7 +2,7 @@
 # Aims to enhance concentration and alertness.
 
 # Global settings
-title: "Focus (Beta)"
+title: Focus (Beta)
 base_frequency: 120 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
 output_filename: "audio/focus_beta.flac" # Default output file name

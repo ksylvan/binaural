@@ -194,6 +194,7 @@ def _process_beat_step(
     sample_rate: int,
     base_freq: float,
     previous_freq: Optional[float],
+    *,  # Add keyword-only separator
     title: str = "Binaural Beat",
 ) -> Tuple[np.ndarray, np.ndarray, float, float]:
     """Processes a single step dict, generates audio, returns segments and end freq.
@@ -275,7 +276,7 @@ def _iterate_beat_steps(
         try:
             # Process the current step
             left_segment, right_segment, step_duration, end_freq = _process_beat_step(
-                idx, step_dict, sample_rate, base_freq, previous_freq, title
+                idx, step_dict, sample_rate, base_freq, previous_freq, title=title
             )
         except ConfigurationError as e:
             # Re-raise configuration errors with step context

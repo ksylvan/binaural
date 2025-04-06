@@ -60,8 +60,13 @@ def render_preview_generate(config: dict[str, Any]) -> None:
 
 def main():
     """Main Streamlit application entry point."""
+    # Initialize session state and get config
+    config = initialize_session_state()
+    # Use the title from config if available for the page title
     st.set_page_config(
-        page_title="Binaural Beat Generator", page_icon="🔊", layout="wide"
+        page_title=f"Binaural - {config.get('title', 'Beat Generator')}",
+        page_icon="🔊",
+        layout="wide",
     )
 
     sine_svg = r"""
@@ -76,16 +81,14 @@ def main():
     """
     st.markdown(sine_svg, unsafe_allow_html=True)
 
-    st.title("Binaural Beat Generator")
+    # Display custom title based on configuration
+    st.title(f"{config.get('title', 'Beat Generator')}")
     st.markdown(
         """
         Create custom binaural beat audio for meditation, focus, relaxation, and more.
         Configure your audio sequence below and download the result.
         """
     )
-
-    # Initialize session state and get config
-    config = initialize_session_state()
 
     # Get available noise types
     all_noise_types = NoiseFactory.strategies()

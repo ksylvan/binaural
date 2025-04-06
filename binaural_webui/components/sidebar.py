@@ -41,6 +41,13 @@ def _handle_example_loading(config: dict[str, Any]) -> None:
 def _render_global_settings(config: dict[str, Any]) -> None:
     """Render global settings controls in the sidebar."""
     st.subheader("Global Settings")
+    # Add title input field
+    config["title"] = st.text_input(
+        "Title",
+        value=config.get("title", "Binaural Beat Session"),
+        help="Title of your binaural beat session",
+    )
+
     config["base_frequency"] = st.number_input(
         "Base Carrier Frequency (Hz)",
         min_value=50,

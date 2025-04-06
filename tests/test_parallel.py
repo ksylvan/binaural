@@ -79,6 +79,7 @@ def test_parallel_vs_sequential_output(sample_steps):
         base_freq=base_freq,
         steps=sample_steps,
         noise_config=noise_config,
+        title="Test Binaural Beat",
     )
 
     # Check durations are the same
@@ -127,6 +128,7 @@ def test_performance_improvement(sample_steps, request: pytest.FixtureRequest):
         base_freq=base_freq,
         steps=large_steps,
         noise_config=noise_config,
+        title="Performance Test",
     )
     par_time = time.time() - start_par
 
