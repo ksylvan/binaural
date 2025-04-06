@@ -1,6 +1,7 @@
 # Example Binaural Beat Generation Script with Fades and Background Noise
 
 # Global settings
+title: Example Binaural Beat Script
 base_frequency: 100 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
 output_filename: "audio/example_fade_noise.flac" # Default output file name
