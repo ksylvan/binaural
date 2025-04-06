@@ -173,6 +173,7 @@ def main() -> None:
         noise_config = config.get("noise_config", NoiseConfig())  # Default just in case
 
         logger.debug("Loaded configuration: %s", config)
+        logger.info("Processing Audio for: %s", config.get("title", "Binaural Beat"))
         logger.info("Sample Rate: %d Hz", sample_rate)
         logger.info("Base Frequency: %.2f Hz", base_freq)
         if noise_config.type != "none":
