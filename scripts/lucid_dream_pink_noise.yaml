@@ -3,6 +3,7 @@
 # Purpose: To induce REM sleep and enhance lucid dreaming potential
 
 # Global settings
+title: "Lucid Dreaming (Pink Noise)"
 base_frequency: 200 # Hz (higher carrier frequency for better perception during sleep)
 sample_rate: 44100 # Hz (standard audio sample rate)
 output_filename: "audio/lucid_dreaming_pink.flac" # Output file name (FLAC format)

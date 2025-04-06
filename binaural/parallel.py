@@ -24,6 +24,7 @@ def generate_step_in_parallel(
     sample_rate: int,
     base_freq: float,
     previous_freq: Optional[float],
+    title: str = "Binaural Beat",
 ) -> Tuple[int, np.ndarray, np.ndarray, float, float]:
     """Generate audio for a single step, to be used in parallel processing.
 
@@ -35,6 +36,7 @@ def generate_step_in_parallel(
         sample_rate: Audio sample rate in Hz.
         base_freq: Base carrier frequency in Hz.
         previous_freq: The ending frequency of the previous step (for transitions).
+        title: The title of the audio session.
 
     Returns:
         A tuple containing:
@@ -45,7 +47,7 @@ def generate_step_in_parallel(
         - end_freq: The binaural beat frequency at the end of this step.
     """
     left_segment, right_segment, step_duration, end_freq = _process_beat_step(
-        idx, step_dict, sample_rate, base_freq, previous_freq
+        idx, step_dict, sample_rate, base_freq, previous_freq, title
     )
     return idx, left_segment, right_segment, step_duration, end_freq
 
@@ -87,6 +89,7 @@ def _submit_tone_generation_tasks(
     audio_steps: list[AudioStep],
     sample_rate: int,
     base_freq: float,
+    title: str = "Binaural Beat",
 ) -> list:
     """Submit tone generation tasks to the thread pool.
 
@@ -96,6 +99,7 @@ def _submit_tone_generation_tasks(
         audio_steps: Pre-processed AudioStep objects
         sample_rate: The audio sample rate in Hz
         base_freq: The base carrier frequency in Hz
+        title: The title of the audio session
 
     Returns:
         List of futures with their context information
@@ -104,7 +108,7 @@ def _submit_tone_generation_tasks(
 
     for idx, (_, audio_step) in enumerate(zip(steps, audio_steps), start=1):
         # Create tone from the step
-        tone = audio_step.to_tone(base_freq)
+        tone = audio_step.to_tone(base_freq, title)
 
         # Submit task to the executor
         future = executor.submit(generate_tone, sample_rate, audio_step.duration, tone)
@@ -163,6 +167,7 @@ def _generate_audio_segments_parallel(
     base_freq: float,
     steps: list[dict[str, Any]],
     audio_steps: list[AudioStep],
+    title: str = "Binaural Beat",
     max_workers: Optional[int] = None,
 ) -> tuple[list, float]:
     """Generate audio segments in parallel.
@@ -174,6 +179,7 @@ def _generate_audio_segments_parallel(
         base_freq: The base carrier frequency in Hz.
         steps: A list of dictionaries, each representing an audio generation step.
         audio_steps: Pre-processed AudioStep objects with dependencies resolved.
+        title: The title of the audio session.
         max_workers: Maximum number of worker threads. None uses CPU count.
 
     Returns:
@@ -190,7 +196,7 @@ def _generate_audio_segments_parallel(
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         # Submit all tone generation tasks to the thread pool
         futures = _submit_tone_generation_tasks(
-            executor, steps, audio_steps, sample_rate, base_freq
+            executor, steps, audio_steps, sample_rate, base_freq, title
         )
 
         # Collect and process results
@@ -234,6 +240,7 @@ def generate_audio_sequence_parallel(
     base_freq: float,
     steps: list[dict[str, Any]],
     noise_config: NoiseConfig,
+    title: str = "Binaural Beat",
     max_workers: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray, float]:
     """Generates the complete stereo audio sequence in parallel.
@@ -246,6 +253,7 @@ def generate_audio_sequence_parallel(
         base_freq: The base carrier frequency in Hz.
         steps: A list of dictionaries, each representing an audio generation step.
         noise_config: A NoiseConfig object specifying background noise settings.
+        title: The title of the audio session.
         max_workers: Maximum number of worker threads. None uses CPU count.
 
     Returns:
@@ -268,7 +276,7 @@ def generate_audio_sequence_parallel(
 
     # Generate audio segments in parallel
     step_results, total_duration = _generate_audio_segments_parallel(
-        sample_rate, base_freq, steps, audio_steps, max_workers
+        sample_rate, base_freq, steps, audio_steps, title, max_workers
     )
 
     # Combine the segments into continuous channels

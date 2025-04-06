@@ -5,6 +5,8 @@ from typing import Any
 import streamlit as st
 import yaml
 
+from binaural.utils import get_all_script_configs
+
 
 def load_config_file(file_path: str) -> dict[str, Any]:
     """Load a YAML configuration file."""
@@ -49,3 +51,16 @@ def format_time(seconds: int) -> str:
     """Format seconds as mm:ss."""
     minutes, seconds = divmod(seconds, 60)
     return f"{int(minutes):02d}:{int(seconds):02d}"
+
+
+def get_available_configs(scripts_dir: str = "scripts") -> dict[str, str]:
+    """Get all available configuration files with their titles.
+
+    Args:
+        scripts_dir: Directory containing YAML configuration files
+
+    Returns:
+        Dictionary mapping configuration titles to file paths
+    """
+    # Use the utility function from binaural.utils
+    return get_all_script_configs(scripts_dir)

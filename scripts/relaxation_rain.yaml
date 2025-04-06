@@ -2,6 +2,7 @@
 # Aims to reduce stress and promote deep relaxation with a rain ambience.
 
 # Global settings
+title: "Relaxation (Rain)"
 base_frequency: 100 # Hz
 sample_rate: 44100 # Hz
 output_filename: "audio/relaxation_rain.flac"

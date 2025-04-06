@@ -12,17 +12,25 @@ from binaural.constants import (
     GITHUB_URL,
     LICENSE,
 )
-from binaural_webui.components.config_utils import load_config_file
-from binaural_webui.constants import BRAINWAVE_PRESETS, EXAMPLE_CONFIGS
+from binaural_webui.components.config_utils import (
+    get_available_configs,
+    load_config_file,
+)
+from binaural_webui.constants import BRAINWAVE_PRESETS
 
 
 def _handle_example_loading(config: dict[str, Any]) -> None:
     """Handle the loading of example configurations in the sidebar."""
+    # Get configurations dynamically from YAML files
+    available_configs = get_available_configs()
+
     example_name = st.selectbox(
-        "Load Example Configuration", ["Custom"] + list(EXAMPLE_CONFIGS.keys())
+        "Load Example Configuration",
+        ["Custom"] + sorted(list(available_configs.keys())),
     )
+
     if example_name != "Custom" and st.button("Load Example"):
-        loaded_config = load_config_file(EXAMPLE_CONFIGS[example_name])
+        loaded_config = load_config_file(available_configs[example_name])
         if loaded_config:
             config.clear()
             config.update(loaded_config)

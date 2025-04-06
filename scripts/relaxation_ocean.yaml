@@ -2,6 +2,7 @@
 # Aims to reduce stress and promote deep relaxation using Alpha waves and simulated ocean ambience.
 
 # Global settings
+title: "Relaxation (Ocean)"
 base_frequency: 100 # Hz
 sample_rate: 44100 # Hz
 output_filename: "audio/relaxation_ocean.flac"

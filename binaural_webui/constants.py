@@ -18,19 +18,3 @@ FREQUENCY_PRESETS = {
 
 STEP_TYPES = ["stable", "transition"]
 DEFAULT_STEP_DURATION = 300  # 5 minutes in seconds
-EXAMPLE_CONFIGS = {
-    "Relaxation (Alpha)": "scripts/relaxation_alpha.yaml",
-    "Focus (Beta)": "scripts/focus_beta.yaml",
-    "Focus (Gamma)": "scripts/focus_gamma.yaml",
-    "Meditation (Theta)": "scripts/meditation_theta.yaml",
-    "Sleep (Delta)": "scripts/sleep_delta.yaml",
-    "Creativity (Theta)": "scripts/creativity_theta.yaml",
-    "Creativity (Blue Noise)": "scripts/creativity_blue.yaml",
-    "Focus (Violet Noise)": "scripts/focus_violet.yaml",
-    "Relaxation (Grey Noise)": "scripts/relaxation_grey.yaml",
-    "Relaxation (Rain)": "scripts/relaxation_rain.yaml",
-    "Relaxation (Ocean)": "scripts/relaxation_ocean.yaml",  # Added Ocean example
-    "Lucid Dreaming": "scripts/lucid_dreaming.yaml",
-    "Lucid Dreaming (Pink Noise)": "scripts/lucid_dream_pink_noise.yaml",
-    "Migraine Relief": "scripts/migraine_relief.yaml",
-}

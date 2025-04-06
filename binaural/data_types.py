@@ -13,6 +13,7 @@ class Tone:
     freq_diff_end: float
     fade_in_sec: float = 0.0
     fade_out_sec: float = 0.0
+    title: str = "Binaural Beat"
 
 
 @dataclass
@@ -116,11 +117,12 @@ class AudioStep:
                 f"({self.duration}s)."
             )
 
-    def to_tone(self, base_freq: float) -> Tone:
+    def to_tone(self, base_freq: float, title: str = "Binaural Beat") -> Tone:
         """Convert AudioStep to a Tone for audio generation.
 
         Args:
             base_freq: The base carrier frequency in Hz
+            title: Title for the generated tone
 
         Returns:
             A Tone object configured according to this AudioStep
@@ -131,6 +133,7 @@ class AudioStep:
             freq_diff_end=self.freq.end,
             fade_in_sec=self.fade.fade_in_sec,
             fade_out_sec=self.fade.fade_out_sec,
+            title=title,
         )
 
     def __str__(self) -> str:

@@ -4,6 +4,7 @@
 # perceptually balanced sound that feels more natural and less artificial.
 
 # Global settings
+title: "Relaxation (Grey Noise)"
 base_frequency: 100 # Hz (carrier frequency)
 sample_rate: 44100 # Hz (audio sample rate)
 output_filename: "audio/relaxation_grey.flac" # Default output file name

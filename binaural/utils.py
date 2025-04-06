@@ -1,6 +1,9 @@
 """Utility functions for loading and validating YAML configuration files."""
 
+import glob
 import logging
+import os
+from typing import Optional
 
 import yaml
 
@@ -91,3 +94,47 @@ def load_yaml_config(path: str) -> dict:
         raise BinauralError(
             f"An unexpected error occurred loading config '{path}': {e}"
         ) from e
+
+
+def get_yaml_title(path: str) -> Optional[str]:
+    """Extracts only the title from a YAML file.
+
+    Args:
+        path: Path to the YAML configuration file.
+
+    Returns:
+        The title string if found, otherwise None.
+    """
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            config = yaml.safe_load(file)
+
+        if isinstance(config, dict) and "title" in config:
+            return config["title"]
+
+        # Fallback to filename if no title in the YAML
+        basename = os.path.basename(path)
+        return os.path.splitext(basename)[0].replace("_", " ").title()
+    except (FileNotFoundError, yaml.YAMLError, IOError):
+        # If any common error occurs, return None
+        return None
+
+
+def get_all_script_configs(scripts_dir: str = "scripts") -> dict[str, str]:
+    """Scan a directory for YAML files and return a mapping of titles to file paths.
+
+    Args:
+        scripts_dir: Directory to scan for YAML files.
+
+    Returns:
+        A dictionary mapping titles to file paths.
+    """
+    config_files = {}
+
+    # Find all YAML files in the scripts directory
+    for yaml_path in glob.glob(os.path.join(scripts_dir, "*.yaml")):
+        title = get_yaml_title(yaml_path)
+        if title:
+            config_files[title] = yaml_path
+
+    return config_files

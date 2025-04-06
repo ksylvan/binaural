@@ -93,6 +93,7 @@ class AudioConfig:
         base_freq: The base carrier frequency in Hz.
         steps: A list of dictionaries, each representing an audio generation step.
         noise_config: A NoiseConfig object specifying background noise settings.
+        title: The title of the audio session.
         use_parallel: Whether to use parallel processing.
         max_workers: Maximum number of worker threads (None = use CPU count).
     """
@@ -101,6 +102,7 @@ class AudioConfig:
     base_freq: float
     steps: list[dict[str, Any]]
     noise_config: NoiseConfig
+    title: str = "Binaural Beat"
     use_parallel: bool = False
     max_workers: Optional[int] = None
 
@@ -125,6 +127,7 @@ def generate_audio(config: AudioConfig) -> AudioGenerationResult:
             base_freq=config.base_freq,
             steps=config.steps,
             noise_config=config.noise_config,
+            title=config.title,
             max_workers=config.max_workers,
         )
     else:
@@ -134,6 +137,7 @@ def generate_audio(config: AudioConfig) -> AudioGenerationResult:
             base_freq=config.base_freq,
             steps=config.steps,
             noise_config=config.noise_config,
+            title=config.title,
         )
 
     processing_time = time.time() - start_time
@@ -184,6 +188,7 @@ def main() -> None:
             base_freq=base_freq,
             steps=config["steps"],
             noise_config=noise_config,
+            title=config.get("title", "Binaural Beat"),  # Get title from config
             use_parallel=args.parallel,
             max_workers=args.threads,
         )

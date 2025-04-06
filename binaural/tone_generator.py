@@ -194,6 +194,7 @@ def _process_beat_step(
     sample_rate: int,
     base_freq: float,
     previous_freq: Optional[float],
+    title: str = "Binaural Beat",
 ) -> Tuple[np.ndarray, np.ndarray, float, float]:
     """Processes a single step dict, generates audio, returns segments and end freq.
 
@@ -205,6 +206,7 @@ def _process_beat_step(
         sample_rate: Audio sample rate in Hz.
         base_freq: Base carrier frequency in Hz.
         previous_freq: The ending frequency of the previous step (for transitions).
+        title: The title for the audio session (for metadata).
 
     Returns:
         A tuple containing:
@@ -223,7 +225,7 @@ def _process_beat_step(
     logger.debug("Generating beat segment for step %d: %s", idx, audio_step)
 
     # Create a Tone object from the validated AudioStep
-    tone = audio_step.to_tone(base_freq)
+    tone = audio_step.to_tone(base_freq, title)
 
     # Generate the audio segments for this step
     left_segment, right_segment = generate_tone(sample_rate, audio_step.duration, tone)
@@ -246,7 +248,10 @@ def _process_beat_step(
 
 
 def _iterate_beat_steps(
-    sample_rate: int, base_freq: float, steps: list[dict[str, Any]]
+    sample_rate: int,
+    base_freq: float,
+    steps: list[dict[str, Any]],
+    title: str = "Binaural Beat",
 ) -> iter:
     """Iterates through configuration steps, yielding processed beat segments.
 
@@ -256,6 +261,7 @@ def _iterate_beat_steps(
         sample_rate: Audio sample rate in Hz.
         base_freq: Base carrier frequency in Hz.
         steps: List of step configuration dictionaries.
+        title: The title of the audio session.
 
     Yields:
         Tuple containing (left_segment, right_segment, step_duration).
@@ -269,7 +275,7 @@ def _iterate_beat_steps(
         try:
             # Process the current step
             left_segment, right_segment, step_duration, end_freq = _process_beat_step(
-                idx, step_dict, sample_rate, base_freq, previous_freq
+                idx, step_dict, sample_rate, base_freq, previous_freq, title
             )
         except ConfigurationError as e:
             # Re-raise configuration errors with step context
@@ -290,7 +296,10 @@ def _iterate_beat_steps(
 
 
 def _generate_beat_segments(
-    sample_rate: int, base_freq: float, steps: list[dict[str, Any]]
+    sample_rate: int,
+    base_freq: float,
+    steps: list[dict[str, Any]],
+    title: str = "Binaural Beat",
 ) -> Tuple[np.ndarray, np.ndarray, float]:
     """Generates and concatenates all binaural beat segments from config steps.
 
@@ -300,6 +309,7 @@ def _generate_beat_segments(
         sample_rate: Audio sample rate in Hz.
         base_freq: Base carrier frequency in Hz.
         steps: List of step configuration dictionaries.
+        title: The title of the audio session.
 
     Returns:
         Tuple containing:
@@ -312,7 +322,7 @@ def _generate_beat_segments(
     """
     # Use the iterator to process all steps and collect the results
     # list() consumes the iterator defined in _iterate_beat_steps
-    segments = list(_iterate_beat_steps(sample_rate, base_freq, steps))
+    segments = list(_iterate_beat_steps(sample_rate, base_freq, steps, title))
 
     # Check if any segments were generated
     if not segments:
@@ -417,6 +427,7 @@ def generate_audio_sequence(
     base_freq: float,
     steps: list[dict[str, Any]],
     noise_config: NoiseConfig,
+    title: str = "Binaural Beat",
 ) -> Tuple[np.ndarray, np.ndarray, float]:
     """Generates the complete stereo audio sequence based on the YAML steps,
     including optional background noise.
@@ -427,6 +438,7 @@ def generate_audio_sequence(
         steps: A list of dictionaries, each representing an audio generation step
                as defined in the YAML configuration.
         noise_config: A NoiseConfig object specifying background noise settings.
+        title: The title of the audio session.
 
     Returns:
         A tuple containing:
@@ -442,7 +454,7 @@ def generate_audio_sequence(
     # Generate the concatenated beat sequence for left and right channels
     logger.info("Generating binaural beat sequence...")
     left_beats, right_beats, total_duration_sec = _generate_beat_segments(
-        sample_rate, base_freq, steps
+        sample_rate, base_freq, steps, title
     )
     logger.info("Beat sequence generated (%.2f seconds).", total_duration_sec)
 
