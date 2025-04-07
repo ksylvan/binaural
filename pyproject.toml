@@ -1,5 +1,5 @@
 [project]
-name = "binaural"
+name = "binaural-generator"
 version = "0.1.0"
 description = "Generate binaural beat audio with background noise for brainwave entrainment"
 authors = [{ name = "Kayvan Sylvan", email = "kayvan@sylvan.com" }]
@@ -9,15 +9,13 @@ keywords = ["audio", "binaural", "beats", "meditation", "sound"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Topic :: Multimedia :: Sound/Audio",
 ]
 
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 dependencies = [
     "numpy>=2.2.4",
     "pyyaml>=6.0.2",
@@ -34,29 +32,9 @@ dev = [
     "pytest>=8.3.5",
     "pylint>=3.3.6",
     "hypothesis>=6.130.8",
+    "build>=1.2.2.post1",
+    "twine>=6.1.0",
 ]
 
-[project.urls]
-"Homepage" = "https://github.com/ksylvan/binaural"
-"Repository" = "https://github.com/ksylvan/binaural"
-"Bug Tracker" = "https://github.com/ksylvan/binaural/issues"
-"Documentation" = "https://github.com/ksylvan/binaural#readme"
-
-[tool.black]
-line-length = 88
-
-[tool.pylint.format]
-max-line-length = 88
-
-[tool.pylint.design]
-max-args = 8
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = "test_*.py"
-
-[tool.uv]
-required-version = ">=0.6.11"
-
-[tool.pylint.MASTER]
-ignore = ["__init__.py", ".git", ".venv", "__pycache__"]
+[tool.setuptools]
+packages = ["binaural", "binaural_webui"]

@@ -1,10 +1,16 @@
-# Binaural
+# Binaural Generator
 
-Binaural is a Python tool that generates binaural beat audio (WAV or FLAC) designed to induce different brain wave states, configured via a simple YAML script. It can optionally mix background noise (white, pink, or brown) with the binaural beats.
+Binaural Generator is a Python tool that creates binaural beat audio (WAV or FLAC) designed to
+influence different brainwave states. Configure precise frequency patterns via YAML
+scripts to target specific mental states such as focus, relaxation, meditation, or sleep.
+Features include smooth frequency transitions, volume fading, and optional background
+noise mixing (standard types like white/pink/brown, advanced types like blue/violet/grey,
+and nature sounds like rain/ocean). Access via command line or interactive web interface,
+with a library of pre-configured scripts for common use cases.
 
 ## Table of Contents
 
-- [Binaural](#binaural)
+- [Binaural Generator](#binaural-generator)
   - [Table of Contents](#table-of-contents)
   - [Description](#description)
   - [Background](#background)

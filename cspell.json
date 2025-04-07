@@ -84,6 +84,7 @@
         "scrapy",
         "sdist",
         "selectbox",
+        "setuptools",
         "Sewell",
         "sosfilt",
         "soundfile",
