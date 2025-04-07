@@ -3,7 +3,7 @@
 import numpy as np
 from scipy import signal
 
-from binaural.noise import NoiseFactory
+from binaural_generator.core.noise import NoiseFactory
 
 # Define constants for tests
 SAMPLE_RATE = 44100

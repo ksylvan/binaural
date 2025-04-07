@@ -7,8 +7,8 @@ from typing import Optional
 
 import yaml
 
-from binaural.data_types import NoiseConfig
-from binaural.exceptions import (
+from binaural_generator.core.data_types import NoiseConfig
+from binaural_generator.core.exceptions import (
     BinauralError,
     ConfigFileNotFoundError,
     ConfigurationError,

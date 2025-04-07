@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from binaural.noise import NoiseFactory, OceanNoiseStrategy
+from binaural_generator.core.noise import NoiseFactory, OceanNoiseStrategy
 from tests.test_common import check_generate_output
 
 # Test sample parameters

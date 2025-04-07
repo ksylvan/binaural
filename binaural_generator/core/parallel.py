@@ -6,9 +6,9 @@ from typing import Any, Optional, Tuple
 
 import numpy as np
 
-from binaural.data_types import AudioStep, NoiseConfig
-from binaural.exceptions import AudioGenerationError
-from binaural.tone_generator import (
+from binaural_generator.core.data_types import AudioStep, NoiseConfig
+from binaural_generator.core.exceptions import AudioGenerationError
+from binaural_generator.core.tone_generator import (
     _generate_and_mix_noise,
     _process_beat_step,
     config_step_to_audio_step,

@@ -2,7 +2,7 @@
 
 import pytest
 
-from binaural.data_types import AudioStep, FadeInfo, FrequencyRange
+from binaural_generator.core.data_types import AudioStep, FadeInfo, FrequencyRange
 
 
 def test_audio_step_invalid_duration():

@@ -5,18 +5,18 @@ from typing import Any
 
 import streamlit as st
 
-from binaural.constants import (
+from binaural_generator.core.constants import (
     AUTHOR_EMAIL,
     AUTHOR_NAME,
     DEFAULT_BASE_FREQUENCY,
     GITHUB_URL,
     LICENSE,
 )
-from binaural_webui.components.config_utils import (
+from binaural_generator.webui.components.config_utils import (
     get_available_configs,
     load_config_file,
 )
-from binaural_webui.constants import BRAINWAVE_PRESETS
+from binaural_generator.webui.constants import BRAINWAVE_PRESETS
 
 
 def _handle_example_loading(config: dict[str, Any]) -> None:

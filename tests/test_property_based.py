@@ -10,10 +10,16 @@ import soundfile as sf
 from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
-from binaural.constants import DEFAULT_BASE_FREQUENCY
-from binaural.data_types import AudioStep, FadeInfo, FrequencyRange, NoiseConfig, Tone
-from binaural.noise import NoiseFactory
-from binaural.tone_generator import (
+from binaural_generator.core.constants import DEFAULT_BASE_FREQUENCY
+from binaural_generator.core.data_types import (
+    AudioStep,
+    FadeInfo,
+    FrequencyRange,
+    NoiseConfig,
+    Tone,
+)
+from binaural_generator.core.noise import NoiseFactory
+from binaural_generator.core.tone_generator import (
     config_step_to_audio_step,
     generate_audio_sequence,
     generate_tone,

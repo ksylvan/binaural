@@ -5,7 +5,7 @@ from typing import Any
 import streamlit as st
 import yaml
 
-from binaural.utils import get_all_script_configs
+from binaural_generator.core.utils import get_all_script_configs
 
 
 def load_config_file(file_path: str) -> dict[str, Any]:
@@ -62,5 +62,5 @@ def get_available_configs(scripts_dir: str = "scripts") -> dict[str, str]:
     Returns:
         Dictionary mapping configuration titles to file paths
     """
-    # Use the utility function from binaural.utils
+    # Use the utility function from binaural_generator.core.utils
     return get_all_script_configs(scripts_dir)

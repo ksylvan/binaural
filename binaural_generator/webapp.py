@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Run the Binaural Beat Generator Streamlit web application."""
 
+import os
 import sys
 from pathlib import Path
 
@@ -13,12 +14,15 @@ def main():
     script_dir = Path(__file__).parent.absolute()
 
     # Path to the Streamlit app
-    app_path = script_dir / "binaural_webui" / "main.py"
+    app_path = script_dir / "webui" / "main.py"
 
     # Check if the file exists
     if not app_path.exists():
         print(f"Error: Could not find Streamlit app at {app_path}")
         sys.exit(1)
+
+    # cd to the script directory
+    os.chdir(script_dir)
 
     # Construct arguments for Streamlit CLI
     sys.argv = [

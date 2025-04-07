@@ -24,7 +24,8 @@ with a library of pre-configured scripts for common use cases.
   - [Scientific Research](#scientific-research)
   - [Installation](#installation)
     - [Requirements](#requirements)
-    - [Setup](#setup)
+    - [From PyPi](#from-pypi)
+    - [From Source](#from-source)
   - [Contributing](#contributing)
   - [Usage](#usage)
     - [Web Interface](#web-interface)
@@ -108,12 +109,24 @@ Research on binaural beats has shown mixed results, but several studies suggest 
 
 ### Requirements
 
-- Python 3.12+
+- Python 3.10+
 - Dependencies listed in `pyproject.toml` (numpy, PyYAML, soundfile, scipy).
 
-### Setup
+### From PyPi
 
-1. **Automatic setup** with the provided script:
+```bash
+pip install binaural-generator
+```
+
+### From Source
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/ksylvan/binaural-generator.git
+    ```
+
+2. **Automatic setup** with the provided script:
 
     ```bash
     ./bin/setup.sh
@@ -156,8 +169,16 @@ Research on binaural beats has shown mixed results, but several studies suggest 
 
 For a more interactive experience, run the web-based user interface:
 
+If you installed the Python package (via `pip install`), simply run:
+
 ```bash
-python run_webapp.py
+binaural-webapp
+```
+
+If running from the repository source directory:
+
+```bash
+./webapp
 ```
 
 This launches a Streamlit-based web interface that allows you to:
@@ -172,24 +193,32 @@ Once launched, open your web browser and navigate to `http://localhost:8501` to 
 
 ### Command Line Interface
 
-Run the script with the path to a YAML configuration file:
+Similarly, to run the CLI script if you installed the Python package:
 
 ```bash
-python generate.py <path_to_script.yaml> [options]
+binaural-generate [options] <path_to_script.yaml>
+```
+
+From the source directory:
+
+```bash
+./generate [options] <path_to_script.yaml>
 ```
 
 **Arguments:**
 
 - `<path_to_script.yaml>`: YAML file defining the binaural beat sequence and settings.
 - `-o <output_file>`, `--output <output_file>` (Optional): Specify the output audio file path. The file extension determines the format (`.wav` or `.flac`) and overrides the `output_filename` in the YAML.
-- `--verbose` (Optional): Enable verbose logging output.
+- `-v` or `--verbose` (Optional): Enable verbose logging output.
+- `-p`, or `--parallel` (Optional): Use parallel processing for faster audio generation.
+- `--threads` NUMBER: Number of threads to use for parallel processing (defaults to CPU count)
 
 **Example:**
 
 To use the example script provided (which defaults to FLAC output):
 
 ```bash
-python generate.py example_script.yaml
+./generate example_script.yaml
 ```
 
 This will generate `audio/example_fade_noise.flac` (or the filename specified in `example_script.yaml`) in the `audio/` directory.
@@ -197,7 +226,7 @@ This will generate `audio/example_fade_noise.flac` (or the filename specified in
 To use one of the pre-defined scripts from the library and output as WAV:
 
 ```bash
-python generate.py scripts/relaxation_alpha.yaml -o audio/relaxation_alpha.wav
+./generate scripts/relaxation_alpha.yaml -o audio/relaxation_alpha.wav
 ```
 
 This will generate `relaxation_alpha.wav` in the `audio/` directory, overriding the default name in the script.
@@ -205,7 +234,7 @@ This will generate `relaxation_alpha.wav` in the `audio/` directory, overriding 
 To generate a FLAC file with a custom name:
 
 ```bash
-python generate.py scripts/focus_beta.yaml -o my_focus_session.flac
+./generate scripts/focus_beta.yaml -o my_focus_session.flac
 ```
 
 ## YAML Script Format
@@ -214,6 +243,7 @@ The YAML script defines the parameters and sequence for audio generation.
 
 **Global Settings (Optional):**
 
+- `title`: Short title (also displayed in the Web UI)
 - `base_frequency`: The carrier frequency in Hz (e.g., 100). Default: `100`.
 - `sample_rate`: The audio sample rate in Hz (e.g., 44100). Default: `44100`.
 - `output_filename`: The default name for the output audio file (e.g., `"audio/my_session.flac"` or `"audio/my_session.wav"`). The extension (`.wav` or `.flac`) determines the output format. Default: `"output.flac"`.

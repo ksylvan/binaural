@@ -4,13 +4,13 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from binaural.data_types import NoiseConfig, Tone
-from binaural.exceptions import (
+from binaural_generator.core.data_types import NoiseConfig, Tone
+from binaural_generator.core.exceptions import (
     AudioGenerationError,
     ConfigurationError,
     UnsupportedFormatError,
 )
-from binaural.tone_generator import (
+from binaural_generator.core.tone_generator import (
     config_step_to_audio_step,
     generate_audio_sequence,
     generate_tone,

@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from binaural.noise import NoiseFactory, RainNoiseStrategy
+from binaural_generator.core.noise import NoiseFactory, RainNoiseStrategy
 from tests.test_common import check_basic_noise_properties, check_generate_output
 
 # Test sample parameters

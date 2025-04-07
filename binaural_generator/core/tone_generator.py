@@ -10,15 +10,21 @@ from typing import Any, Optional, Tuple
 import numpy as np
 import soundfile as sf
 
-from binaural.constants import SUPPORTED_FORMATS
-from binaural.data_types import AudioStep, FadeInfo, FrequencyRange, NoiseConfig, Tone
-from binaural.exceptions import (
+from binaural_generator.core.constants import SUPPORTED_FORMATS
+from binaural_generator.core.data_types import (
+    AudioStep,
+    FadeInfo,
+    FrequencyRange,
+    NoiseConfig,
+    Tone,
+)
+from binaural_generator.core.exceptions import (
     AudioGenerationError,
     ConfigurationError,
     UnsupportedFormatError,
 )
-from binaural.fade import apply_fade
-from binaural.noise import NoiseFactory
+from binaural_generator.core.fade import apply_fade
+from binaural_generator.core.noise import NoiseFactory
 
 logger = logging.getLogger(__name__)
 

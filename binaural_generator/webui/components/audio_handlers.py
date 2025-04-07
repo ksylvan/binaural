@@ -9,10 +9,16 @@ import numpy as np
 import soundfile as sf
 import streamlit as st
 
-from binaural.constants import DEFAULT_BASE_FREQUENCY, DEFAULT_SAMPLE_RATE
-from binaural.data_types import NoiseConfig
-from binaural.exceptions import BinauralError
-from binaural.tone_generator import generate_audio_sequence, save_audio_file
+from binaural_generator.core.constants import (
+    DEFAULT_BASE_FREQUENCY,
+    DEFAULT_SAMPLE_RATE,
+)
+from binaural_generator.core.data_types import NoiseConfig
+from binaural_generator.core.exceptions import BinauralError
+from binaural_generator.core.tone_generator import (
+    generate_audio_sequence,
+    save_audio_file,
+)
 
 
 def _extract_noise_config(config: dict[str, Any]) -> NoiseConfig:

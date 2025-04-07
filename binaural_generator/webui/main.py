@@ -4,15 +4,15 @@ from typing import Any
 
 import streamlit as st
 
-from binaural.noise import NoiseFactory
-from binaural_webui.components.audio_handlers import (
+from binaural_generator.core.noise import NoiseFactory
+from binaural_generator.webui.components.audio_handlers import (
     display_audio_players,
     handle_full_audio_generation,
     handle_preview_generation,
 )
-from binaural_webui.components.sidebar import render_sidebar
-from binaural_webui.components.step_editor import ui_step_editor
-from binaural_webui.components.ui_utils import (
+from binaural_generator.webui.components.sidebar import render_sidebar
+from binaural_generator.webui.components.step_editor import ui_step_editor
+from binaural_generator.webui.components.ui_utils import (
     display_total_duration,
     display_yaml_config,
     initialize_session_state,

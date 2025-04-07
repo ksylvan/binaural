@@ -5,10 +5,13 @@ from typing import Any
 import streamlit as st
 import yaml
 
-from binaural.constants import DEFAULT_BASE_FREQUENCY, DEFAULT_SAMPLE_RATE
-from binaural.exceptions import BinauralError
-from binaural.parallel import prepare_audio_steps
-from binaural_webui.constants import DEFAULT_STEP_DURATION, FREQUENCY_PRESETS
+from binaural_generator.core.constants import (
+    DEFAULT_BASE_FREQUENCY,
+    DEFAULT_SAMPLE_RATE,
+)
+from binaural_generator.core.exceptions import BinauralError
+from binaural_generator.core.parallel import prepare_audio_steps
+from binaural_generator.webui.constants import DEFAULT_STEP_DURATION, FREQUENCY_PRESETS
 
 
 def initialize_session_state() -> dict[str, Any]:

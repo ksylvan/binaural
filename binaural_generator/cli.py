@@ -10,16 +10,19 @@ from typing import Any, Optional
 
 import numpy as np
 
-from binaural.constants import (
+from binaural_generator.core.constants import (
     DEFAULT_BASE_FREQUENCY,
     DEFAULT_OUTPUT_FILENAME,
     DEFAULT_SAMPLE_RATE,
 )
-from binaural.data_types import NoiseConfig
-from binaural.exceptions import BinauralError
-from binaural.parallel import generate_audio_sequence_parallel
-from binaural.tone_generator import generate_audio_sequence, save_audio_file
-from binaural.utils import load_yaml_config
+from binaural_generator.core.data_types import NoiseConfig
+from binaural_generator.core.exceptions import BinauralError
+from binaural_generator.core.parallel import generate_audio_sequence_parallel
+from binaural_generator.core.tone_generator import (
+    generate_audio_sequence,
+    save_audio_file,
+)
+from binaural_generator.core.utils import load_yaml_config
 
 
 def parse_args() -> argparse.Namespace:

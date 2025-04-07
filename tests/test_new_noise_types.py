@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from binaural.noise import (
+from binaural_generator.core.noise import (
     BlueNoiseStrategy,
     GreyNoiseStrategy,
     NoiseFactory,

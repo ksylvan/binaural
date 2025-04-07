@@ -2,12 +2,12 @@
 
 import pytest
 
-from binaural.exceptions import (
+from binaural_generator.core.exceptions import (
     ConfigFileNotFoundError,
     ConfigurationError,
     YAMLParsingError,
 )
-from binaural.utils import load_yaml_config
+from binaural_generator.core.utils import load_yaml_config
 
 
 def test_non_existent_file(tmp_path):

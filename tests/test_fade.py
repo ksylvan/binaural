@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from binaural.fade import apply_fade
+from binaural_generator.core.fade import apply_fade
 
 
 def test_apply_fade_in_and_out():

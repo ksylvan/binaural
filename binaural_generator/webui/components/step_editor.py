@@ -4,10 +4,10 @@ from typing import Any, Callable, Optional
 
 import streamlit as st
 
-from binaural.exceptions import BinauralError
-from binaural.parallel import prepare_audio_steps
-from binaural_webui.components.config_utils import format_time
-from binaural_webui.constants import DEFAULT_STEP_DURATION, STEP_TYPES
+from binaural_generator.core.exceptions import BinauralError
+from binaural_generator.core.parallel import prepare_audio_steps
+from binaural_generator.webui.components.config_utils import format_time
+from binaural_generator.webui.constants import DEFAULT_STEP_DURATION, STEP_TYPES
 
 
 def _get_implied_start_frequency(
