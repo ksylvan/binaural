@@ -24,7 +24,7 @@ jobs:
 
       - name: Build and publish
         run: |
-          python -m build
+          source .venv/bin/activate && python -m build
           twine check dist/*
           twine upload dist/*
         env:
