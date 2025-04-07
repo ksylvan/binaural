@@ -68,6 +68,7 @@
         "pylint",
         "pypa",
         "pypackages",
+        "PYPI",
         "pypirc",
         "pyproject",
         "pytest",

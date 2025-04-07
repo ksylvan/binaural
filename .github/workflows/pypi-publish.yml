@@ -26,7 +26,7 @@ jobs:
         run: |
           source .venv/bin/activate && python -m build
           twine check dist/*
-          twine upload dist/*
+          twine upload --skip-existing dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
