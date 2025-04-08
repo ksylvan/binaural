@@ -382,7 +382,7 @@ bin
 └── setup.sh: Shell script to set up the development environment using `uv` and a virtual environment.
 
 binaural_generator
-├── cli.py: [TODO: SHORT DESCRIPTION]
+├── cli.py: Command-line interface with argument parsing and audio generation functions for the generator tool.
 ├── core
 │   ├── __init__.py
 │   ├── constants.py: Defines default values and constant parameters used throughout the package.
@@ -411,42 +411,42 @@ binaural_generator
 │   ├── relaxation_ocean.yaml: 25-minute deep relaxation with Alpha waves and simulated ocean wave sounds.
 │   ├── relaxation_rain.yaml: 20-minute relaxation sequence with Alpha waves and rain ambient sounds.
 │   └── sleep_delta.yaml: 45-minute sleep induction transitioning from Alpha through Theta to Delta (2 Hz).
-├── webapp.py: [TODO: SHORT DESCRIPTION]
+├── webapp.py: Web application launcher script that configures and runs the Streamlit-based interface.
 └── webui
     ├── __init__.py
     ├── components
     │   ├── __init__.py
-    │   ├── audio_handlers.py: [TODO: SHORT DESCRIPTION]
-    │   ├── config_utils.py: [TODO: SHORT DESCRIPTION]
-    │   ├── sidebar.py: [TODO: SHORT DESCRIPTION]
-    │   ├── step_editor.py: [TODO: SHORT DESCRIPTION]
-    │   └── ui_utils.py: [TODO: SHORT DESCRIPTION]
-    ├── constants.py: [TODO: SHORT DESCRIPTION]
-    └── main.py: [TODO: SHORT DESCRIPTION]
+    │   ├── audio_handlers.py: Audio generation and playback utilities for the web interface, managing preview and full audio generation.
+    │   ├── config_utils.py: YAML configuration loading, validation and handling utilities for the web interface.
+    │   ├── sidebar.py: Sidebar component rendering with settings controls for the web interface.
+    │   ├── step_editor.py: UI components for editing and visualizing individual audio sequence steps.
+    │   └── ui_utils.py: General UI utility functions for session state management and interface rendering.
+    ├── constants.py: UI-specific constants including brainwave presets and frequency ranges.
+    └── main.py: Main entry point for the web application, orchestrating components and layout.
 
-conftest.py: [TODO: SHORT DESCRIPTION]
-cspell.json: [TODO: SHORT DESCRIPTION]
-example_script.yaml: [TODO: SHORT DESCRIPTION]
-generate: [TODO: SHORT DESCRIPTION]
-LICENSE: [TODO: SHORT DESCRIPTION]
-pyproject.toml: [TODO: SHORT DESCRIPTION]
-README.md: [TODO: SHORT DESCRIPTION]
+conftest.py: Pytest configuration file with custom markers and command-line options.
+cspell.json: Configuration for code spell-checking with custom dictionary of specialized terms.
+example_script.yaml: Example YAML configuration demonstrating various binaural beat features.
+generate: Executable script wrapper for the command-line interface with env path correction.
+LICENSE: MIT license file with copyright information and terms of use.
+pyproject.toml: Project configuration with dependencies, scripts, and development tools settings.
+README.md: Project documentation with detailed usage instructions and background information.
 
 tests
-├── test_common.py: [TODO: SHORT DESCRIPTION]
-├── test_data_types.py: [TODO: SHORT DESCRIPTION]
-├── test_fade.py: [TODO: SHORT DESCRIPTION]
-├── test_new_noise_types.py: [TODO: SHORT DESCRIPTION]
-├── test_noise.py: [TODO: SHORT DESCRIPTION]
-├── test_ocean_noise.py: [TODO: SHORT DESCRIPTION]
-├── test_parallel.py: [TODO: SHORT DESCRIPTION]
-├── test_property_based.py: [TODO: SHORT DESCRIPTION]
-├── test_rain_noise.py: [TODO: SHORT DESCRIPTION]
-├── test_tone_generator.py: [TODO: SHORT DESCRIPTION]
-└── test_utils.py: [TODO: SHORT DESCRIPTION]
+├── test_common.py: Common test utilities and helper functions shared across test modules.
+├── test_data_types.py: Unit tests for the data type classes validating constraints and behavior.
+├── test_fade.py: Tests for audio volume fading implementation and edge cases.
+├── test_new_noise_types.py: Tests for advanced noise types like blue, violet, and grey noise.
+├── test_noise.py: Core tests for the standard noise generation algorithms.
+├── test_ocean_noise.py: Tests for the ocean wave sound simulation.
+├── test_parallel.py: Tests for parallel processing implementation with thread management.
+├── test_property_based.py: Property-based tests using hypothesis for robust test coverage.
+├── test_rain_noise.py: Tests for the rain sound simulation algorithm.
+├── test_tone_generator.py: Tests for binaural beat generation and frequency transitions.
+└── test_utils.py: Tests for configuration loading and utility functions.
 
-uv.lock: [TODO: SHORT DESCRIPTION]
-webapp: [TODO: SHORT DESCRIPTION]
+uv.lock: Dependency lock file for the uv package manager with exact versions.
+webapp: Executable script wrapper for the web interface with env path correction.
 
 ```
 
