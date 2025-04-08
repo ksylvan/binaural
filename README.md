@@ -145,7 +145,6 @@ pip install binaural-generator
 - Create a feature branch (`git checkout -b feature/awesome-feature`).
 - Write clear, concise code with type hints and docstrings.
 - Ensure new features are tested and add appropriate unit tests.
-- Ensure code passes linters (`pylint binaural tests`) and tests (`pytest`).
 - Run tests:
 
   ```bash
