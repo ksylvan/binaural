@@ -336,85 +336,119 @@ steps:
 
 ## Script Library
 
-A collection of pre-defined YAML scripts for common use-cases is available in the `scripts/` directory.
+A collection of pre-defined YAML scripts for common use-cases is available in the `binaural_generator/scripts/` directory.
 Most scripts default to `.flac` output. Some include background noise as noted below.
 
 ### Standard Scripts
 
-- **`scripts/focus_beta.yaml`**: Designed to enhance concentration and alertness using Beta waves (14-18 Hz).
-- **`scripts/focus_gamma.yaml`**: Targets peak concentration and problem-solving with Gamma waves (40 Hz).
-- **`scripts/relaxation_alpha.yaml`**: Aims to reduce stress and promote calmness using Alpha waves (8-10 Hz).
-- **`scripts/meditation_theta.yaml`**: Facilitates deep meditation and introspection using Theta waves (6 Hz).
-- **`scripts/sleep_delta.yaml`**: Guides the brain towards deep sleep states using Delta waves (2 Hz).
+- **`binaural_generator/scripts/focus_beta.yaml`**: Designed to enhance concentration and alertness using Beta waves (14-18 Hz).
+- **`binaural_generator/scripts/focus_gamma.yaml`**: Targets peak concentration and problem-solving with Gamma waves (40 Hz).
+- **`binaural_generator/scripts/meditation_theta.yaml`**: Facilitates deep meditation and introspection using Theta waves (6 Hz).
+- **`binaural_generator/scripts/relaxation_alpha.yaml`**: Aims to reduce stress and promote calmness using Alpha waves (8-10 Hz).
+- **`binaural_generator/scripts/sleep_delta.yaml`**: Guides the brain towards deep sleep states using Delta waves (2 Hz).
 
 ### Advanced Scripts with Specialized Noise
 
-- **`scripts/focus_violet.yaml`**: Concentration enhancement with Gamma waves (40 Hz) and violet noise for heightened alertness.
-- **`scripts/relaxation_grey.yaml`**: Stress reduction with Alpha waves (8-10 Hz) and perceptually balanced grey noise.
-- **`scripts/relaxation_rain.yaml`**: Calming experience with Alpha waves (8-10 Hz) and natural rain sounds.
-- **`scripts/relaxation_ocean.yaml`**: Deep relaxation with Alpha waves (8-10 Hz) and simulated ocean sounds.
-- **`scripts/creativity_blue.yaml`**: Creative flow enhancement with Theta waves (6-7.83 Hz) and blue noise for clarity.
-- **`scripts/creativity_theta.yaml`**: Intended to foster an intuitive and creative mental state using Theta waves (7 Hz).
-- **`scripts/lucid_dream_pink.yaml`**: Aims to facilitate REM sleep states potentially conducive to lucid
-  dreaming (90 minutes, with pink noise).
-- **`scripts/lucid_dreaming.yaml`**: Aims to facilitate REM sleep states potentially conducive to lucid dreaming.
-- **`scripts/migraine_relief.yaml`**: Uses specific frequencies and transitions aimed at reducing migraine symptoms.
+- **`binaural_generator/scripts/creativity_blue.yaml`**: Creative flow enhancement with Theta waves (6-7.83 Hz) and blue noise for clarity.
+- **`binaural_generator/scripts/creativity_theta.yaml`**: Intended to foster an intuitive and creative mental state using Theta waves (7 Hz).
+- **`binaural_generator/scripts/focus_violet.yaml`**: Concentration enhancement with Gamma waves (40 Hz) and violet noise for heightened alertness.
+- **`binaural_generator/scripts/lucid_dream_pink_noise.yaml`**: 85-minute script to induce REM sleep and enhance lucid dreaming potential with pink noise.
+- **`binaural_generator/scripts/lucid_dreaming.yaml`**: 60-minute script transitioning from Alpha to Theta to Gamma to promote lucid dream states.
+- **`binaural_generator/scripts/migraine_relief.yaml`**: Progressive relaxation from Alpha to Theta to Delta to reduce migraine pain.
+- **`binaural_generator/scripts/relaxation_grey.yaml`**: Alpha wave relaxation with perceptually balanced grey noise for a natural ambient sound.
+- **`binaural_generator/scripts/relaxation_ocean.yaml`**: 25-minute deep relaxation with Alpha waves and simulated ocean wave sounds.
+- **`binaural_generator/scripts/relaxation_rain.yaml`**: 20-minute relaxation sequence with Alpha waves and rain ambient sounds.
 
 You can use these scripts directly, modify them (e.g., add `background_noise`), or use the `-o` command-line option to change the output format/name.
 
 Example usage for WAV output with added noise (assuming you modify the script):
 
 ```bash
-# (First, edit scripts/sleep_delta.yaml to add background_noise section)
-python generate.py scripts/sleep_delta.yaml -o audio/sleep_delta_with_noise.wav
+# (First, edit binaural_generator/scripts/sleep_delta.yaml to add background_noise section)
+./generate binaural_generator/scripts/sleep_delta.yaml -o audio/sleep_delta_with_noise.wav
 ```
 
 ## File Structure
 
-- `generate.py`: Main script entry point.
-- `example_script.yaml`: Example YAML script with fades and noise.
-- `scripts/`: Directory containing pre-defined YAML scripts.
-- `binaural/`: Source code package.
-  - `__init__.py`
-  - `cli.py`: Command-line interface logic.
-  - `constants.py`: Default values and constants.
-  - `data_types.py`: Dataclasses for configuration objects (AudioStep, NoiseConfig, etc.).
-  - `exceptions.py`: Custom exception classes.
-  - `fade.py`: Audio fade logic.
-  - `noise.py`: Background noise generation functions.
-  - `parallel.py`: Parallel processing utilities.
-  - `tone_generator.py`: Core audio generation logic for beats and mixing.
-  - `utils.py`: YAML loading and validation utilities.
-- `binaural_webui/`: Modular web UI implementation for the Binaural Beat Generator.
-  - `__init__.py`
-  - `main.py`: Main Streamlit application entry point.
-  - `constants.py`: Constants for UI components (brainwave presets, step types, etc.).
-  - `components/`: Directory containing modular UI code.
-    - `audio_handlers.py`: Audio generation & handling logic (preview and full audio clips).
-    - `config_utils.py`: Configuration loading/parsing utilities.
-    - `sidebar.py`: Sidebar layout and controls.
-    - `step_editor.py`: Editing components for individual steps.
-    - `ui_utils.py`: Common Streamlit UI helpers.
-- `tests/`: Directory of unit tests.
-  - `test_common.py`: Common test utilities.
-  - `test_data_types.py`: data type/validation tests.
-  - `test_fade.py`: fade data type tests.
-  - `test_noise.py`: Tests for standard noise types.
-  - `test_new_noise_types.py`: Tests for advanced/nature noise types.
-  - `test_ocean_noise.py`: Specific tests for ocean noise.
-  - `test_parallel.py`: Tests for parallel generation.
-  - `test_property_based.py`: Hypothesis property-based tests.
-  - `test_rain_noise.py`: Specific tests for rain noise.
-  - `test_tone_generator.py`
-  - `test_utils.py`
-- `bin/setup.sh`: Setup script for development environment.
-- `pyproject.toml`: Project configuration and dependencies.
-- `.python-version`: Specifies Python version.
-- `README.md`: This file.
-- `LICENSE`: Project license information.
-- `conftest.py`: Pytest configuration.
-- `cspell.json`: Spell checking configuration.
-- `run_webapp.py`: Script to launch the web UI.
+```markdown
+.github
+└── workflows
+    └── pypi-publish.yml: GitHub Actions workflow for building and publishing the package to PyPI on master branch pushes.
+
+.vscode
+└── tasks.json: VS Code task definitions for environment setup, running tests, and linting.
+
+bin
+└── setup.sh: Shell script to set up the development environment using `uv` and a virtual environment.
+
+binaural_generator
+├── cli.py: [TODO: SHORT DESCRIPTION]
+├── core
+│   ├── __init__.py
+│   ├── constants.py: Defines default values and constant parameters used throughout the package.
+│   ├── data_types.py: Defines dataclasses for configuration objects (e.g., AudioStep, NoiseConfig)
+|   |                  and validates their parameters.
+│   ├── exceptions.py: Defines custom exception classes specific to the binaural generator package.
+│   ├── fade.py: Implements linear audio fade-in and fade-out logic for audio segments.
+│   ├── noise.py: Contains strategies for generating various types of background noise (white, pink, brown, blue,
+|   |             violet, grey, rain, ocean).
+│   ├── parallel.py: Provides utilities for generating audio steps in parallel using threads to speed up processing.
+│   ├── tone_generator.py: Core logic for generating binaural beat tones, handling frequency transitions,
+|   |                      applying fades, mixing noise, and saving audio files.
+│   └── utils.py: Contains utility functions for loading, validating, and parsing YAML configuration files.
+├── scripts
+│   ├── creativity_blue.yaml: Creative flow enhancement with Theta waves (6-7.83 Hz) and blue noise.
+│   ├── creativity_theta.yaml: Foster intuitive and creative mental state using Theta waves (7 Hz).
+│   ├── focus_beta.yaml: Enhance concentration and alertness using Beta waves (14-18 Hz).
+│   ├── focus_gamma.yaml: Target peak concentration and problem-solving with Gamma waves (40 Hz).
+│   ├── focus_violet.yaml: Concentration enhancement with Gamma waves (40 Hz) and violet noise for heightened alertness.
+│   ├── lucid_dream_pink_noise.yaml: 85-minute script to induce REM sleep and enhance lucid dreaming potential with pink noise.
+│   ├── lucid_dreaming.yaml: 60-minute script transitioning from Alpha to Theta to Gamma to promote lucid dream states.
+│   ├── meditation_theta.yaml: 30-minute deep meditation sequence transitioning from Alpha (10 Hz) to Theta (6 Hz).
+│   ├── migraine_relief.yaml: Progressive relaxation from Alpha to Theta to Delta to reduce migraine pain.
+│   ├── relaxation_alpha.yaml: 20-minute stress reduction sequence using Alpha waves (8-10 Hz).
+│   ├── relaxation_grey.yaml: Alpha wave relaxation with perceptually balanced grey noise for a natural ambient sound.
+│   ├── relaxation_ocean.yaml: 25-minute deep relaxation with Alpha waves and simulated ocean wave sounds.
+│   ├── relaxation_rain.yaml: 20-minute relaxation sequence with Alpha waves and rain ambient sounds.
+│   └── sleep_delta.yaml: 45-minute sleep induction transitioning from Alpha through Theta to Delta (2 Hz).
+├── webapp.py: [TODO: SHORT DESCRIPTION]
+└── webui
+    ├── __init__.py
+    ├── components
+    │   ├── __init__.py
+    │   ├── audio_handlers.py: [TODO: SHORT DESCRIPTION]
+    │   ├── config_utils.py: [TODO: SHORT DESCRIPTION]
+    │   ├── sidebar.py: [TODO: SHORT DESCRIPTION]
+    │   ├── step_editor.py: [TODO: SHORT DESCRIPTION]
+    │   └── ui_utils.py: [TODO: SHORT DESCRIPTION]
+    ├── constants.py: [TODO: SHORT DESCRIPTION]
+    └── main.py: [TODO: SHORT DESCRIPTION]
+
+conftest.py: [TODO: SHORT DESCRIPTION]
+cspell.json: [TODO: SHORT DESCRIPTION]
+example_script.yaml: [TODO: SHORT DESCRIPTION]
+generate: [TODO: SHORT DESCRIPTION]
+LICENSE: [TODO: SHORT DESCRIPTION]
+pyproject.toml: [TODO: SHORT DESCRIPTION]
+README.md: [TODO: SHORT DESCRIPTION]
+
+tests
+├── test_common.py: [TODO: SHORT DESCRIPTION]
+├── test_data_types.py: [TODO: SHORT DESCRIPTION]
+├── test_fade.py: [TODO: SHORT DESCRIPTION]
+├── test_new_noise_types.py: [TODO: SHORT DESCRIPTION]
+├── test_noise.py: [TODO: SHORT DESCRIPTION]
+├── test_ocean_noise.py: [TODO: SHORT DESCRIPTION]
+├── test_parallel.py: [TODO: SHORT DESCRIPTION]
+├── test_property_based.py: [TODO: SHORT DESCRIPTION]
+├── test_rain_noise.py: [TODO: SHORT DESCRIPTION]
+├── test_tone_generator.py: [TODO: SHORT DESCRIPTION]
+└── test_utils.py: [TODO: SHORT DESCRIPTION]
+
+uv.lock: [TODO: SHORT DESCRIPTION]
+webapp: [TODO: SHORT DESCRIPTION]
+
+```
 
 ## Resources
 
