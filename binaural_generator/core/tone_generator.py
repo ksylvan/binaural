@@ -348,6 +348,59 @@ def _generate_beat_segments(
     return concatenated_left, concatenated_right, total_duration
 
 
+def _mix_beats_and_noise(
+    left_beats: np.ndarray,
+    right_beats: np.ndarray,
+    noise_signal: np.ndarray,
+    noise_amplitude: float,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Mixes generated beat signals with a generated noise signal.
+
+    Handles scaling of both signals and ensures length compatibility.
+
+    Args:
+        left_beats: The generated left channel beat signal.
+        right_beats: The generated right channel beat signal.
+        noise_signal: The generated noise signal (assumed not None).
+        noise_amplitude: The amplitude (0.0 to 1.0) for the noise signal.
+
+    Returns:
+        Tuple of final mixed left and right channel numpy arrays.
+    """
+    # Scale the noise signal by its configured amplitude
+    scaled_noise = noise_signal * noise_amplitude
+
+    # Scale the beat signal down to make room for the noise
+    beat_scale_factor = 1.0 - noise_amplitude
+    scaled_left_beats = left_beats * beat_scale_factor
+    scaled_right_beats = right_beats * beat_scale_factor
+
+    # Ensure noise signal length matches concatenated beats length
+    target_len = len(scaled_left_beats)
+    if len(scaled_noise) != target_len:
+        logger.warning(
+            "Noise length (%d) differs from combined beat "
+            "length (%d). Adjusting noise length.",
+            len(scaled_noise),
+            target_len,
+        )
+        if len(scaled_noise) > target_len:
+            scaled_noise = scaled_noise[:target_len]  # Truncate
+        else:
+            padding = target_len - len(scaled_noise)  # Pad
+            scaled_noise = np.pad(scaled_noise, (0, padding), "constant")
+
+    # Add the scaled noise to the scaled beat signals
+    left_final = scaled_left_beats + scaled_noise
+    right_final = scaled_right_beats + scaled_noise
+
+    # Optional: Clip final signal just in case of minor floating point overshoot
+    # left_final = np.clip(left_final, -1.0, 1.0)
+    # right_final = np.clip(right_final, -1.0, 1.0)
+
+    return left_final, right_final
+
+
 def _generate_and_mix_noise(
     sample_rate: int,
     total_duration_sec: float,
@@ -357,8 +410,7 @@ def _generate_and_mix_noise(
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Generates background noise (if configured) and mixes it with beat channels.
 
-    Scales down the beat signal before mixing to prevent clipping when noise is added.
-    Internal helper function.
+    This is the sequential version used by generate_audio_sequence.
 
     Args:
         sample_rate: Audio sample rate in Hz.
@@ -368,23 +420,19 @@ def _generate_and_mix_noise(
         right_channel_beats: Numpy array for the generated right beat channel.
 
     Returns:
-        Tuple containing the final left and right channel numpy arrays, potentially
-        mixed with noise.
+        Tuple containing the final left and right channel numpy arrays.
 
     Raises:
         AudioGenerationError: If noise generation or mixing fails.
     """
-    # Calculate the total number of samples required for the noise
     total_num_samples = int(sample_rate * total_duration_sec)
 
-    # --- Check if noise generation is needed --- #
-    # No noise if type is 'none', amplitude is zero, or duration is zero
+    # Check if noise generation is needed
     if (
         noise_config.type == "none"
         or noise_config.amplitude <= 0
         or total_num_samples <= 0
     ):
-        # Return the original beat channels if no noise is added
         return left_channel_beats, right_channel_beats
 
     # --- Generate Noise --- #
@@ -394,39 +442,26 @@ def _generate_and_mix_noise(
         noise_config.amplitude,
     )
     try:
-        # Get the appropriate noise generation strategy using the factory
         noise_strategy = NoiseFactory.get_strategy(noise_config.type)
-        # Generate the noise signal for the total duration
-        # Noise strategies should return normalized noise [-1, 1]
         noise_signal = noise_strategy.generate(total_num_samples)
+    except Exception as e:
+        raise AudioGenerationError(
+            f"Error generating '{noise_config.type}' noise: {e}"
+        ) from e
 
-        # --- Mix Noise and Beats --- #
-        # Scale the noise signal by its configured amplitude
-        scaled_noise = noise_signal * noise_config.amplitude
-
-        # Scale the beat signal down to make room for the noise, preventing clipping
-        # beat_scale_factor = 1.0 is max amplitude for beats (no noise)
-        # beat_scale_factor = 0.0 means only noise is present
-        beat_scale_factor = 1.0 - noise_config.amplitude
-        scaled_left_beats = left_channel_beats * beat_scale_factor
-        scaled_right_beats = right_channel_beats * beat_scale_factor
-
-        # Add the scaled noise to the scaled beat signals
-        # Since both beats and noise were normalized and scaled appropriately,
-        # the sum should generally remain within [-1, 1]
-        left_final = scaled_left_beats + scaled_noise
-        right_final = scaled_right_beats + scaled_noise
-
-        # Optional: Clip final signal just in case of minor floating point overshoot
-        # left_final = np.clip(left_final, -1.0, 1.0)
-        # right_final = np.clip(right_final, -1.0, 1.0)
-
+    # Call the dedicated mixing function
+    logger.info("Mixing noise with beat signals...")
+    try:
+        left_final, right_final = _mix_beats_and_noise(
+            left_channel_beats,
+            right_channel_beats,
+            noise_signal,
+            noise_config.amplitude,
+        )
         logger.info("Noise mixed successfully.")
         return left_final, right_final
-
     except Exception as e:
-        # Catch any error during noise generation or mixing
-        raise AudioGenerationError(f"Error generating or mixing noise: {e}") from e
+        raise AudioGenerationError(f"Error mixing noise: {e}") from e
 
 
 def generate_audio_sequence(
