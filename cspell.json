@@ -35,6 +35,7 @@
         "ipython",
         "isort",
         "Jirakittayakorn",
+        "jsonschema",
         "Kraus",
         "levelname",
         "mccabe",

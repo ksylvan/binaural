@@ -1,6 +1,6 @@
 [project]
 name = "binaural-generator"
-version = "0.5.3"
+version = "0.6.0"
 description = "Generate binaural beat audio with background noise for brainwave entrainment"
 authors = [{ name = "Kayvan Sylvan", email = "kayvan@sylvan.com" }]
 license = "MIT"
@@ -44,6 +44,9 @@ dev = [
     "build>=1.2.2.post1",
     "twine>=6.1.0",
 ]
+
+[tool.setuptools.packages.find]
+exclude = ["audio"]
 
 [tool.setuptools.package-data]
 binaural_generator = ["scripts/*"]
