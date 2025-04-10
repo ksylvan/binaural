@@ -8,8 +8,8 @@ import numpy as np
 
 from binaural_generator.core.data_types import AudioStep, NoiseConfig
 from binaural_generator.core.exceptions import AudioGenerationError
+from binaural_generator.core.noise import NoiseFactory
 from binaural_generator.core.tone_generator import (
-    _generate_and_mix_noise,
     _process_beat_step,
     config_step_to_audio_step,
     generate_tone,
@@ -247,10 +247,11 @@ def generate_audio_sequence_parallel(
     title: str = "Binaural Beat",
     max_workers: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray, float]:
-    """Generates the complete stereo audio sequence in parallel.
+    """Generates the complete stereo audio sequence in parallel, including noise.
 
     This function parallelizes the audio generation process using multiple threads
-    for faster execution on multi-core systems.
+    for faster execution on multi-core systems. It generates beat segments and
+    the full noise track concurrently.
 
     Args:
         sample_rate: The audio sample rate in Hz.
@@ -272,28 +273,149 @@ def generate_audio_sequence_parallel(
     """
     logger.info("Preparing audio steps for parallel generation...")
 
-    # First pass: interpret all steps to resolve dependencies
+    # First pass: interpret all steps sequentially to resolve dependencies
     audio_steps = prepare_audio_steps(steps)
 
-    # Generate all steps in parallel
-    logger.info("Generating audio steps in parallel...")
-
-    # Generate audio segments in parallel
-    step_results, total_duration = _generate_audio_segments_parallel(
-        sample_rate, base_freq, steps, audio_steps, title=title, max_workers=max_workers
+    # Calculate total duration and samples needed *before* parallel execution
+    total_duration = sum(step.duration for step in audio_steps)
+    total_num_samples = int(sample_rate * total_duration)
+    logger.debug(
+        "Total duration calculated: %.2f seconds (%d samples)",
+        total_duration,
+        total_num_samples,
     )
 
-    # Combine the segments into continuous channels
-    left_channel, right_channel, _ = _combine_audio_segments(step_results)
+    noise_future = None
+    noise_signal = None
+    noise_strategy = None  # Keep strategy reference for logging type later
 
-    logger.info("Audio segments generated in parallel (%.2f seconds).", total_duration)
+    logger.info("Generating audio segments and noise (if configured) in parallel...")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # Submit beat generation tasks
+        beat_futures = _submit_tone_generation_tasks(
+            executor, steps, audio_steps, sample_rate, base_freq, title=title
+        )
 
-    # Apply noise if configured
-    left_final, right_final = _generate_and_mix_noise(
-        sample_rate, total_duration, noise_config, left_channel, right_channel
+        # Submit noise generation task if needed
+        if (
+            noise_config.type != "none"
+            and noise_config.amplitude > 0
+            and total_num_samples > 0
+        ):
+            try:
+                noise_strategy = NoiseFactory.get_strategy(noise_config.type)
+                logger.info(
+                    "Submitting '%s' noise generation task"
+                    " (amplitude %.3f) for %d samples...",
+                    noise_config.type,
+                    noise_config.amplitude,
+                    total_num_samples,
+                )
+                noise_future = executor.submit(
+                    noise_strategy.generate, total_num_samples
+                )
+            except Exception as e:
+                logger.error(
+                    "Failed to submit noise generation task: %s", e, exc_info=True
+                )
+                # Raise error to halt execution if noise generation setup fails
+                raise AudioGenerationError(f"Noise generation setup failed: {e}") from e
+
+        # Collect beat results (this inherently waits for beat futures to complete)
+        step_results = _collect_audio_results(beat_futures)
+        logger.info("Beat segments generated in parallel.")
+
+        # Collect noise result (wait for noise future if it exists)
+        if noise_future and noise_strategy:  # Check noise_strategy exists too
+            try:
+                logger.info(
+                    "Waiting for '%s' noise generation to complete...",
+                    noise_config.type,
+                )
+                noise_signal = noise_future.result()  # This blocks until noise is done
+                logger.info("'%s' noise generated successfully.", noise_config.type)
+            except Exception as e:
+                # If noise generation itself fails after submission
+                raise AudioGenerationError(
+                    f"Error during execution of '{noise_config.type}'"
+                    f" noise generation task: {e}"
+                ) from e
+
+    # --- Combine results ---
+    # Combine beat segments (now happens after the parallel block)
+    logger.debug("Combining beat segments...")
+    left_beats, right_beats, calculated_total_duration = _combine_audio_segments(
+        step_results
+    )
+    # Sanity check duration - use the duration calculated from audio_steps sum
+    if not np.isclose(calculated_total_duration, total_duration):
+        logger.warning(
+            "Mismatch between summed step durations (%.4f) "
+            "and combined segment duration (%.4f). Using summed value: %.4f.",
+            total_duration,
+            calculated_total_duration,
+            total_duration,
+        )
+        # Stick with total_duration derived directly from audio_steps sum.
+
+    logger.info(
+        "Beat segments combined (Total calculated duration: %.2f seconds).",
+        total_duration,
     )
 
-    # Ensure output arrays are float64 for consistency with non-parallel version
+    # Mix noise if it was successfully generated
+    if noise_signal is not None and noise_config.amplitude > 0:
+        logger.info("Mixing '%s' noise with beat segments...", noise_config.type)
+        try:
+            # --- Mix Noise and Beats ---
+            # Scale the noise signal by its configured amplitude
+            scaled_noise = noise_signal * noise_config.amplitude
+
+            # Scale the beat signal down to make room for the noise
+            beat_scale_factor = 1.0 - noise_config.amplitude
+            scaled_left_beats = left_beats * beat_scale_factor
+            scaled_right_beats = right_beats * beat_scale_factor
+
+            # Ensure noise signal length matches concatenated beats length
+            # This handles potential minor discrepancies from float calculations
+            target_len = len(scaled_left_beats)
+            if len(scaled_noise) != target_len:
+                logger.warning(
+                    "Noise length (%d) differs from "
+                    "combined beat length (%d). Adjusting noise length.",
+                    len(scaled_noise),
+                    target_len,
+                )
+                if len(scaled_noise) > target_len:
+                    # Truncate noise if longer
+                    scaled_noise = scaled_noise[:target_len]
+                else:
+                    # Pad noise with zeros if shorter (less likely)
+                    padding = target_len - len(scaled_noise)
+                    scaled_noise = np.pad(scaled_noise, (0, padding), "constant")
+
+            # Add the scaled noise to the scaled beat signals
+            left_final = scaled_left_beats + scaled_noise
+            right_final = scaled_right_beats + scaled_noise
+
+            # Optional: Clip final signal just in case of minor floating point overshoot
+            # left_final = np.clip(left_final, -1.0, 1.0)
+            # right_final = np.clip(right_final, -1.0, 1.0)
+
+            logger.info("Noise mixed successfully.")
+        except Exception as e:
+            # Catch errors during the mixing process
+            raise AudioGenerationError(f"Error mixing noise: {e}") from e
+    else:
+        # No noise requested, amplitude is zero, or noise generation failed earlier
+        if noise_config.type != "none" and noise_config.amplitude > 0:
+            logger.info("Skipping noise mixing because noise signal was not generated.")
+        else:
+            logger.info("Skipping noise mixing (not configured or zero amplitude).")
+        left_final = left_beats
+        right_final = right_beats
+
+    # Ensure output arrays are float64 for consistency
     left_final = left_final.astype(np.float64)
     right_final = right_final.astype(np.float64)
 
