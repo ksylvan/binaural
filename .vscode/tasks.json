@@ -27,7 +27,7 @@
             "type": "shell",
             "command": "cd ${workspaceFolder} && pylint .",
             "group": {
-                "kind": "test",
+                "kind": "none",
                 "isDefault": true
             },
             "problemMatcher": ["$python"],

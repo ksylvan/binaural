@@ -12,8 +12,8 @@ from binaural_generator.core.constants import (
     GITHUB_URL,
     LICENSE,
 )
+from binaural_generator.core.utils import get_all_script_configs
 from binaural_generator.webui.components.config_utils import (
-    get_available_configs,
     load_config_file,
 )
 from binaural_generator.webui.constants import BRAINWAVE_PRESETS
@@ -21,8 +21,7 @@ from binaural_generator.webui.constants import BRAINWAVE_PRESETS
 
 def _handle_example_loading(config: dict[str, Any]) -> None:
     """Handle the loading of example configurations in the sidebar."""
-    # Get configurations dynamically from YAML files
-    available_configs = get_available_configs()
+    available_configs = get_all_script_configs()
 
     example_name = st.selectbox(
         "Load Example Configuration",
