@@ -3,6 +3,8 @@
 import argparse
 import logging
 import multiprocessing
+import os
+from pathlib import Path
 import sys
 import time
 from dataclasses import dataclass
@@ -22,32 +24,52 @@ from binaural_generator.core.tone_generator import (
     generate_audio_sequence,
     save_audio_file,
 )
-from binaural_generator.core.utils import load_yaml_config
+from binaural_generator.core.utils import get_all_script_configs, load_yaml_config
+from binaural_generator import __version__
 
 
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Generate binaural beats audio (WAV or FLAC) from a YAML script."
+        description="Generate binaural beats audio from a YAML script."
     )
-    parser.add_argument("script", help="Path to YAML configuration script.")
-    parser.add_argument(
+    cmd_group = parser.add_argument_group(
+        title="Audio Generation Options",
+        description="Options for generating audio from a YAML script.",
+    )
+    cmd_group.add_argument(
         "-o", "--output", help="Output audio file path (overrides YAML setting)."
     )
-    parser.add_argument(
+    cmd_group.add_argument(
         "-v", "--verbose", action="store_true", help="Enable verbose logging."
     )
-    parser.add_argument(
+    cmd_group.add_argument(
         "-p",
         "--parallel",
         action="store_true",
         help="Use parallel processing for faster audio generation.",
     )
-    parser.add_argument(
+    cmd_group.add_argument(
         "--threads",
         type=int,
         help="Number of threads to use for parallel processing. Defaults to CPU count.",
         default=multiprocessing.cpu_count(),
+    )
+    cmd_group.add_argument(
+        "script", help="Path to YAML configuration script.", nargs="?"
+    )
+
+    info_group = parser.add_argument_group(
+        title="Information Options",
+        description="Options for displaying information about the script.",
+    )
+
+    list_parser_group = info_group.add_mutually_exclusive_group()
+    list_parser_group.add_argument(
+        "--version", action="version", version=f"binaural-generator {__version__}"
+    )
+    list_parser_group.add_argument(
+        "-l", "--list", action="store_true", help="List available scripts."
     )
     return parser.parse_args()
 
@@ -159,9 +181,37 @@ def main() -> None:
     configure_logging(args.verbose)
     logger = logging.getLogger(__name__)
 
+    script_dir = Path(__file__).parent.absolute()
+
+    # Determine script path
+    script_path = args.script
+    if script_path and not os.path.exists(args.script):
+        # If not found and no path separators in the name, check in scripts directory
+        if os.path.basename(args.script) == args.script:
+            potential_script_path = script_dir / "scripts" / args.script
+            if os.path.exists(potential_script_path):
+                script_path = potential_script_path
+                logger.info("Using script from scripts directory: %s", script_path)
+
+    if args.list:
+        os.chdir(script_dir)
+        all_scripts = get_all_script_configs(file_names_only=True)
+        print(
+            f"Available scripts: in {script_dir / 'scripts'}\n\n"
+            + "\n".join(
+                sorted([f"  {title}: {path}" for title, path in all_scripts.items()])
+            )
+        )
+        print("\nUse --script <script_name.yaml> to run a specific script.")
+        sys.exit(0)
+
+    if not script_path:
+        logger.error("No script specified. Use --script <script_name.yaml>.")
+        sys.exit(1)
+
     try:
         # Load YAML configuration using the utility function
-        config = load_yaml_config(args.script)
+        config = load_yaml_config(script_path)
 
         # Extract global settings, providing defaults if they are missing
         sample_rate = config.get("sample_rate", DEFAULT_SAMPLE_RATE)

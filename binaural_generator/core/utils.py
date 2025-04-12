@@ -120,7 +120,9 @@ def get_yaml_title(path: str) -> Optional[str]:
         return None
 
 
-def get_all_script_configs(scripts_dir: str = "scripts") -> dict[str, str]:
+def get_all_script_configs(
+    scripts_dir: str = "scripts", file_names_only=False
+) -> dict[str, str]:
     """Scan a directory for YAML files and return a mapping of titles to file paths.
 
     Args:
@@ -134,7 +136,8 @@ def get_all_script_configs(scripts_dir: str = "scripts") -> dict[str, str]:
     # Find all YAML files in the scripts directory
     for yaml_path in glob.glob(os.path.join(scripts_dir, "*.yaml")):
         title = get_yaml_title(yaml_path)
-        if title:
-            config_files[title] = yaml_path
+        k = title
+        v = yaml_path if not file_names_only else os.path.basename(yaml_path)
+        config_files[k] = v
 
     return config_files

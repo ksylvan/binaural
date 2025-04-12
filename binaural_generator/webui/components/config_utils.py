@@ -5,8 +5,6 @@ from typing import Any
 import streamlit as st
 import yaml
 
-from binaural_generator.core.utils import get_all_script_configs
-
 
 def load_config_file(file_path: str) -> dict[str, Any]:
     """Load a YAML configuration file."""
