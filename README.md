@@ -211,6 +211,8 @@ From the source directory:
 - `-v` or `--verbose` (Optional): Enable verbose logging output.
 - `-p`, or `--parallel` (Optional): Use parallel processing for faster audio generation.
 - `--threads` NUMBER: Number of threads to use for parallel processing (defaults to CPU count)
+- `--version`: Print the version and exit.
+- `-l`, or `--list`: List the available builtin scripts.
 
 **Example:**
 
@@ -234,6 +236,51 @@ To generate a FLAC file with a custom name:
 
 ```bash
 ./generate scripts/focus_beta.yaml -o my_focus_session.flac
+```
+
+You can also reference the builtin scripts without using the full path. Simply list the
+available scripts:
+
+```plaintext
+$ binaural-generate -l
+Available scripts: in /Users/kayvan/src/TMP/.venv/lib/python3.12/site-packages/binaural_generator/scripts
+
+  Creativity (Blue Noise): creativity_blue.yaml
+  Creativity (Theta): creativity_theta.yaml
+  Focus (Beta): focus_beta.yaml
+  Focus (Gamma): focus_gamma.yaml
+  Focus (Violet Noise): focus_violet.yaml
+  Lucid Dreaming (Pink Noise): lucid_dream_pink_noise.yaml
+  Lucid Dreaming: lucid_dreaming.yaml
+  Meditation (Theta): meditation_theta.yaml
+  Migraine Relief (Alpha/Theta/Delta): migraine_relief.yaml
+  Relaxation (Alpha): relaxation_alpha.yaml
+  Relaxation (Grey Noise): relaxation_grey.yaml
+  Relaxation (Ocean): relaxation_ocean.yaml
+  Relaxation (Rain): relaxation_rain.yaml
+  Sleep (Delta): sleep_delta.yaml
+
+usage: generate [-h] [-o OUTPUT] [-v] [-p] [--threads THREADS] [--version | -l] [script]
+```
+
+And then:
+
+```plaintext
+$ binaural-generate -p meditation_theta.yaml
+2025-04-12 07:39:40,375 - INFO - Using script from scripts directory: /Users/kayvan/src/TMP/.venv/lib/python3.12/site-packages/binaural_generator/scripts/meditation_theta.yaml
+2025-04-12 07:39:40,376 - INFO - Processing Audio for: Meditation (Theta)
+2025-04-12 07:39:40,376 - INFO - Sample Rate: 44100 Hz
+2025-04-12 07:39:40,376 - INFO - Base Frequency: 100.00 Hz
+2025-04-12 07:39:40,376 - INFO - Using parallel processing for audio generation...
+2025-04-12 07:39:40,376 - INFO - Preparing audio steps for parallel generation...
+2025-04-12 07:39:40,376 - INFO - Starting parallel generation of beats and noise...
+2025-04-12 07:39:40,879 - INFO - Beat segments generated and collected.
+2025-04-12 07:39:40,968 - INFO - Beat segments combined (Duration from segments: 1800.00 seconds).
+2025-04-12 07:39:40,969 - INFO - Skipping noise mixing (not generated or zero amplitude).
+2025-04-12 07:39:41,105 - INFO - Audio sequence generated successfully in 0.73 seconds.
+2025-04-12 07:39:41,287 - INFO - Writing audio file to: audio/meditation_theta.flac
+2025-04-12 07:39:42,884 - INFO - Audio file 'meditation_theta.flac' (.flac format, 44100 Hz) created. Duration: 30m 0.00s.
+2025-04-12 07:39:42,907 - INFO - Audio file saved successfully to 'audio/meditation_theta.flac'.
 ```
 
 ## YAML Script Format

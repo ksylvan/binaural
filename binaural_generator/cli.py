@@ -28,7 +28,7 @@ from binaural_generator.core.utils import get_all_script_configs, load_yaml_conf
 from binaural_generator import __version__
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args() -> tuple[argparse.Namespace, argparse.ArgumentParser]:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Generate binaural beats audio from a YAML script."
@@ -71,7 +71,7 @@ def parse_args() -> argparse.Namespace:
     list_parser_group.add_argument(
         "-l", "--list", action="store_true", help="List available scripts."
     )
-    return parser.parse_args()
+    return parser.parse_args(), parser
 
 
 def configure_logging(verbose: bool) -> None:
@@ -177,7 +177,7 @@ def generate_audio(config: AudioConfig) -> AudioGenerationResult:
 
 def main() -> None:
     """Main entry point for the CLI."""
-    args = parse_args()
+    args, parser = parse_args()
     configure_logging(args.verbose)
     logger = logging.getLogger(__name__)
 
@@ -201,12 +201,14 @@ def main() -> None:
             + "\n".join(
                 sorted([f"  {title}: {path}" for title, path in all_scripts.items()])
             )
+            + "\n"
         )
-        print("\nUse --script <script_name.yaml> to run a specific script.")
+        parser.print_usage()
         sys.exit(0)
 
     if not script_path:
-        logger.error("No script specified. Use --script <script_name.yaml>.")
+        logger.error("No script specified. The path to script must be provided.")
+        parser.print_help()
         sys.exit(1)
 
     try:
