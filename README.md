@@ -168,16 +168,10 @@ pip install binaural-generator
 
 For a more interactive experience, run the web-based user interface:
 
-If you installed the Python package (via `pip install`), simply run:
+Once you installed the Python package (via `pip install` or from source), simply run:
 
 ```bash
 binaural-webapp
-```
-
-If running from the repository source directory:
-
-```bash
-./webapp
 ```
 
 This launches a Streamlit-based web interface that allows you to:
@@ -192,16 +186,10 @@ Once launched, open your web browser and navigate to `http://localhost:8501` to 
 
 ### Command Line Interface
 
-Similarly, to run the CLI script if you installed the Python package:
+Similarly, to run the CLI script:
 
 ```bash
 binaural-generate [options] <path_to_script.yaml>
-```
-
-From the source directory:
-
-```bash
-./generate [options] <path_to_script.yaml>
 ```
 
 **Arguments:**
@@ -219,7 +207,7 @@ From the source directory:
 To use the example script provided (which defaults to FLAC output):
 
 ```bash
-./generate example_script.yaml
+binaural-generate example_script.yaml
 ```
 
 This will generate `audio/example_fade_noise.flac` (or the filename specified in `example_script.yaml`) in the `audio/` directory.
@@ -227,7 +215,7 @@ This will generate `audio/example_fade_noise.flac` (or the filename specified in
 To use one of the pre-defined scripts from the library and output as WAV:
 
 ```bash
-./generate scripts/relaxation_alpha.yaml -o audio/relaxation_alpha.wav
+binaural-generate scripts/relaxation_alpha.yaml -o audio/relaxation_alpha.wav
 ```
 
 This will generate `relaxation_alpha.wav` in the `audio/` directory, overriding the default name in the script.
@@ -235,7 +223,7 @@ This will generate `relaxation_alpha.wav` in the `audio/` directory, overriding 
 To generate a FLAC file with a custom name:
 
 ```bash
-./generate scripts/focus_beta.yaml -o my_focus_session.flac
+binaural-generate scripts/focus_beta.yaml -o my_focus_session.flac
 ```
 
 You can also reference the builtin scripts without using the full path. Simply list the
@@ -411,7 +399,7 @@ Example usage for WAV output with added noise (assuming you modify the script):
 
 ```bash
 # (First, edit binaural_generator/scripts/sleep_delta.yaml to add background_noise section)
-./generate binaural_generator/scripts/sleep_delta.yaml -o audio/sleep_delta_with_noise.wav
+binaural-generate binaural_generator/scripts/sleep_delta.yaml -o audio/sleep_delta_with_noise.wav
 ```
 
 ## File Structure
@@ -473,7 +461,6 @@ binaural_generator
 conftest.py: Pytest configuration file with custom markers and command-line options.
 cspell.json: Configuration for code spell-checking with custom dictionary of specialized terms.
 example_script.yaml: Example YAML configuration demonstrating various binaural beat features.
-generate: Executable script wrapper for the command-line interface with env path correction.
 LICENSE: MIT license file with copyright information and terms of use.
 pyproject.toml: Project configuration with dependencies, scripts, and development tools settings.
 README.md: Project documentation with detailed usage instructions and background information.
@@ -492,7 +479,6 @@ tests
 └── test_utils.py: Tests for configuration loading and utility functions.
 
 uv.lock: Dependency lock file for the uv package manager with exact versions.
-webapp: Executable script wrapper for the web interface with env path correction.
 
 ```
 

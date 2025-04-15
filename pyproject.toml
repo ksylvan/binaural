@@ -69,6 +69,7 @@ python_files = "test_*.py"
 
 [tool.uv]
 required-version = ">=0.6.11"
+package = true
 
 [tool.pylint.MASTER]
 ignore = ["__init__.py", ".git", ".venv", "__pycache__"]

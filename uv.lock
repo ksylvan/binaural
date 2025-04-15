@@ -55,7 +55,7 @@ wheels = [
 
 [[package]]
 name = "binaural-generator"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "numpy" },
     { name = "pyyaml" },
