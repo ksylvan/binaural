@@ -52,7 +52,7 @@ version = { attr = "binaural_generator.__version__" }
 exclude = ["audio"]
 
 [tool.setuptools.package-data]
-binaural_generator = ["scripts/*"]
+binaural_generator = ["scripts/*", "docs/*"]
 
 [tool.black]
 line-length = 88
