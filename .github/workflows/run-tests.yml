@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - develop
+  push:
+    branches:
+      - main
+      - develop
 
 jobs:
   test:
@@ -25,4 +29,4 @@ jobs:
           uv sync --group dev
 
       - name: Run Pytest
-        run: pytest --run-performance
+        run: source .venv/bin/activate && pytest --run-performance
