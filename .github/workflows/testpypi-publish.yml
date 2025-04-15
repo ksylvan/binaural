@@ -1,0 +1,13 @@
+name: Publish to TestPyPi
+
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  publish:
+    uses: ./.github/workflows/publish-reusable.yml
+    with:
+      repository: testpypi
+    secrets:
+      TWINE_PASSWORD: ${{ secrets.TESTPYPI_API_TOKEN }}
