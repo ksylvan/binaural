@@ -12,7 +12,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5.4.2
+        with:
+          enable-cache: true
 
       - name: Set up Python
         uses: actions/setup-python@v5.5.0
@@ -21,9 +27,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install --upgrade pip
-          pip install uv
           uv sync --group dev
 
       - name: Run Pytest
-        run: source .venv/bin/activate && pytest --run-performance
+        run: uv run pytest --run-performance
