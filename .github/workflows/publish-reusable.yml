@@ -38,8 +38,8 @@ jobs:
       - name: Build and publish
         run: |
           uv build
-          twine check dist/*
-          twine upload --skip-existing --repository ${{ inputs.repository }} dist/*
+          uv run twine check dist/*
+          uv run twine upload --skip-existing --repository ${{ inputs.repository }} dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
